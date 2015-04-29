@@ -8,7 +8,9 @@ categories:
 - development
 ---
 
-Es bueno estar de vuelta escribiendo, ya ha pasado bastante tiempo desde que hice un post así que vamos a ver algo que me ayudó en un curso. El día de hoy hablaremos de Ratpack y para ello primero vamos a dar una pequeña introducción de lo que es. Ratpack, como su página lo dice, es un conjunto de librerías de JAVA que facilita la rapidez, eficiencia, evolución y pruebas de aplicaciones HTTP, está construida sobre Netty y por ello posee muchos de los beneficios del motor del mismo. Ratpack se enfoca en permitir applicaciones HTTP para ser eficientes, modulares y adaptativas a los nuevos requerimientos, tecnologías y buenas pruebas sobre el tiempo. Bueno vamos a dejar de momento las definiciones y vamos a lo bonito, el código. Para este post vamos a hacer uso de gvm y de lazybones, para ello procederemos a instalar [gvm][1] Una vez listo procedemos a ejecutar el siguiente comando :
+Es bueno estar de vuelta escribiendo, ya ha pasado bastante tiempo desde que hice un post así que vamos a ver algo que me ayudó en un curso. El día de hoy hablaremos de Ratpack y para ello primero vamos a dar una pequeña introducción de lo que es. Ratpack, como su página lo dice, es un conjunto de librerías de JAVA que facilita la rapidez, eficiencia, evolución y pruebas de aplicaciones HTTP, está construida sobre Netty y por ello posee muchos de los beneficios del motor del mismo. Ratpack se enfoca en permitir applicaciones HTTP para ser eficientes, modulares y adaptativas a los nuevos requerimientos, tecnologías y buenas pruebas sobre el tiempo. Bueno vamos a dejar de momento las definiciones y vamos a lo bonito, el código.
+<!-- more -->
+Para este post vamos a hacer uso de gvm y de lazybones, para ello procederemos a instalar [gvm][1] Una vez listo procedemos a ejecutar el siguiente comando :
 
 ``` bash
 gvm install lazybones
@@ -110,88 +112,97 @@ Recargamos la página y vemos el cambio. Ahora vamos a añadir un form para pode
     <!-- endbuild -->
   </body>
 ```
+Ahora para visualizar la nueva página le agregamos al archivo **Ratpack.groovy** lo siguiente :
 
-Ahora para visualizar la nueva página le agregamos al archivo
-
-**Ratpack.groovy** lo siguiente :
-<pre><code class="groovy">get('contacts/new') {
+``` groovy
+get('contacts/new') {
   render groovyTemplate("contacts/new.html", title: "New contact")
 }
-</code></pre> Y dentro de la carpeta de templates creamos una carpeta llamada contacts y dentro de ella agregamos un archivo llamado
+```
 
-**new.html**
-<pre><code class="html">&lt;!doctype html&gt;
-  &lt;!--[if lt IE 7]&gt;      &lt;html class="no-js lt-ie9 lt-ie8 lt-ie7"&gt; &lt;![endif]--&gt;
-  &lt;!--[if IE 7]&gt;         &lt;html class="no-js lt-ie9 lt-ie8"&gt; &lt;![endif]--&gt;
-  &lt;!--[if IE 8]&gt;         &lt;html class="no-js lt-ie9"&gt; &lt;![endif]--&gt;
-  &lt;!--[if gt IE 8]&gt;&lt;!--&gt; &lt;html class="no-js"&gt; &lt;!--&lt;![endif]--&gt;
-  &lt;head&gt;
-    &lt;meta charset="utf-8"&gt;
-    &lt;meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"&gt;
-    &lt;title&gt;Ratpack: ${model.title}&lt;/title&gt;
-    &lt;meta name="description" content=""&gt;
-    &lt;meta name="viewport" content="width=device-width"&gt;
-  &lt;/head&gt;
+Y dentro de la carpeta de templates creamos una carpeta llamada contacts y dentro de ella agregamos un archivo llamado **new.html**
 
-  &lt;body&gt;
-    &lt;section&gt;
-      &lt;h1&gt;${model.title}&lt;/h1&gt;
-    &lt;/section&gt;
+``` html
+<!doctype html>
+  <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+  <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+  <!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+  <!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Ratpack: ${model.title}</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+  </head>
 
-    &lt;a href="/"&gt;Home&lt;/a&gt;
+  <body>
+    <section>
+      <h1>${model.title}</h1>
+    </section>
 
-    &lt;footer class="site-footer"&gt;&lt;/footer&gt;
-  &lt;/body&gt;
-&lt;/html&gt;
-</code></pre> Así para cuando regresemos a la página y la recarguemos podemos ver el link y hasta el momento navegar la página sin problemas. Ahora vamos a agregar un pequeño formulario para poder capturar los datos del contacto, como son:
+    <a href="/">Home</a>
 
-*   **Nombre**
-*   **Apellidos**
-*   **Correo**
-*   **Alias**
-*   **Teléfono** Para ello vamos a hacer un formulario común y silvestre en el html:
+    <footer class="site-footer"></footer>
+  </body>
+</html>
+```
 
-<pre><code class="html">  &lt;body&gt;
-    &lt;section&gt;
-      &lt;h1&gt;${model.title}&lt;/h1&gt;
-    &lt;/section&gt;
+Así para cuando regresemos a la página y la recarguemos podemos ver el link y hasta el momento navegar la página sin problemas. Ahora vamos a agregar un pequeño formulario para poder capturar los datos del contacto, como son:
 
-    &lt;form action="/contacts" method="post"&gt;
-      &lt;div&gt;
-        &lt;label for="name"/&gt;Name&lt;/label&gt;
-        &lt;input type="text" name="name" /&gt;
-      &lt;/div&gt;
+- **Nombre**
+- **Apellidos**
+- **Correo**
+- **Alias**
+- **Teléfono**
 
-      &lt;div&gt;
-        &lt;label for="lastName"/&gt;Last name&lt;/label&gt;
-        &lt;input type="text" name="lastName" /&gt;
-      &lt;/div&gt;
+Para ello vamos a hacer un formulario común y silvestre en el html:
 
-      &lt;div&gt;
-        &lt;label for="email"/&gt;Email&lt;/label&gt;
-        &lt;input type="text" name="email" /&gt;
-      &lt;/div&gt;
+``` html
+  <body>
+    <section>
+      <h1>${model.title}</h1>
+    </section>
 
-      &lt;div&gt;
-        &lt;label for="nickname"/&gt;Nickname&lt;/label&gt;
-        &lt;input type="text" name="nickname" /&gt;
-      &lt;/div&gt;
+    <form action="/contacts" method="post">
+      <div>
+        <label for="name"/>Name</label>
+        <input type="text" name="name" />
+      </div>
 
-      &lt;div&gt;
-        &lt;label for="phone"/&gt;Phone&lt;/label&gt;
-        &lt;input type="text" name="phone" /&gt;
-      &lt;/div&gt;
+      <div>
+        <label for="lastName"/>Last name</label>
+        <input type="text" name="lastName" />
+      </div>
 
-      &lt;button type="submit"&gt; Create &lt;/button&gt;
-    &lt;/form&gt;
+      <div>
+        <label for="email"/>Email</label>
+        <input type="text" name="email" />
+      </div>
 
-    &lt;a href="/"&gt;Home&lt;/a&gt;
+      <div>
+        <label for="nickname"/>Nickname</label>
+        <input type="text" name="nickname" />
+      </div>
 
-    &lt;footer class="site-footer"&gt;&lt;/footer&gt;
-  &lt;/body&gt;
-</code></pre> Una vez que tenemos eso lo demás es cuestión de recibirlo y procesarlo para ello hacemos uso del handler post con el path al que va a responder y vamos a agregarlo a una variable global (esto es para efectos de ejemplo no intenten esto en casa o sus trabajos XD)
+      <div>
+        <label for="phone"/>Phone</label>
+        <input type="text" name="phone" />
+      </div>
 
-<pre><code class="groovy">ratpack {
+      <button type="submit"> Create </button>
+    </form>
+
+    <a href="/">Home</a>
+
+    <footer class="site-footer"></footer>
+  </body>
+```
+
+Una vez que tenemos eso lo demás es cuestión de recibirlo y procesarlo para ello hacemos uso del handler post con el path al que va a responder y vamos a agregarlo a una variable global (esto es para efectos de ejemplo no intenten esto en casa o sus trabajos XD)
+
+``` groovy
+ratpack {
   def contacts = []
 
   handlers {
@@ -208,7 +219,7 @@ Ahora para visualizar la nueva página le agregamos al archivo
       contact.email = form.email
       contact.nickname = form.nickname
       contact.phone = form.phone
-      contacts &lt;&lt; contact
+      contacts << contact
       redirect "/contacts/${contact.id}"
     }
 
@@ -219,67 +230,73 @@ Ahora para visualizar la nueva página le agregamos al archivo
     assets "public"
   }
 }
-</code></pre> Como podrán observar mediante el
+```
 
-*context.parse(Form)* obtenemos los datos enviados en la petición y de esa manera podemos acceder a los datos enviados como si fuera un mapa de groovy. Al final de la petición hacemos un redirect para ver los datos que se han creado con esa petición, pero de momento esto no funciona así que vamos a agregar un nuevo handler con algo que se le llama *pathTokens* y para ello agregamos lo siguiente:
-<pre><code class="groovy">  get('contacts/:id') {
+Como podrán observar mediante el `context.parse(Form)` obtenemos los datos enviados en la petición y de esa manera podemos acceder a los datos enviados como si fuera un mapa de groovy. Al final de la petición hacemos un redirect para ver los datos que se han creado con esa petición, pero de momento esto no funciona así que vamos a agregar un nuevo handler con algo que se le llama *pathTokens* y para ello agregamos lo siguiente:
+
+```groovy
+  get('contacts/:id') {
     def id = pathTokens.asLong('id')
     def contact = contacts.find {
       it.id == id
     }
     render groovyTemplate("contacts/show.html", contact:contact)
   }
-</code></pre> Así mismo agregamos la página que va a visualizar los datos del contacto dentro de la carpeta
+```
 
-*contacts*:
-<pre><code class="html">&lt;html&gt;
-  &lt;head&gt;
-    &lt;title&gt;Ratpack: Show contact&lt;/title&gt;
-  &lt;/head&gt;
+Así mismo agregamos la página que va a visualizar los datos del contacto dentro de la carpeta *contacts*:
 
-  &lt;body&gt;
-    &lt;section&gt;
-      &lt;h1&gt;Show contact&lt;/h1&gt;
-    &lt;/section&gt;
+``` html
+<html>
+  <head>
+    <title>Ratpack: Show contact</title>
+  </head>
 
-    &lt;div&gt;
-      &lt;div&gt;
-        &lt;label for="name"/&gt;Name : &lt;/label&gt;
-        &lt;span&gt;&lt;strong&gt; ${model.contact.name} &lt;/strong&gt;&lt;/span&gt;
-      &lt;/div&gt;
+  <body>
+    <section>
+      <h1>Show contact</h1>
+    </section>
 
-      &lt;div&gt;
-        &lt;label for="lastName"/&gt;Last name : &lt;/label&gt;
-        &lt;span&gt;&lt;strong&gt; ${model.contact.lastName} &lt;/strong&gt;&lt;/span&gt;
-      &lt;/div&gt;
+    <div>
+      <div>
+        <label for="name"/>Name : </label>
+        <span><strong> ${model.contact.name} </strong></span>
+      </div>
 
-      &lt;div&gt;
-        &lt;label for="email"/&gt;Email : &lt;/label&gt;
-        &lt;span&gt;&lt;strong&gt; ${model.contact.email} &lt;/strong&gt;&lt;/span&gt;
-      &lt;/div&gt;
+      <div>
+        <label for="lastName"/>Last name : </label>
+        <span><strong> ${model.contact.lastName} </strong></span>
+      </div>
 
-      &lt;div&gt;
-        &lt;label for="nickname"/&gt;Nickname : &lt;/label&gt;
-        &lt;span&gt;&lt;strong&gt; ${model.contact.nickname} &lt;/strong&gt;&lt;/span&gt;
-      &lt;/div&gt;
+      <div>
+        <label for="email"/>Email : </label>
+        <span><strong> ${model.contact.email} </strong></span>
+      </div>
 
-      &lt;div&gt;
-        &lt;label for="phone"/&gt;Phone : &lt;/label&gt;
-        &lt;span&gt;&lt;strong&gt; ${model.contact.phone} &lt;/strong&gt;&lt;/span&gt;
-      &lt;/div&gt;
-    &lt;/div&gt;
+      <div>
+        <label for="nickname"/>Nickname : </label>
+        <span><strong> ${model.contact.nickname} </strong></span>
+      </div>
 
-    &lt;ul&gt;
-      &lt;li&gt; &lt;a href="/"&gt;Home&lt;/a&gt; &lt;/li&gt;
-      &lt;li&gt; &lt;a href="contacts/new"&gt;New contact&lt;/a&gt; &lt;/li&gt;
-    &lt;/ul&gt;
+      <div>
+        <label for="phone"/>Phone : </label>
+        <span><strong> ${model.contact.phone} </strong></span>
+      </div>
+    </div>
 
-  &lt;/body&gt;
-&lt;/html&gt;
-</code></pre> Ahora vamos a visualizar nuestra lista de contactos y para ello agregaremos un nuevo
+    <ul>
+      <li> <a href="/">Home</a> </li>
+      <li> <a href="contacts/new">New contact</a> </li>
+    </ul>
 
-*handler* y un nuevo elemento llamado *byMethod*:
-<pre><code class="groovy">  handler("contacts") {
+  </body>
+</html>
+```
+
+Ahora vamos a visualizar nuestra lista de contactos y para ello agregaremos un nuevo *handler* y un nuevo elemento llamado *byMethod*:
+
+``` groovy
+  handler("contacts") {
     byMethod {
       get {
         render groovyTemplate("contacts/list.html", contacts: contacts)
@@ -294,62 +311,66 @@ Ahora para visualizar la nueva página le agregamos al archivo
         contact.email = form.email
         contact.nickname = form.nickname
         contact.phone = form.phone
-        contacts &lt;&lt; contact
+        contacts << contact
         redirect "/contacts/${contact.id}"
       }
     }
   }
-</code></pre> Lo que hará el
+```
 
-*handler* es manejar la url "contacts" y delegarla por al método por el cual se haya realizado la petición en el caso de GET visualizará la lista de contactos pero si es por POST agregará los datos del contacto y después de agregarse se visualizará la información de dicho contacto. También agregaremos un link a la lista de contactos para poder visualizar cada uno de los datos de manera individual esto es por si se tiene información extra que no se muestre en el detalle general de la lista de contactos.
-<pre><code class="html">&lt;html&gt;
-  &lt;head&gt;
-    &lt;title&gt;Ratpack: Contact list&lt;/title&gt;
-  &lt;/head&gt;
+Lo que hará el *handler* es manejar la url "contacts" y delegarla por al método por el cual se haya realizado la petición en el caso de GET visualizará la lista de contactos pero si es por POST agregará los datos del contacto y después de agregarse se visualizará la información de dicho contacto. También agregaremos un link a la lista de contactos para poder visualizar cada uno de los datos de manera individual esto es por si se tiene información extra que no se muestre en el detalle general de la lista de contactos.
 
-  &lt;body&gt;
-    &lt;section&gt;
-      &lt;h1&gt;Contact list&lt;/h1&gt;
-    &lt;/section&gt;
+``` html
+<html>
+  <head>
+    <title>Ratpack: Contact list</title>
+  </head>
 
-    &lt;div&gt;
-      &lt;table border="1"&gt;
-        &lt;thead&gt;
-          &lt;tr&gt;
-            &lt;th&gt;Name&lt;/th&gt;
-            &lt;th&gt;Last name&lt;/th&gt;
-            &lt;th&gt;Phone&lt;/th&gt;
-            &lt;th&gt;Email&lt;/th&gt;
-            &lt;th&gt;Nickname&lt;/th&gt;
-            &lt;th&gt;Show&lt;/th&gt;
-          &lt;/tr&gt;
-        &lt;/thead&gt;
-        &lt;tbody&gt;
-          &lt;% model.contacts.each { %&gt;
-            &lt;tr&gt;
-              &lt;td&gt;${it.name}&lt;/td&gt;
-              &lt;td&gt;${it.lastName}&lt;/td&gt;
-              &lt;td&gt;${it.phone}&lt;/td&gt;
-              &lt;td&gt;${it.email}&lt;/td&gt;
-              &lt;td&gt;${it.nickname}&lt;/td&gt;
-              &lt;td&gt; &lt;a href="/contacts/${it.id}"&gt;Show&lt;/a&gt; &lt;/td&gt;
-            &lt;/tr&gt;
-          &lt;% } %&gt;
-        &lt;/tbody&gt;
-      &lt;/table&gt;
-    &lt;/div&gt;
+  <body>
+    <section>
+      <h1>Contact list</h1>
+    </section>
 
-    &lt;ul&gt;
-      &lt;li&gt; &lt;a href="/"&gt;Home&lt;/a&gt; &lt;/li&gt;
-      &lt;li&gt; &lt;a href="contacts/new"&gt;New contact&lt;/a&gt; &lt;/li&gt;
-    &lt;/ul&gt;
+    <div>
+      <table border="1">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Last name</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th>Nickname</th>
+            <th>Show</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% model.contacts.each { %>
+            <tr>
+              <td>${it.name}</td>
+              <td>${it.lastName}</td>
+              <td>${it.phone}</td>
+              <td>${it.email}</td>
+              <td>${it.nickname}</td>
+              <td> <a href="/contacts/${it.id}">Show</a> </td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
 
-  &lt;/body&gt;
-&lt;/html&gt;
-</code></pre> Ya nos falta poco para poder tener un
+    <ul>
+      <li> <a href="/">Home</a> </li>
+      <li> <a href="contacts/new">New contact</a> </li>
+    </ul>
 
-*CRUD* completo, solo nos falta eliminar y actualizar (casi nada XD). Así que para ello vamos a agregar un *handler* más y anidar un *byMethod* como lo hicimos con el POST de *contacts*. Para ello hacemos lo siguiente:
-<pre><code class="groovy">  handler("contacts/:id") {
+  </body>
+</html>
+```
+
+Ya nos falta poco para poder tener un *CRUD* completo, solo nos falta eliminar y actualizar (casi nada XD). Así que para ello vamos a agregar un *handler* más y anidar un *byMethod* como lo hicimos con el POST de *contacts*. Para ello hacemos lo siguiente:
+
+``` groovy
+  handler("contacts/:id") {
     byMethod {
       get {
         def id = pathTokens.asLong('id')
@@ -368,21 +389,23 @@ Ahora para visualizar la nueva página le agregamos al archivo
         }
     }
   }
-</code></pre> Ahora una pregunta, ¿Cómo hacemos para llamar a ese método desde la página? bueno para hacer eso vamos a requerir a jQuery y para ello ocuparemos
+```
 
-[Bower][6] y para instalar jquery usamos el siguiente comando
-<pre><code class="sh">bower install jquery
-</code></pre> Esto nos creará una carpeta llamada
+Ahora una pregunta, ¿Cómo hacemos para llamar a ese método desde la página? bueno para hacer eso vamos a requerir a jQuery y para ello ocuparemos [Bower][6] y para instalar jquery usamos el siguiente comando: `bower install jquery`.
 
-*bower_components* que de momento moveremos a la carpeta de **src/ratpack/public/lib** para tenerla disponible en la aplicación.
-<pre><code class="sh">mv bower_components src/ratpack/public/lib/
-</code></pre> Una vez hecho procedemos a incluir el script en la app en la lista de contactos y agregamos un archivo más que es el que se encargará de eliminar el elemento.
+Esto nos creará una carpeta llamada *bower_components* que de momento moveremos a la carpeta de **src/ratpack/public/lib** para tenerla disponible en la aplicación:  `mv bower_components src/ratpack/public/lib/`.
 
-<pre><code class="html">  &lt;script src="lib/bower_components/jquery/dist/jquery.js"&gt;&lt;/script&gt;
-  &lt;script src="scripts/delete.js"&gt;&lt;/script&gt;
-</code></pre> El código de eliminar es relativamente sencillo ya que lo que vamos a hacer es que cada elemento con la clase delete vamos a añadir el evento click y vamos a realizar la llamada al server con los datos del href.
+Una vez hecho procedemos a incluir el script en la app en la lista de contactos y agregamos un archivo más que es el que se encargará de eliminar el elemento.
 
-<pre><code class="javascript">  $(function() {
+``` html
+  <script src="lib/bower_components/jquery/dist/jquery.js"></script>
+  <script src="scripts/delete.js"></script>
+```
+
+El código de eliminar es relativamente sencillo ya que lo que vamos a hacer es que cada elemento con la clase delete vamos a añadir el evento click y vamos a realizar la llamada al server con los datos del href.
+
+``` javascript
+  $(function() {
     $(".delete").click(function(event) {
       event.preventDefault();
       var url = $(event.target).attr('href');
@@ -394,10 +417,12 @@ Ahora para visualizar la nueva página le agregamos al archivo
       });
     });
   });
-</code></pre> Una vez realizado esto podremos ver como nuestros datos cambian al eliminar un elemento de la lista de contactos. Veamos ahora como editar un elemento. Para la edición vamos a hacerlo de la manera más fácil que podamos esto es agregaremos en el
+```
 
-*byMethod* anterior el método POST, agregamos otro GET más para visualizar la pantalla de edición y actualizaremos los datos de ese elemento, para ello requerimos crear una pantalla nueva y agregarla a la navegación:
-<pre><code class="groovy">  get("contacts/:id/edit") {
+Una vez realizado esto podremos ver como nuestros datos cambian al eliminar un elemento de la lista de contactos. Veamos ahora como editar un elemento. Para la edición vamos a hacerlo de la manera más fácil que podamos esto es agregaremos en el *byMethod* anterior el método POST, agregamos otro GET más para visualizar la pantalla de edición y actualizaremos los datos de ese elemento, para ello requerimos crear una pantalla nueva y agregarla a la navegación:
+
+``` groovy
+  get("contacts/:id/edit") {
     def id = pathTokens.asLong('id')
     def contact = contacts.find {
       it.id == id
@@ -424,61 +449,64 @@ Ahora para visualizar la nueva página le agregamos al archivo
       }
     }
   }
-</code></pre>
+```
 
-<pre><code class="html">  &lt;!doctype html&gt;
-  &lt;html&gt;
-    &lt;head&gt;
-      &lt;meta charset="utf-8"&gt;
-      &lt;meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"&gt;
-    &lt;/head&gt;
+``` html
+  <!doctype html>
+  <html>
+    <head>
+      <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    </head>
 
-    &lt;body&gt;
-      &lt;section&gt;
-        &lt;h1&gt;${model.title}&lt;/h1&gt;
-      &lt;/section&gt;
+    <body>
+      <section>
+        <h1>${model.title}</h1>
+      </section>
 
-      &lt;form action="/contacts/${model.contact.id}" method="post"&gt;
-        &lt;div&gt;
-          &lt;label for="name"/&gt;Name&lt;/label&gt;
-          &lt;input type="text" name="name" value="${model.contact.name}" /&gt;
-        &lt;/div&gt;
+      <form action="/contacts/${model.contact.id}" method="post">
+        <div>
+          <label for="name"/>Name</label>
+          <input type="text" name="name" value="${model.contact.name}" />
+        </div>
 
-        &lt;div&gt;
-          &lt;label for="lastName"/&gt;Last name&lt;/label&gt;
-          &lt;input type="text" name="lastName" value="${model.contact.lastName}"/&gt;
-        &lt;/div&gt;
+        <div>
+          <label for="lastName"/>Last name</label>
+          <input type="text" name="lastName" value="${model.contact.lastName}"/>
+        </div>
 
-        &lt;div&gt;
-          &lt;label for="email"/&gt;Email&lt;/label&gt;
-          &lt;input type="text" name="email" value="${model.contact.email}"/&gt;
-        &lt;/div&gt;
+        <div>
+          <label for="email"/>Email</label>
+          <input type="text" name="email" value="${model.contact.email}"/>
+        </div>
 
-        &lt;div&gt;
-          &lt;label for="nickname"/&gt;Nickname&lt;/label&gt;
-          &lt;input type="text" name="nickname" value="${model.contact.nickname}"/&gt;
-        &lt;/div&gt;
+        <div>
+          <label for="nickname"/>Nickname</label>
+          <input type="text" name="nickname" value="${model.contact.nickname}"/>
+        </div>
 
-        &lt;div&gt;
-          &lt;label for="phone"/&gt;Phone&lt;/label&gt;
-          &lt;input type="text" name="phone" value="${model.contact.phone}"/&gt;
-        &lt;/div&gt;
+        <div>
+          <label for="phone"/>Phone</label>
+          <input type="text" name="phone" value="${model.contact.phone}"/>
+        </div>
 
-        &lt;button type="submit"&gt; Update &lt;/button&gt;
-      &lt;/form&gt;
+        <button type="submit"> Update </button>
+      </form>
 
-      &lt;ul&gt;
-        &lt;li&gt; &lt;a href="/"&gt;Home&lt;/a&gt; &lt;/li&gt;
-        &lt;li&gt; &lt;a href="/contacts"&gt;Contact list&lt;/a&gt; &lt;/li&gt;
-        &lt;li&gt; &lt;a href="/contacts/new"&gt;New contact&lt;/a&gt; &lt;/li&gt;
-      &lt;/ul&gt;
+      <ul>
+        <li> <a href="/">Home</a> </li>
+        <li> <a href="/contacts">Contact list</a> </li>
+        <li> <a href="/contacts/new">New contact</a> </li>
+      </ul>
 
-      &lt;footer class="site-footer"&gt;&lt;/footer&gt;
-    &lt;/body&gt;
-  &lt;/html&gt;
-</code></pre> Y de esta manera tenemos un pequeño
+      <footer class="site-footer"></footer>
+    </body>
+  </html>
+```
 
-*CRUD* con llamadas normales y un poco de *jquery*. En POST posteriores vamos a tomar este código y vamos a hacerle algunas mejoras. Para empezar haremos uso de los *groovyTemplates* como tal y ajustaremos esto a que se maneja más por *REST*. Espero les haya gustado y cualquier duda o comentario ya saben donde encontrarnos. Saludos. GL HF.
+Y de esta manera tenemos un pequeño CRUD con llamadas normales y un poco de jquery. En POST posteriores vamos a tomar este código y vamos a hacerle algunas mejoras. Para empezar haremos uso de los groovyTemplates como tal y ajustaremos esto a que se maneja más por REST. Espero les haya gustado y cualquier duda o comentario ya saben donde encontrarnos.
+
+**Saludos. GLHF.**
 
  [1]: http://gvmtool.net/ "gvm"
  [2]: https://bintray.com/
