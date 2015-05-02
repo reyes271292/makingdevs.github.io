@@ -15,6 +15,7 @@ Por esta razón te recomiendo personalizar las notificaciones por defecto de **J
 
 Objetivo: Informar los despliegues desde Jenkins por correo, usando el [plugin: Email-ext][1]
 
+<!-- more -->
 Procedimiento:
 
 1.  Instalar el plugin desde la consola de administración de Jenkins. ![Screenshot 1]({{ site.url }}/images/IC-Jenkins-PlugIn-Email-Ext_01.jpg)

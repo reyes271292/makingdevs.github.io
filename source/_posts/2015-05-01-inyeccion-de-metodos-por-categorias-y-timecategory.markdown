@@ -16,6 +16,7 @@ En Groovy se pueden inyectar métodos de algunas formas, uno de ellos es a trav�
 *   Los métodos de la clase deben ser definidos como estáticos
 *   El primer argumento de dicho método define el tipo sobre el cual se inyectarían los nuevos métodos
 *   Deben de ser usados dentro del alcance de un closure con ayuda de la palabra reservada `use`
+<!-- more -->
 
 Un ejemplo podría ser el siguiente:
 

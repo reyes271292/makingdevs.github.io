@@ -11,6 +11,7 @@ categories:
 Hola a todos es un gusto contribuir al blog de makingdevs.com y mostrarles un poco de lo que es Apache Camel, para ellos hablaremos primero de su definición.
 
 [Apache Camel][1] es un framework de integración de código abierto, basado en [Enterprise Integration Patterns (Patrones de Integración Empresarial)][3]. Camel nos permite definir las reglas de enrutamiento o mediación con ayuda de un lenguaje especifico (DSL), incluyendo un API basada en Java o mediante una configuración XML. El uso de un lenguaje específico del dominio significa que Apache Camel es capaz de soportar un comportamiento automático de las reglas de ruteo en un entorno de desarrollo integrado usando código Java sin gran cantidad de archivos de configuración XML.
+<!-- more -->
 
 Con ayuda de camel y Mail Component (componente de e-mail de Camel) realize un script para la lectura de un correo Gmail, filtrando el procesamiento de los mismo por su subject y escupiendo el contenido a un endPoint de log.
 
