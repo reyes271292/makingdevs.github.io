@@ -1,0 +1,714 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Development | Blog de MakingDevs]]></title>
+  <link href="http://makingdevs.github.io/blog/categories/development/atom.xml" rel="self"/>
+  <link href="http://makingdevs.github.io/"/>
+  <updated>2015-05-02T15:33:04-05:00</updated>
+  <id>http://makingdevs.github.io/</id>
+  <author>
+    <name><![CDATA[MakingDevs]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Clusterizacion Con Camel]]></title>
+    <link href="http://makingdevs.github.io/2015/04/07/clusterizacion-con-camel/"/>
+    <updated>2015-04-07T19:56:54-05:00</updated>
+    <id>http://makingdevs.github.io/2015/04/07/clusterizacion-con-camel</id>
+    <content type="html"><![CDATA[<p>Camel ofrece distintas soluciones para ser escalado o para distribuir la carga en diferentes instancias, la soluciones que ofrece dependerá de como se encuentra nuestra infraestructura ( y configuración).</p>
+
+<ul>
+<li>Misma JVM y CamelContext</li>
+<li>Misma JVM pero diferente CamelContext</li>
+<li>Diferente JVM y CamelContext</li>
+</ul>
+
+
+<p>El problema que me vi envuelto fue de estas tres, la ultima, el clusterizar camel que se encontraban en diferentes JVM y CamelContext. Y en particular tuve un problema de mensajes duplicados. Para esto camel ofrece ciertas soluciones, un componente llamado <strong>Idempotent Consumer</strong>. El Idempotent Consumer pertenece a los patrones de EIP se usa para filtrar los mensajes duplicados. Este modelo se implementa utilizando la clase IdempotentConsumer. Este utiliza una expresión para calcular una cadena de mensaje ID único para un intercambio de mensajes, este ID puede ser consultado en la IdempotentRepository para ver si se ha visto antes, si se tiene no es tomado para ser procesado, en cambio si no se tiene, entonces el mensaje se procesa y la ID se añade al repositorio.</p>
+
+<p>Hay varios tipos de IdempotentRepository:</p>
+
+<ul>
+<li>MemoryIdempotentRepository</li>
+<li>FileIdempotentRepository</li>
+<li>HazelcastIdempotentRepository (Available as of Camel 2.8)</li>
+<li>JdbcMessageIdRepository (Available as of Camel 2.7)</li>
+<li>JpaMessageIdRepository</li>
+</ul>
+
+
+<pre><code class="groovy">@Grab(group='org.slf4j', module='slf4j-api', version='1.7.10')
+@Grab(group='org.apache.camel', module='camel-core', version='2.12.0')
+@Grab(group='org.apache.camel', module='camel-mail', version='2.12.0')
+
+import org.apache.camel.impl.DefaultCamelContext
+import org.apache.camel.builder.RouteBuilder
+import org.apache.camel.processor.idempotent.FileIdempotentRepository
+
+def camelContext = new DefaultCamelContext()
+camelContext.addRoutes(new RouteBuilder() {
+  def void configure() {
+    from("imaps://imap.gmail.com?username=jorge@makingdevs.com"
+      + "&amp;password=m4k1ngd3vs"
+      + "&amp;consumer.delay=6000")
+    .idempotentConsumer( header("Message-ID"),
+      FileIdempotentRepository.fileIdempotentRepository(
+        new File("idempotentRepository.txt")))
+    .to("log:groovymail?showAll=true&amp;multiline=true") } })
+
+camelContext.start()
+addShutdownHook{ camelContext.stop() }
+synchronized(this){ this.wait() }
+</code></pre>
+
+<p>Este es un script ejemplo el cual utiliza <code>FileIdempotentRepository</code> utilizando un archivo ejemplo para llevar el control, si exploramos el archivo ahí se encuentra los id de los mensajes procesados.</p>
+
+<p><img src="/images/camel_output.png" alt="Camel output" /></p>
+
+<p>Asi si hay un mensaje el cual ya se encuentra dentro de este archivo se ignora y no es procesado. En mi caso utilize JpaMessageIdRepository dentro de grails y fue muy simple utilizar este componente solo agregue la dependencia de camel sql en el buildConfig.groovy</p>
+
+<pre><code class="groovy">runtime 'org.apache.camel:camel-sql:2.13.0’
+</code></pre>
+
+<p>y agregue el bean en resources.groovy</p>
+
+<pre><code class="groovy">import org.apache.camel.processor.idempotent.jdbc.JdbcMessageIdRepository
+
+beans = {
+  messageIdRepository(JdbcMessageIdRepository,ref('dataSource'),'jdbcProcessorName')
+}
+</code></pre>
+
+<p>y por ultimo agregue el <em>idempotentComponent</em>.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Personalizar Notificaciones De Correo en Jenkins]]></title>
+    <link href="http://makingdevs.github.io/2014/11/06/personalizar-notificaciones-de-correo-en-jenkins/"/>
+    <updated>2014-11-06T18:08:56-06:00</updated>
+    <id>http://makingdevs.github.io/2014/11/06/personalizar-notificaciones-de-correo-en-jenkins</id>
+    <content type="html"><![CDATA[<p>Las <strong>notificaciones</strong> son básicas para la correcta comunicación de los involucrados de nuestros proyectos como: <em>Stakeholders/ Key Users / Developers / Clientes / Testers</em>.</p>
+
+<p>Por esta razón te recomiendo personalizar las notificaciones por defecto de <strong>Jenkins</strong>.</p>
+
+<p>Objetivo: Informar los despliegues desde Jenkins por correo, usando el <a href="https://wiki.jenkins-ci.org/display/JENKINS/Email-ext+plugin">plugin: Email-ext</a></p>
+
+<p>Procedimiento:</p>
+
+<ol>
+<li><p>Instalar el plugin desde la consola de administración de Jenkins. <img src="/images/IC-Jenkins-PlugIn-Email-Ext_01.jpg" alt="Screenshot 1" /></p></li>
+<li><p>Configurar la cuenta de correo saliente SMTP, te recomiendo que uses el autenticado.<img src="/images/IC-Jenkins-PlugIn-Email-Ext_02.jpg" alt="Screenshot 2" /></p></li>
+<li><p>Configurar el plugin: Email-ext con información base de los usuarios a notificar ( <em>Stake Holders/ Key Users / Developers / Clientes / Testers</em> ) en las listas por DEFAULT de la configuración general a nivel. Esto te permitirá contar con la misma configuración para tus N tareas de despliegue. <img src="/images/IC-Jenkins-PlugIn-Email-Ext_03.jpg" alt="Screenshot 3" /></p></li>
+<li><p>Para personalizar el correo que se enviará, copiaremos un<strong>Template</strong> dentro del Home de Jenkins, <em>static-analysis.jelly</em> y asignando nombre relacionado al proyecto. Si requieres más información, consulta la <a href="https://github.com/jenkinsci/email-ext-plugin/tree/master/src/main/resources/hudson/plugins/emailext/templates">documentación del plugin en GitHub</a>. Este template es un <strong>HTML el cual puedes editar su contenido</strong>, incluyendo titulo del proyecto, una imagen, etc. <img src="/images/IC-Jenkins-PlugIn-Email-Ext_04.jpg" alt="Screenshot 4" /></p></li>
+<li><p>Añade en una tarea de Jenkins, un paso al finalizar, usando Email notification. <img src="/images/IC-Jenkins-PlugIn-Email-Ext_05.jpg" alt="Screenshot 5" /></p></li>
+<li><p>Ejecuta tu tarea y verifica el correo recibido. <img src="/images/IC-Jenkins-PlugIn-Email-Ext_06.jpg" alt="Screenshot 6" /></p></li>
+</ol>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Inyección De Métodos Por Categorías Y TimeCategory]]></title>
+    <link href="http://makingdevs.github.io/2014/09/16/inyeccion-de-metodos-por-categorias-y-timecategory/"/>
+    <updated>2014-09-16T18:55:30-05:00</updated>
+    <id>http://makingdevs.github.io/2014/09/16/inyeccion-de-metodos-por-categorias-y-timecategory</id>
+    <content type="html"><![CDATA[<h2>Acerca de las categorías</h2>
+
+<p>En Groovy se pueden inyectar métodos de algunas formas, uno de ellos es a través del uso de categorías, la cual nos da inyección temporal y controlada de dichos elementos. Para hacerlo las clases que son categorías deben de cumplir con cierta estructura:</p>
+
+<ul>
+<li>Los métodos de la clase deben ser definidos como estáticos</li>
+<li>El primer argumento de dicho método define el tipo sobre el cual se inyectarían los nuevos métodos</li>
+<li>Deben de ser usados dentro del alcance de un closure con ayuda de la palabra reservada <code>use</code></li>
+</ul>
+
+
+<p>Un ejemplo podría ser el siguiente:</p>
+
+<pre><code class="groovy">    class NameUtil{
+        static prettify(String name){
+            name.trim().split(' ').grep { it.size() }*.capitalize().join(' ')
+        }
+    }
+
+    use NameUtil, {
+        println "  josé   juan    reyes    zuñiga   ".prettify()
+    }
+</code></pre>
+
+<p>Adicionalmente, podemos crear dicha inyección de métodos con ayuda de la anotación <code>@Category</code>, que prácticamente nos facilita a que cualquier clase pueda ser usada como categoría, pues no necesariamente los métodos tiene que ser estáticos y el contexto del argumento para la inyección es el objeto <code>this</code> en donde se esté intentando usar.</p>
+
+<h2>Uso de GroovyTime</h2>
+
+<p>La clase <code>TimeCategory</code> es una clase que tiene una serie de métodos de conveniencia para el manejo del tiempo, formando así un DSL, con el que podemos operar. Y con ayuda de la clase <code>Duration</code> complementamos algunas operaciones que se pueden realizar en el contexto de los objetos que estemos usando.</p>
+
+<pre><code class="groovy">    import groovy.time.TimeCategory
+
+    use ( TimeCategory ) {
+        println 2.hours.ago
+        println 30.minutes.from // TimeDuration
+        println 30.minutes.from.now
+        println 40.minutes + 30.minutes.from.now
+        println 30.minutes.ago
+
+        def today = new Date()
+        println today - 3.years
+        println today + 4.weeks
+        println today + 90.minutes
+    }
+</code></pre>
+
+<p>Para que consideres el conjunto de operaciones que tienes disponibles te recomendamos visitar la documentación de <a href="http://groovy.codehaus.org/api/groovy/time/TimeCategory.html">TimeCategory</a> y <a href="http://groovy.codehaus.org/api/groovy/time/Duration.html">Duration</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Lectura De Correo Con Apache Camel + Groovy]]></title>
+    <link href="http://makingdevs.github.io/2014/08/26/lectura-de-correo-con-apache-camel-plus-groovy/"/>
+    <updated>2014-08-26T18:29:26-05:00</updated>
+    <id>http://makingdevs.github.io/2014/08/26/lectura-de-correo-con-apache-camel-plus-groovy</id>
+    <content type="html"><![CDATA[<p>Hola a todos es un gusto contribuir al blog de makingdevs.com y mostrarles un poco de lo que es Apache Camel, para ellos hablaremos primero de su definición.</p>
+
+<p><a href="http://camel.apache.org/">Apache Camel</a> es un framework de integración de código abierto, basado en <a href="http://www.enterpriseintegrationpatterns.com/toc.html">Enterprise Integration Patterns (Patrones de Integración Empresarial)</a>. Camel nos permite definir las reglas de enrutamiento o mediación con ayuda de un lenguaje especifico (DSL), incluyendo un API basada en Java o mediante una configuración XML. El uso de un lenguaje específico del dominio significa que Apache Camel es capaz de soportar un comportamiento automático de las reglas de ruteo en un entorno de desarrollo integrado usando código Java sin gran cantidad de archivos de configuración XML.</p>
+
+<p>Con ayuda de camel y Mail Component (componente de e-mail de Camel) realize un script para la lectura de un correo Gmail, filtrando el procesamiento de los mismo por su subject y escupiendo el contenido a un endPoint de log.</p>
+
+<p>Pero si son curiosos ustedes se preguntaran <strong>¿Que es un endPoint?</strong>. Un endpoint es la interface a través de la cual los sistemas externos pueden enviar y recibir mensajes, permitiendo así la integración de sistemas en Camel. La función de un endpoint es crear productores y consumidores, lo que nos permite usar este endpoint como to y from dentro de una ruta Camel. Asi se denota un endpoint URIs siguiendo el siguiente formato: <strong>[componente]:[contexto]?[opciones]</strong>.</p>
+
+<h3>Producers y Consumers</h3>
+
+<p>Un productor es el encargado de proveer los mensajes, siendo el puente de comunicación con el sistema externo, no procesa la información solo provee el mensaje, en este ejemplo el correo es el productor. Un consumidor es el encargado de recibir el mensaje que el productor obtiene y así procesar el mensaje o inclusive partir dicho mensaje para que sea procesado por otro consumidor. Bueno después de una pequeña introducción a Camel les muestro mi script en la cual hago lectura del correo filtro los mensajes por su subject y los arrojo a un log y no solo puede ser un log gracias a camel este puede ser un bean, FTP, intancia de amazon, un archivo, <a href="http://camel.apache.org/components.html">casi cualquier cosa</a>. Nota necesitamos las dependencias de camel core y camel mail para el siguiente ejemplo:</p>
+
+<pre><code class="groovy">@Grab(group='org.apache.camel', module='camel-core', version='1.6.0')
+@Grab(group='org.apache.camel', module='camel-mail', version='1.6.0')
+
+import org.apache.camel.impl.DefaultCamelContext
+import org.apache.camel.builder.RouteBuilder
+
+def camelContext = new DefaultCamelContext()
+camelContext.addRoutes(new RouteBuilder() {
+  def void configure() {
+    from("imaps://imap.gmail.com?username=user"
+    + "&amp;password=password"
+    + "&amp;deleteProcessedMessages=false"
+    + "&amp;processOnlyUnseenMessages=true"
+    + "&amp;consumer.delay=6000")
+    .filter {it.in.headers.subject.contains('camel')}
+    .to("log:groovymail?showAll=true&amp;multiline=true")
+  }
+})
+camelContext.start()
+
+addShutdownHook{ camelContext.stop() }
+synchronized(this){ this.wait() }
+</code></pre>
+
+<p>Notaran que al final del script hay una declaración <code>camelContext.start()</code>. El <em>CamelContext</em> representa una sola base de reglas de enrutamiento Camel. Se utiliza el CamelContext de una manera similar al ApplicationContext. Y asi tenemos un pequeño ejemplo de lectura de correo con ayuda de Camel.</p>
+
+<p>Como vemos Camel nos permite integrar sistemas muy facilmente. Espero les agradece este pequeño articulo y les sea de gran ayuda, dudas y comentarios son bienvenidas. Salu2</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Introduccion a Ratpack]]></title>
+    <link href="http://makingdevs.github.io/2014/08/19/introduccion-a-ratpack/"/>
+    <updated>2014-08-19T00:34:28-05:00</updated>
+    <id>http://makingdevs.github.io/2014/08/19/introduccion-a-ratpack</id>
+    <content type="html"><![CDATA[<p>Es bueno estar de vuelta escribiendo, ya ha pasado bastante tiempo desde que hice un post así que vamos a ver algo que me ayudó en un curso. El día de hoy hablaremos de Ratpack y para ello primero vamos a dar una pequeña introducción de lo que es. Ratpack, como su página lo dice, es un conjunto de librerías de JAVA que facilita la rapidez, eficiencia, evolución y pruebas de aplicaciones HTTP, está construida sobre Netty y por ello posee muchos de los beneficios del motor del mismo. Ratpack se enfoca en permitir applicaciones HTTP para ser eficientes, modulares y adaptativas a los nuevos requerimientos, tecnologías y buenas pruebas sobre el tiempo. Bueno vamos a dejar de momento las definiciones y vamos a lo bonito, el código.</p>
+
+<!-- more -->
+
+
+<p>Para este post vamos a hacer uso de gvm y de lazybones, para ello procederemos a instalar <a href="http://gvmtool.net/" title="gvm">gvm</a> Una vez listo procedemos a ejecutar el siguiente comando :</p>
+
+<pre><code class="bash">gvm install lazybones
+</code></pre>
+
+<p>Y con ello tendremos lazybones instalado en nuestra máquina&hellip; bueno y ¿para que necesitamos lazybones si es un post sobre Ratpack? Lazybones es una herramienta de línea de comandos que nos permite generar una estructura de un proyecto para cualquier framework basado en plantillas predefinidas. Y Ratpack tiene varias plantillas para lazybones que pueden ser encontradas en</p>
+
+<p><a href="https://bintray.com/">Bintray</a> en el apartado de <a href="https://bintray.com/ratpack/lazybones">ratpack/lazybones repository</a>. Si desean saber un poco más de Lazybones pueden encontrarlo en la <a href="https://github.com/pledbrook/lazybones#running-it">documentación</a> Para crear la estructura del proyecto ejecutaremos la siguiente sentencia :</p>
+
+<pre><code class="bash">lazybones create ratpack contact-book
+</code></pre>
+
+<p>Al ejecutar la instrucción nos aparecerá en pantalla una serie de instrucciones y también lo que ganamos al ejecutarla. A parte nos da la estructura de directorios que se genera y nos dice como levantar nuestra aplicación.</p>
+
+<pre><code class="bash">  &lt;proj&gt;
+    |
+    +- src
+        |
+        +- ratpack
+        |     |
+        |     +- ratpack.groovy
+        |     +- ratpack.properties
+        |     +- public          // Static assets in here
+        |          |
+        |          +- images
+        |          +- lib
+        |          +- scripts
+        |          +- styles
+        |
+        +- main
+        |   |
+        |   +- groovy
+                 |
+                 +- // App classes in here!
+        |
+        +- test
+            |
+            +- groovy
+                 |
+                 +- // Spock tests in here!
+</code></pre>
+
+<p>Para levantar el ejemplo nos movemos a la carpeta con cd, ejecutamos lo siguiente y nos preparamos un café porque va a descargar dependencias XD:
+<code>./gradlew run</code></p>
+
+<p>Una vez que terminó de ejecutarse podemos ver lo que se creó en la url <a href="http://localhost:5050">http://localhost:5050</a> como podrán observar la página que se creó no es gran cosa pero ya tenemos lo necesario para trabajar en una aplicación un poco más compleja como iremos viendo a lo largo de este post. Como podremos ver en el <strong>README.md</strong> existen prácticamente tres archivos principales:</p>
+
+<ul>
+<li><strong>build.gradle</strong></li>
+<li><strong>Ratpack.groovy</strong></li>
+<li><strong>index.html</strong></li>
+</ul>
+
+
+<p>El primero es un archivo de gradle (para los que no lo han manejado o conocen de él pueden revisar el siguiente <a href="http://www.gradle.org/documentation">link</a> pero a grandes rasgos gradle vendría siendo lo mismo que Maven pero con drogas XD. El segundo archivo es donde usualmente sucede la magia ya que es donde se resuelven las urls y se hace todo el show necesario. Y el tercer archivo no es más que una plantilla html que se visualiza a través del segundo archivo. Con los arvhivos que vamos a estar trabajando de momento son <strong>index.html</strong> y <strong>Ratpack.groovy</strong>. En el tag body del html dejamos lo siguiente:</p>
+
+<pre><code class="html">&lt;body&gt;
+  &lt;section&gt;
+    &lt;h1&gt;${model.title}&lt;/h1&gt;
+    &lt;p&gt;This is the main page of your contacts&lt;/p&gt;
+  &lt;/section&gt;
+
+  &lt;footer class="site-footer"&gt;&lt;/footer&gt;
+&lt;/body&gt;
+</code></pre>
+
+<p>Y en el <strong>Ratpack.groovy</strong> dejamos lo siguiente:</p>
+
+<pre><code class="groovy">import static ratpack.groovy.Groovy.groovyTemplate
+import static ratpack.groovy.Groovy.ratpack
+
+ratpack {
+  handlers {
+    get {
+      render groovyTemplate("index.html", title: "Contact book")
+    }
+
+    assets "public"
+  }
+}
+</code></pre>
+
+<p>Recargamos la página y vemos el cambio. Ahora vamos a añadir un form para poder agregar a un elemento a la lista de contactos. Para ello agregamos un link a nuestro <em>index.html</em></p>
+
+<pre><code class="html">  &lt;body&gt;
+    &lt;section&gt;
+      &lt;h1&gt;${model.title}&lt;/h1&gt;
+      &lt;p&gt;This is the main page of your contacts&lt;/p&gt;
+    &lt;/section&gt;
+
+    &lt;a href="create"&gt;Create contact&lt;/a&gt;
+
+    &lt;footer class="site-footer"&gt;&lt;/footer&gt;
+
+    &lt;!-- build:js scripts/jquery.js --&gt;
+    &lt;script src="lib/jquery/jquery.min.js"&gt;&lt;/script&gt;
+    &lt;!-- endbuild --&gt;
+  &lt;/body&gt;
+</code></pre>
+
+<p>Ahora para visualizar la nueva página le agregamos al archivo <strong>Ratpack.groovy</strong> lo siguiente :</p>
+
+<pre><code class="groovy">get('contacts/new') {
+  render groovyTemplate("contacts/new.html", title: "New contact")
+}
+</code></pre>
+
+<p>Y dentro de la carpeta de templates creamos una carpeta llamada contacts y dentro de ella agregamos un archivo llamado <strong>new.html</strong></p>
+
+<pre><code class="html">&lt;!doctype html&gt;
+  &lt;!--[if lt IE 7]&gt;      &lt;html class="no-js lt-ie9 lt-ie8 lt-ie7"&gt; &lt;![endif]--&gt;
+  &lt;!--[if IE 7]&gt;         &lt;html class="no-js lt-ie9 lt-ie8"&gt; &lt;![endif]--&gt;
+  &lt;!--[if IE 8]&gt;         &lt;html class="no-js lt-ie9"&gt; &lt;![endif]--&gt;
+  &lt;!--[if gt IE 8]&gt;&lt;!--&gt; &lt;html class="no-js"&gt; &lt;!--&lt;![endif]--&gt;
+  &lt;head&gt;
+    &lt;meta charset="utf-8"&gt;
+    &lt;meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"&gt;
+    &lt;title&gt;Ratpack: ${model.title}&lt;/title&gt;
+    &lt;meta name="description" content=""&gt;
+    &lt;meta name="viewport" content="width=device-width"&gt;
+  &lt;/head&gt;
+
+  &lt;body&gt;
+    &lt;section&gt;
+      &lt;h1&gt;${model.title}&lt;/h1&gt;
+    &lt;/section&gt;
+
+    &lt;a href="http://makingdevs.github.io/"&gt;Home&lt;/a&gt;
+
+    &lt;footer class="site-footer"&gt;&lt;/footer&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+<p>Así para cuando regresemos a la página y la recarguemos podemos ver el link y hasta el momento navegar la página sin problemas. Ahora vamos a agregar un pequeño formulario para poder capturar los datos del contacto, como son:</p>
+
+<ul>
+<li><strong>Nombre</strong></li>
+<li><strong>Apellidos</strong></li>
+<li><strong>Correo</strong></li>
+<li><strong>Alias</strong></li>
+<li><strong>Teléfono</strong></li>
+</ul>
+
+
+<p>Para ello vamos a hacer un formulario común y silvestre en el html:</p>
+
+<pre><code class="html">  &lt;body&gt;
+    &lt;section&gt;
+      &lt;h1&gt;${model.title}&lt;/h1&gt;
+    &lt;/section&gt;
+
+    &lt;form action="/contacts" method="post"&gt;
+      &lt;div&gt;
+        &lt;label for="name"/&gt;Name&lt;/label&gt;
+        &lt;input type="text" name="name" /&gt;
+      &lt;/div&gt;
+
+      &lt;div&gt;
+        &lt;label for="lastName"/&gt;Last name&lt;/label&gt;
+        &lt;input type="text" name="lastName" /&gt;
+      &lt;/div&gt;
+
+      &lt;div&gt;
+        &lt;label for="email"/&gt;Email&lt;/label&gt;
+        &lt;input type="text" name="email" /&gt;
+      &lt;/div&gt;
+
+      &lt;div&gt;
+        &lt;label for="nickname"/&gt;Nickname&lt;/label&gt;
+        &lt;input type="text" name="nickname" /&gt;
+      &lt;/div&gt;
+
+      &lt;div&gt;
+        &lt;label for="phone"/&gt;Phone&lt;/label&gt;
+        &lt;input type="text" name="phone" /&gt;
+      &lt;/div&gt;
+
+      &lt;button type="submit"&gt; Create &lt;/button&gt;
+    &lt;/form&gt;
+
+    &lt;a href="http://makingdevs.github.io/"&gt;Home&lt;/a&gt;
+
+    &lt;footer class="site-footer"&gt;&lt;/footer&gt;
+  &lt;/body&gt;
+</code></pre>
+
+<p>Una vez que tenemos eso lo demás es cuestión de recibirlo y procesarlo para ello hacemos uso del handler post con el path al que va a responder y vamos a agregarlo a una variable global (esto es para efectos de ejemplo no intenten esto en casa o sus trabajos XD)</p>
+
+<pre><code class="groovy">ratpack {
+  def contacts = []
+
+  handlers {
+    get {
+      render groovyTemplate("index.html", title: "Contact book")
+    }
+
+    post('contacts') {
+      Form form = context.parse(Form)
+      def contact = [:]
+      contact.id = contacts ? contacts.id.max() + 1 : 1
+      contact.name = form.name
+      contact.lastName = form.lastName
+      contact.email = form.email
+      contact.nickname = form.nickname
+      contact.phone = form.phone
+      contacts &lt;&lt; contact
+      redirect "/contacts/${contact.id}"
+    }
+
+    get('contacts/new') {
+      render groovyTemplate("contacts/new.html", title: "New contact")
+    }
+
+    assets "public"
+  }
+}
+</code></pre>
+
+<p>Como podrán observar mediante el <code>context.parse(Form)</code> obtenemos los datos enviados en la petición y de esa manera podemos acceder a los datos enviados como si fuera un mapa de groovy. Al final de la petición hacemos un redirect para ver los datos que se han creado con esa petición, pero de momento esto no funciona así que vamos a agregar un nuevo handler con algo que se le llama <em>pathTokens</em> y para ello agregamos lo siguiente:</p>
+
+<pre><code class="groovy">  get('contacts/:id') {
+    def id = pathTokens.asLong('id')
+    def contact = contacts.find {
+      it.id == id
+    }
+    render groovyTemplate("contacts/show.html", contact:contact)
+  }
+</code></pre>
+
+<p>Así mismo agregamos la página que va a visualizar los datos del contacto dentro de la carpeta <em>contacts</em>:</p>
+
+<pre><code class="html">&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;Ratpack: Show contact&lt;/title&gt;
+  &lt;/head&gt;
+
+  &lt;body&gt;
+    &lt;section&gt;
+      &lt;h1&gt;Show contact&lt;/h1&gt;
+    &lt;/section&gt;
+
+    &lt;div&gt;
+      &lt;div&gt;
+        &lt;label for="name"/&gt;Name : &lt;/label&gt;
+        &lt;span&gt;&lt;strong&gt; ${model.contact.name} &lt;/strong&gt;&lt;/span&gt;
+      &lt;/div&gt;
+
+      &lt;div&gt;
+        &lt;label for="lastName"/&gt;Last name : &lt;/label&gt;
+        &lt;span&gt;&lt;strong&gt; ${model.contact.lastName} &lt;/strong&gt;&lt;/span&gt;
+      &lt;/div&gt;
+
+      &lt;div&gt;
+        &lt;label for="email"/&gt;Email : &lt;/label&gt;
+        &lt;span&gt;&lt;strong&gt; ${model.contact.email} &lt;/strong&gt;&lt;/span&gt;
+      &lt;/div&gt;
+
+      &lt;div&gt;
+        &lt;label for="nickname"/&gt;Nickname : &lt;/label&gt;
+        &lt;span&gt;&lt;strong&gt; ${model.contact.nickname} &lt;/strong&gt;&lt;/span&gt;
+      &lt;/div&gt;
+
+      &lt;div&gt;
+        &lt;label for="phone"/&gt;Phone : &lt;/label&gt;
+        &lt;span&gt;&lt;strong&gt; ${model.contact.phone} &lt;/strong&gt;&lt;/span&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;ul&gt;
+      &lt;li&gt; &lt;a href="http://makingdevs.github.io/"&gt;Home&lt;/a&gt; &lt;/li&gt;
+      &lt;li&gt; &lt;a href="contacts/new"&gt;New contact&lt;/a&gt; &lt;/li&gt;
+    &lt;/ul&gt;
+
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+<p>Ahora vamos a visualizar nuestra lista de contactos y para ello agregaremos un nuevo <em>handler</em> y un nuevo elemento llamado <em>byMethod</em>:</p>
+
+<pre><code class="groovy">  handler("contacts") {
+    byMethod {
+      get {
+        render groovyTemplate("contacts/list.html", contacts: contacts)
+      }
+
+      post {
+        Form form = context.parse(Form)
+        def contact = [:]
+        contact.id = contacts ? contacts.id.max() + 1 : 1
+        contact.name = form.name
+        contact.lastName = form.lastName
+        contact.email = form.email
+        contact.nickname = form.nickname
+        contact.phone = form.phone
+        contacts &lt;&lt; contact
+        redirect "/contacts/${contact.id}"
+      }
+    }
+  }
+</code></pre>
+
+<p>Lo que hará el <em>handler</em> es manejar la url &ldquo;contacts&rdquo; y delegarla por al método por el cual se haya realizado la petición en el caso de GET visualizará la lista de contactos pero si es por POST agregará los datos del contacto y después de agregarse se visualizará la información de dicho contacto. También agregaremos un link a la lista de contactos para poder visualizar cada uno de los datos de manera individual esto es por si se tiene información extra que no se muestre en el detalle general de la lista de contactos.</p>
+
+<pre><code class="html">&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;Ratpack: Contact list&lt;/title&gt;
+  &lt;/head&gt;
+
+  &lt;body&gt;
+    &lt;section&gt;
+      &lt;h1&gt;Contact list&lt;/h1&gt;
+    &lt;/section&gt;
+
+    &lt;div&gt;
+      &lt;table border="1"&gt;
+        &lt;thead&gt;
+          &lt;tr&gt;
+            &lt;th&gt;Name&lt;/th&gt;
+            &lt;th&gt;Last name&lt;/th&gt;
+            &lt;th&gt;Phone&lt;/th&gt;
+            &lt;th&gt;Email&lt;/th&gt;
+            &lt;th&gt;Nickname&lt;/th&gt;
+            &lt;th&gt;Show&lt;/th&gt;
+          &lt;/tr&gt;
+        &lt;/thead&gt;
+        &lt;tbody&gt;
+          &lt;% model.contacts.each { %&gt;
+            &lt;tr&gt;
+              &lt;td&gt;${it.name}&lt;/td&gt;
+              &lt;td&gt;${it.lastName}&lt;/td&gt;
+              &lt;td&gt;${it.phone}&lt;/td&gt;
+              &lt;td&gt;${it.email}&lt;/td&gt;
+              &lt;td&gt;${it.nickname}&lt;/td&gt;
+              &lt;td&gt; &lt;a href="http://makingdevs.github.io/contacts/${it.id}"&gt;Show&lt;/a&gt; &lt;/td&gt;
+            &lt;/tr&gt;
+          &lt;% } %&gt;
+        &lt;/tbody&gt;
+      &lt;/table&gt;
+    &lt;/div&gt;
+
+    &lt;ul&gt;
+      &lt;li&gt; &lt;a href="http://makingdevs.github.io/"&gt;Home&lt;/a&gt; &lt;/li&gt;
+      &lt;li&gt; &lt;a href="contacts/new"&gt;New contact&lt;/a&gt; &lt;/li&gt;
+    &lt;/ul&gt;
+
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+<p>Ya nos falta poco para poder tener un <em>CRUD</em> completo, solo nos falta eliminar y actualizar (casi nada XD). Así que para ello vamos a agregar un <em>handler</em> más y anidar un <em>byMethod</em> como lo hicimos con el POST de <em>contacts</em>. Para ello hacemos lo siguiente:</p>
+
+<pre><code class="groovy">  handler("contacts/:id") {
+    byMethod {
+      get {
+        def id = pathTokens.asLong('id')
+        def contact = contacts.find {
+          it.id == id
+        }
+        render groovyTemplate("contacts/show.html", contact:contact)
+      }
+
+        delete {
+          def id = pathTokens.asLong('id')
+          contacts = contacts.findAll {
+            it.id != id
+          }
+          render "ok"
+        }
+    }
+  }
+</code></pre>
+
+<p>Ahora una pregunta, ¿Cómo hacemos para llamar a ese método desde la página? bueno para hacer eso vamos a requerir a jQuery y para ello ocuparemos <a href="http://bower.io/]">Bower</a> y para instalar jquery usamos el siguiente comando: <code>bower install jquery</code>.</p>
+
+<p>Esto nos creará una carpeta llamada <em>bower_components</em> que de momento moveremos a la carpeta de <strong>src/ratpack/public/lib</strong> para tenerla disponible en la aplicación:  <code>mv bower_components src/ratpack/public/lib/</code>.</p>
+
+<p>Una vez hecho procedemos a incluir el script en la app en la lista de contactos y agregamos un archivo más que es el que se encargará de eliminar el elemento.</p>
+
+<pre><code class="html">  &lt;script src="lib/bower_components/jquery/dist/jquery.js"&gt;&lt;/script&gt;
+  &lt;script src="scripts/delete.js"&gt;&lt;/script&gt;
+</code></pre>
+
+<p>El código de eliminar es relativamente sencillo ya que lo que vamos a hacer es que cada elemento con la clase delete vamos a añadir el evento click y vamos a realizar la llamada al server con los datos del href.</p>
+
+<pre><code class="javascript">  $(function() {
+    $(".delete").click(function(event) {
+      event.preventDefault();
+      var url = $(event.target).attr('href');
+      $.ajax({
+        type: "DELETE",
+        url: url,
+      }).success(function(data) {
+        location.reload();
+      });
+    });
+  });
+</code></pre>
+
+<p>Una vez realizado esto podremos ver como nuestros datos cambian al eliminar un elemento de la lista de contactos. Veamos ahora como editar un elemento. Para la edición vamos a hacerlo de la manera más fácil que podamos esto es agregaremos en el <em>byMethod</em> anterior el método POST, agregamos otro GET más para visualizar la pantalla de edición y actualizaremos los datos de ese elemento, para ello requerimos crear una pantalla nueva y agregarla a la navegación:</p>
+
+<pre><code class="groovy">  get("contacts/:id/edit") {
+    def id = pathTokens.asLong('id')
+    def contact = contacts.find {
+      it.id == id
+    }
+    render groovyTemplate("contacts/edit.html", title:"Editing contact", contact:contact)
+  }
+
+  handler("contacts/:id") {
+    byMethod {
+      post {
+        def id = pathTokens.asLong('id')
+        def contact = contacts.find {
+          it.id == id
+        }
+
+        Form form = context.parse(Form)
+        contact.name = form.name
+        contact.lastName = form.lastName
+        contact.email = form.email
+        contact.nickname = form.nickname
+        contact.phone = form.phone
+
+        render groovyTemplate("contacts/show.html", contact:contact)
+      }
+    }
+  }
+</code></pre>
+
+<pre><code class="html">  &lt;!doctype html&gt;
+  &lt;html&gt;
+    &lt;head&gt;
+      &lt;meta charset="utf-8"&gt;
+      &lt;meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"&gt;
+    &lt;/head&gt;
+
+    &lt;body&gt;
+      &lt;section&gt;
+        &lt;h1&gt;${model.title}&lt;/h1&gt;
+      &lt;/section&gt;
+
+      &lt;form action="/contacts/${model.contact.id}" method="post"&gt;
+        &lt;div&gt;
+          &lt;label for="name"/&gt;Name&lt;/label&gt;
+          &lt;input type="text" name="name" value="${model.contact.name}" /&gt;
+        &lt;/div&gt;
+
+        &lt;div&gt;
+          &lt;label for="lastName"/&gt;Last name&lt;/label&gt;
+          &lt;input type="text" name="lastName" value="${model.contact.lastName}"/&gt;
+        &lt;/div&gt;
+
+        &lt;div&gt;
+          &lt;label for="email"/&gt;Email&lt;/label&gt;
+          &lt;input type="text" name="email" value="${model.contact.email}"/&gt;
+        &lt;/div&gt;
+
+        &lt;div&gt;
+          &lt;label for="nickname"/&gt;Nickname&lt;/label&gt;
+          &lt;input type="text" name="nickname" value="${model.contact.nickname}"/&gt;
+        &lt;/div&gt;
+
+        &lt;div&gt;
+          &lt;label for="phone"/&gt;Phone&lt;/label&gt;
+          &lt;input type="text" name="phone" value="${model.contact.phone}"/&gt;
+        &lt;/div&gt;
+
+        &lt;button type="submit"&gt; Update &lt;/button&gt;
+      &lt;/form&gt;
+
+      &lt;ul&gt;
+        &lt;li&gt; &lt;a href="http://makingdevs.github.io/"&gt;Home&lt;/a&gt; &lt;/li&gt;
+        &lt;li&gt; &lt;a href="http://makingdevs.github.io/contacts"&gt;Contact list&lt;/a&gt; &lt;/li&gt;
+        &lt;li&gt; &lt;a href="http://makingdevs.github.io/contacts/new"&gt;New contact&lt;/a&gt; &lt;/li&gt;
+      &lt;/ul&gt;
+
+      &lt;footer class="site-footer"&gt;&lt;/footer&gt;
+    &lt;/body&gt;
+  &lt;/html&gt;
+</code></pre>
+
+<p>Y de esta manera tenemos un pequeño CRUD con llamadas normales y un poco de jquery. En POST posteriores vamos a tomar este código y vamos a hacerle algunas mejoras. Para empezar haremos uso de los groovyTemplates como tal y ajustaremos esto a que se maneja más por REST. Espero les haya gustado y cualquier duda o comentario ya saben donde encontrarnos.</p>
+
+<p><strong>Saludos. GLHF.</strong></p>
+]]></content>
+  </entry>
+  
+</feed>
