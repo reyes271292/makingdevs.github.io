@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Groovy | Blog de MakingDevs]]></title>
   <link href="http://makingdevs.github.io/blog/categories/groovy/atom.xml" rel="self"/>
   <link href="http://makingdevs.github.io/"/>
-  <updated>2015-05-02T15:33:04-05:00</updated>
+  <updated>2015-05-02T16:15:17-05:00</updated>
   <id>http://makingdevs.github.io/</id>
   <author>
     <name><![CDATA[MakingDevs]]></name>
@@ -27,6 +27,9 @@
 <li>El primer argumento de dicho método define el tipo sobre el cual se inyectarían los nuevos métodos</li>
 <li>Deben de ser usados dentro del alcance de un closure con ayuda de la palabra reservada <code>use</code></li>
 </ul>
+
+
+<!-- more -->
 
 
 <p>Un ejemplo podría ser el siguiente:</p>

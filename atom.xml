@@ -4,7 +4,7 @@
   <title><![CDATA[Blog de MakingDevs]]></title>
   <link href="http://makingdevs.github.io/atom.xml" rel="self"/>
   <link href="http://makingdevs.github.io/"/>
-  <updated>2015-05-02T15:33:04-05:00</updated>
+  <updated>2015-05-02T16:15:17-05:00</updated>
   <id>http://makingdevs.github.io/</id>
   <author>
     <name><![CDATA[MakingDevs]]></name>
@@ -25,6 +25,9 @@
 <li>Misma JVM pero diferente CamelContext</li>
 <li>Diferente JVM y CamelContext</li>
 </ul>
+
+
+<!-- more -->
 
 
 <p>El problema que me vi envuelto fue de estas tres, la ultima, el clusterizar camel que se encontraban en diferentes JVM y CamelContext. Y en particular tuve un problema de mensajes duplicados. Para esto camel ofrece ciertas soluciones, un componente llamado <strong>Idempotent Consumer</strong>. El Idempotent Consumer pertenece a los patrones de EIP se usa para filtrar los mensajes duplicados. Este modelo se implementa utilizando la clase IdempotentConsumer. Este utiliza una expresión para calcular una cadena de mensaje ID único para un intercambio de mensajes, este ID puede ser consultado en la IdempotentRepository para ver si se ha visto antes, si se tiene no es tomado para ser procesado, en cambio si no se tiene, entonces el mensaje se procesa y la ID se añade al repositorio.</p>
@@ -128,6 +131,9 @@
 
 <p>Objetivo: Informar los despliegues desde Jenkins por correo, usando el <a href="https://wiki.jenkins-ci.org/display/JENKINS/Email-ext+plugin">plugin: Email-ext</a></p>
 
+<!-- more -->
+
+
 <p>Procedimiento:</p>
 
 <ol>
@@ -156,6 +162,9 @@
 <li>El primer argumento de dicho método define el tipo sobre el cual se inyectarían los nuevos métodos</li>
 <li>Deben de ser usados dentro del alcance de un closure con ayuda de la palabra reservada <code>use</code></li>
 </ul>
+
+
+<!-- more -->
 
 
 <p>Un ejemplo podría ser el siguiente:</p>
@@ -230,6 +239,9 @@
     <content type="html"><![CDATA[<p>Hola a todos es un gusto contribuir al blog de makingdevs.com y mostrarles un poco de lo que es Apache Camel, para ellos hablaremos primero de su definición.</p>
 
 <p><a href="http://camel.apache.org/">Apache Camel</a> es un framework de integración de código abierto, basado en <a href="http://www.enterpriseintegrationpatterns.com/toc.html">Enterprise Integration Patterns (Patrones de Integración Empresarial)</a>. Camel nos permite definir las reglas de enrutamiento o mediación con ayuda de un lenguaje especifico (DSL), incluyendo un API basada en Java o mediante una configuración XML. El uso de un lenguaje específico del dominio significa que Apache Camel es capaz de soportar un comportamiento automático de las reglas de ruteo en un entorno de desarrollo integrado usando código Java sin gran cantidad de archivos de configuración XML.</p>
+
+<!-- more -->
+
 
 <p>Con ayuda de camel y Mail Component (componente de e-mail de Camel) realize un script para la lectura de un correo Gmail, filtrando el procesamiento de los mismo por su subject y escupiendo el contenido a un endPoint de log.</p>
 

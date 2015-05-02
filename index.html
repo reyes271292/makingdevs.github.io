@@ -83,6 +83,9 @@
 
 <time class='entry-date' datetime='2015-04-07T19:56:54-05:00'><span class='date'><span class='date-month'>Apr</span> <span class='date-day'>7</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>7:56 pm</span></time>
         
+           | <a href="/2015/04/07/clusterizacion-con-camel/#disqus_thread"
+             data-disqus-identifier="http://makingdevs.github.io/2015/04/07/clusterizacion-con-camel/">Comments</a>
+        
       </p>
     
   </header>
@@ -97,95 +100,12 @@
 </ul>
 
 
-<p>El problema que me vi envuelto fue de estas tres, la ultima, el clusterizar camel que se encontraban en diferentes JVM y CamelContext. Y en particular tuve un problema de mensajes duplicados. Para esto camel ofrece ciertas soluciones, un componente llamado <strong>Idempotent Consumer</strong>. El Idempotent Consumer pertenece a los patrones de EIP se usa para filtrar los mensajes duplicados. Este modelo se implementa utilizando la clase IdempotentConsumer. Este utiliza una expresión para calcular una cadena de mensaje ID único para un intercambio de mensajes, este ID puede ser consultado en la IdempotentRepository para ver si se ha visto antes, si se tiene no es tomado para ser procesado, en cambio si no se tiene, entonces el mensaje se procesa y la ID se añade al repositorio.</p>
-
-<p>Hay varios tipos de IdempotentRepository:</p>
-
-<ul>
-<li>MemoryIdempotentRepository</li>
-<li>FileIdempotentRepository</li>
-<li>HazelcastIdempotentRepository (Available as of Camel 2.8)</li>
-<li>JdbcMessageIdRepository (Available as of Camel 2.7)</li>
-<li>JpaMessageIdRepository</li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="nd">@Grab</span><span class="o">(</span><span class="n">group</span><span class="o">=</span><span class="s1">&#39;org.slf4j&#39;</span><span class="o">,</span> <span class="n">module</span><span class="o">=</span><span class="s1">&#39;slf4j-api&#39;</span><span class="o">,</span> <span class="n">version</span><span class="o">=</span><span class="s1">&#39;1.7.10&#39;</span><span class="o">)</span>
-</span><span class='line'><span class="nd">@Grab</span><span class="o">(</span><span class="n">group</span><span class="o">=</span><span class="s1">&#39;org.apache.camel&#39;</span><span class="o">,</span> <span class="n">module</span><span class="o">=</span><span class="s1">&#39;camel-core&#39;</span><span class="o">,</span> <span class="n">version</span><span class="o">=</span><span class="s1">&#39;2.12.0&#39;</span><span class="o">)</span>
-</span><span class='line'><span class="nd">@Grab</span><span class="o">(</span><span class="n">group</span><span class="o">=</span><span class="s1">&#39;org.apache.camel&#39;</span><span class="o">,</span> <span class="n">module</span><span class="o">=</span><span class="s1">&#39;camel-mail&#39;</span><span class="o">,</span> <span class="n">version</span><span class="o">=</span><span class="s1">&#39;2.12.0&#39;</span><span class="o">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="kn">import</span> <span class="nn">org.apache.camel.impl.DefaultCamelContext</span>
-</span><span class='line'><span class="kn">import</span> <span class="nn">org.apache.camel.builder.RouteBuilder</span>
-</span><span class='line'><span class="kn">import</span> <span class="nn">org.apache.camel.processor.idempotent.FileIdempotentRepository</span>
-</span><span class='line'>
-</span><span class='line'><span class="kt">def</span> <span class="n">camelContext</span> <span class="o">=</span> <span class="k">new</span> <span class="n">DefaultCamelContext</span><span class="o">()</span>
-</span><span class='line'><span class="n">camelContext</span><span class="o">.</span><span class="na">addRoutes</span><span class="o">(</span><span class="k">new</span> <span class="n">RouteBuilder</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>  <span class="kt">def</span> <span class="kt">void</span> <span class="nf">configure</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>    <span class="n">from</span><span class="o">(</span><span class="s2">&quot;imaps://imap.gmail.com?username=jorge@makingdevs.com&quot;</span>
-</span><span class='line'>      <span class="o">+</span> <span class="s2">&quot;&amp;password=m4k1ngd3vs&quot;</span>
-</span><span class='line'>      <span class="o">+</span> <span class="s2">&quot;&amp;consumer.delay=6000&quot;</span><span class="o">)</span>
-</span><span class='line'>    <span class="o">.</span><span class="na">idempotentConsumer</span><span class="o">(</span> <span class="n">header</span><span class="o">(</span><span class="s2">&quot;Message-ID&quot;</span><span class="o">),</span>
-</span><span class='line'>      <span class="n">FileIdempotentRepository</span><span class="o">.</span><span class="na">fileIdempotentRepository</span><span class="o">(</span>
-</span><span class='line'>        <span class="k">new</span> <span class="nf">File</span><span class="o">(</span><span class="s2">&quot;idempotentRepository.txt&quot;</span><span class="o">)))</span>
-</span><span class='line'>    <span class="o">.</span><span class="na">to</span><span class="o">(</span><span class="s2">&quot;log:groovymail?showAll=true&amp;multiline=true&quot;</span><span class="o">)</span> <span class="o">}</span> <span class="o">})</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">camelContext</span><span class="o">.</span><span class="na">start</span><span class="o">()</span>
-</span><span class='line'><span class="n">addShutdownHook</span><span class="o">{</span> <span class="n">camelContext</span><span class="o">.</span><span class="na">stop</span><span class="o">()</span> <span class="o">}</span>
-</span><span class='line'><span class="kd">synchronized</span><span class="o">(</span><span class="k">this</span><span class="o">){</span> <span class="k">this</span><span class="o">.</span><span class="na">wait</span><span class="o">()</span> <span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Este es un script ejemplo el cual utiliza <code>FileIdempotentRepository</code> utilizando un archivo ejemplo para llevar el control, si exploramos el archivo ahí se encuentra los id de los mensajes procesados.</p>
-
-<p><img src="http://makingdevs.github.io/images/camel_output.png" alt="Camel output" /></p>
-
-<p>Asi si hay un mensaje el cual ya se encuentra dentro de este archivo se ignora y no es procesado. En mi caso utilize JpaMessageIdRepository dentro de grails y fue muy simple utilizar este componente solo agregue la dependencia de camel sql en el buildConfig.groovy</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">runtime</span> <span class="err">&#39;</span><span class="n">org</span><span class="o">.</span><span class="na">apache</span><span class="o">.</span><span class="na">camel</span><span class="o">:</span><span class="n">camel</span><span class="o">-</span><span class="nl">sql:</span><span class="mf">2.13</span><span class="o">.</span><span class="mi">0</span><span class="err">’</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>y agregue el bean en resources.groovy</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="kn">import</span> <span class="nn">org.apache.camel.processor.idempotent.jdbc.JdbcMessageIdRepository</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">beans</span> <span class="o">=</span> <span class="o">{</span>
-</span><span class='line'>  <span class="n">messageIdRepository</span><span class="o">(</span><span class="n">JdbcMessageIdRepository</span><span class="o">,</span><span class="n">ref</span><span class="o">(</span><span class="s1">&#39;dataSource&#39;</span><span class="o">),</span><span class="s1">&#39;jdbcProcessorName&#39;</span><span class="o">)</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>y por ultimo agregue el <em>idempotentComponent</em>.</p>
 </div>
   
+  
+    <footer>
+      <a rel="full-article" href="/2015/04/07/clusterizacion-con-camel/">Read on &rarr;</a>
+    </footer>
   
 
 
@@ -207,6 +127,9 @@
 
 <time class='entry-date' datetime='2014-11-06T18:08:56-06:00'><span class='date'><span class='date-month'>Nov</span> <span class='date-day'>6</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>6:08 pm</span></time>
         
+           | <a href="/2014/11/06/personalizar-notificaciones-de-correo-en-jenkins/#disqus_thread"
+             data-disqus-identifier="http://makingdevs.github.io/2014/11/06/personalizar-notificaciones-de-correo-en-jenkins/">Comments</a>
+        
       </p>
     
   </header>
@@ -218,19 +141,12 @@
 
 <p>Objetivo: Informar los despliegues desde Jenkins por correo, usando el <a href="https://wiki.jenkins-ci.org/display/JENKINS/Email-ext+plugin">plugin: Email-ext</a></p>
 
-<p>Procedimiento:</p>
-
-<ol>
-<li><p>Instalar el plugin desde la consola de administración de Jenkins. <img src="http://makingdevs.github.io/images/IC-Jenkins-PlugIn-Email-Ext_01.jpg" alt="Screenshot 1" /></p></li>
-<li><p>Configurar la cuenta de correo saliente SMTP, te recomiendo que uses el autenticado.<img src="http://makingdevs.github.io/images/IC-Jenkins-PlugIn-Email-Ext_02.jpg" alt="Screenshot 2" /></p></li>
-<li><p>Configurar el plugin: Email-ext con información base de los usuarios a notificar ( <em>Stake Holders/ Key Users / Developers / Clientes / Testers</em> ) en las listas por DEFAULT de la configuración general a nivel. Esto te permitirá contar con la misma configuración para tus N tareas de despliegue. <img src="http://makingdevs.github.io/images/IC-Jenkins-PlugIn-Email-Ext_03.jpg" alt="Screenshot 3" /></p></li>
-<li><p>Para personalizar el correo que se enviará, copiaremos un<strong>Template</strong> dentro del Home de Jenkins, <em>static-analysis.jelly</em> y asignando nombre relacionado al proyecto. Si requieres más información, consulta la <a href="https://github.com/jenkinsci/email-ext-plugin/tree/master/src/main/resources/hudson/plugins/emailext/templates">documentación del plugin en GitHub</a>. Este template es un <strong>HTML el cual puedes editar su contenido</strong>, incluyendo titulo del proyecto, una imagen, etc. <img src="http://makingdevs.github.io/images/IC-Jenkins-PlugIn-Email-Ext_04.jpg" alt="Screenshot 4" /></p></li>
-<li><p>Añade en una tarea de Jenkins, un paso al finalizar, usando Email notification. <img src="http://makingdevs.github.io/images/IC-Jenkins-PlugIn-Email-Ext_05.jpg" alt="Screenshot 5" /></p></li>
-<li><p>Ejecuta tu tarea y verifica el correo recibido. <img src="http://makingdevs.github.io/images/IC-Jenkins-PlugIn-Email-Ext_06.jpg" alt="Screenshot 6" /></p></li>
-</ol>
-
 </div>
   
+  
+    <footer>
+      <a rel="full-article" href="/2014/11/06/personalizar-notificaciones-de-correo-en-jenkins/">Read on &rarr;</a>
+    </footer>
   
 
 
@@ -252,6 +168,9 @@
 
 <time class='entry-date' datetime='2014-09-16T18:55:30-05:00'><span class='date'><span class='date-month'>Sep</span> <span class='date-day'>16</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>6:55 pm</span></time>
         
+           | <a href="/2014/09/16/inyeccion-de-metodos-por-categorias-y-timecategory/#disqus_thread"
+             data-disqus-identifier="http://makingdevs.github.io/2014/09/16/inyeccion-de-metodos-por-categorias-y-timecategory/">Comments</a>
+        
       </p>
     
   </header>
@@ -268,69 +187,12 @@
 </ul>
 
 
-<p>Un ejemplo podría ser el siguiente:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="kd">class</span> <span class="nc">NameUtil</span><span class="o">{</span>
-</span><span class='line'>    <span class="kd">static</span> <span class="nf">prettify</span><span class="o">(</span><span class="n">String</span> <span class="n">name</span><span class="o">){</span>
-</span><span class='line'>        <span class="n">name</span><span class="o">.</span><span class="na">trim</span><span class="o">().</span><span class="na">split</span><span class="o">(</span><span class="s1">&#39; &#39;</span><span class="o">).</span><span class="na">grep</span> <span class="o">{</span> <span class="n">it</span><span class="o">.</span><span class="na">size</span><span class="o">()</span> <span class="o">}*.</span><span class="na">capitalize</span><span class="o">().</span><span class="na">join</span><span class="o">(</span><span class="s1">&#39; &#39;</span><span class="o">)</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">use</span> <span class="n">NameUtil</span><span class="o">,</span> <span class="o">{</span>
-</span><span class='line'>    <span class="n">println</span> <span class="s2">&quot;  josé   juan    reyes    zuñiga   &quot;</span><span class="o">.</span><span class="na">prettify</span><span class="o">()</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Adicionalmente, podemos crear dicha inyección de métodos con ayuda de la anotación <code>@Category</code>, que prácticamente nos facilita a que cualquier clase pueda ser usada como categoría, pues no necesariamente los métodos tiene que ser estáticos y el contexto del argumento para la inyección es el objeto <code>this</code> en donde se esté intentando usar.</p>
-
-<h2>Uso de GroovyTime</h2>
-
-<p>La clase <code>TimeCategory</code> es una clase que tiene una serie de métodos de conveniencia para el manejo del tiempo, formando así un DSL, con el que podemos operar. Y con ayuda de la clase <code>Duration</code> complementamos algunas operaciones que se pueden realizar en el contexto de los objetos que estemos usando.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="kn">import</span> <span class="nn">groovy.time.TimeCategory</span>
-</span><span class='line'>
-</span><span class='line'><span class="nf">use</span> <span class="o">(</span> <span class="n">TimeCategory</span> <span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>    <span class="n">println</span> <span class="mi">2</span><span class="o">.</span><span class="na">hours</span><span class="o">.</span><span class="na">ago</span>
-</span><span class='line'>    <span class="n">println</span> <span class="mi">30</span><span class="o">.</span><span class="na">minutes</span><span class="o">.</span><span class="na">from</span> <span class="c1">// TimeDuration</span>
-</span><span class='line'>    <span class="n">println</span> <span class="mi">30</span><span class="o">.</span><span class="na">minutes</span><span class="o">.</span><span class="na">from</span><span class="o">.</span><span class="na">now</span>
-</span><span class='line'>    <span class="n">println</span> <span class="mi">40</span><span class="o">.</span><span class="na">minutes</span> <span class="o">+</span> <span class="mi">30</span><span class="o">.</span><span class="na">minutes</span><span class="o">.</span><span class="na">from</span><span class="o">.</span><span class="na">now</span>
-</span><span class='line'>    <span class="n">println</span> <span class="mi">30</span><span class="o">.</span><span class="na">minutes</span><span class="o">.</span><span class="na">ago</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="kt">def</span> <span class="n">today</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Date</span><span class="o">()</span>
-</span><span class='line'>    <span class="n">println</span> <span class="n">today</span> <span class="o">-</span> <span class="mi">3</span><span class="o">.</span><span class="na">years</span>
-</span><span class='line'>    <span class="n">println</span> <span class="n">today</span> <span class="o">+</span> <span class="mi">4</span><span class="o">.</span><span class="na">weeks</span>
-</span><span class='line'>    <span class="n">println</span> <span class="n">today</span> <span class="o">+</span> <span class="mi">90</span><span class="o">.</span><span class="na">minutes</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Para que consideres el conjunto de operaciones que tienes disponibles te recomendamos visitar la documentación de <a href="http://groovy.codehaus.org/api/groovy/time/TimeCategory.html">TimeCategory</a> y <a href="http://groovy.codehaus.org/api/groovy/time/Duration.html">Duration</a></p>
 </div>
   
+  
+    <footer>
+      <a rel="full-article" href="/2014/09/16/inyeccion-de-metodos-por-categorias-y-timecategory/">Read on &rarr;</a>
+    </footer>
   
 
 
@@ -352,6 +214,9 @@
 
 <time class='entry-date' datetime='2014-08-26T18:29:26-05:00'><span class='date'><span class='date-month'>Aug</span> <span class='date-day'>26</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>6:29 pm</span></time>
         
+           | <a href="/2014/08/26/lectura-de-correo-con-apache-camel-plus-groovy/#disqus_thread"
+             data-disqus-identifier="http://makingdevs.github.io/2014/08/26/lectura-de-correo-con-apache-camel-plus-groovy/">Comments</a>
+        
       </p>
     
   </header>
@@ -361,66 +226,12 @@
 
 <p><a href="http://camel.apache.org/">Apache Camel</a> es un framework de integración de código abierto, basado en <a href="http://www.enterpriseintegrationpatterns.com/toc.html">Enterprise Integration Patterns (Patrones de Integración Empresarial)</a>. Camel nos permite definir las reglas de enrutamiento o mediación con ayuda de un lenguaje especifico (DSL), incluyendo un API basada en Java o mediante una configuración XML. El uso de un lenguaje específico del dominio significa que Apache Camel es capaz de soportar un comportamiento automático de las reglas de ruteo en un entorno de desarrollo integrado usando código Java sin gran cantidad de archivos de configuración XML.</p>
 
-<p>Con ayuda de camel y Mail Component (componente de e-mail de Camel) realize un script para la lectura de un correo Gmail, filtrando el procesamiento de los mismo por su subject y escupiendo el contenido a un endPoint de log.</p>
-
-<p>Pero si son curiosos ustedes se preguntaran <strong>¿Que es un endPoint?</strong>. Un endpoint es la interface a través de la cual los sistemas externos pueden enviar y recibir mensajes, permitiendo así la integración de sistemas en Camel. La función de un endpoint es crear productores y consumidores, lo que nos permite usar este endpoint como to y from dentro de una ruta Camel. Asi se denota un endpoint URIs siguiendo el siguiente formato: <strong>[componente]:[contexto]?[opciones]</strong>.</p>
-
-<h3>Producers y Consumers</h3>
-
-<p>Un productor es el encargado de proveer los mensajes, siendo el puente de comunicación con el sistema externo, no procesa la información solo provee el mensaje, en este ejemplo el correo es el productor. Un consumidor es el encargado de recibir el mensaje que el productor obtiene y así procesar el mensaje o inclusive partir dicho mensaje para que sea procesado por otro consumidor. Bueno después de una pequeña introducción a Camel les muestro mi script en la cual hago lectura del correo filtro los mensajes por su subject y los arrojo a un log y no solo puede ser un log gracias a camel este puede ser un bean, FTP, intancia de amazon, un archivo, <a href="http://camel.apache.org/components.html">casi cualquier cosa</a>. Nota necesitamos las dependencias de camel core y camel mail para el siguiente ejemplo:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="nd">@Grab</span><span class="o">(</span><span class="n">group</span><span class="o">=</span><span class="s1">&#39;org.apache.camel&#39;</span><span class="o">,</span> <span class="n">module</span><span class="o">=</span><span class="s1">&#39;camel-core&#39;</span><span class="o">,</span> <span class="n">version</span><span class="o">=</span><span class="s1">&#39;1.6.0&#39;</span><span class="o">)</span>
-</span><span class='line'><span class="nd">@Grab</span><span class="o">(</span><span class="n">group</span><span class="o">=</span><span class="s1">&#39;org.apache.camel&#39;</span><span class="o">,</span> <span class="n">module</span><span class="o">=</span><span class="s1">&#39;camel-mail&#39;</span><span class="o">,</span> <span class="n">version</span><span class="o">=</span><span class="s1">&#39;1.6.0&#39;</span><span class="o">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="kn">import</span> <span class="nn">org.apache.camel.impl.DefaultCamelContext</span>
-</span><span class='line'><span class="kn">import</span> <span class="nn">org.apache.camel.builder.RouteBuilder</span>
-</span><span class='line'>
-</span><span class='line'><span class="kt">def</span> <span class="n">camelContext</span> <span class="o">=</span> <span class="k">new</span> <span class="n">DefaultCamelContext</span><span class="o">()</span>
-</span><span class='line'><span class="n">camelContext</span><span class="o">.</span><span class="na">addRoutes</span><span class="o">(</span><span class="k">new</span> <span class="n">RouteBuilder</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>  <span class="kt">def</span> <span class="kt">void</span> <span class="nf">configure</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>    <span class="n">from</span><span class="o">(</span><span class="s2">&quot;imaps://imap.gmail.com?username=user&quot;</span>
-</span><span class='line'>    <span class="o">+</span> <span class="s2">&quot;&amp;password=password&quot;</span>
-</span><span class='line'>    <span class="o">+</span> <span class="s2">&quot;&amp;deleteProcessedMessages=false&quot;</span>
-</span><span class='line'>    <span class="o">+</span> <span class="s2">&quot;&amp;processOnlyUnseenMessages=true&quot;</span>
-</span><span class='line'>    <span class="o">+</span> <span class="s2">&quot;&amp;consumer.delay=6000&quot;</span><span class="o">)</span>
-</span><span class='line'>    <span class="o">.</span><span class="na">filter</span> <span class="o">{</span><span class="n">it</span><span class="o">.</span><span class="na">in</span><span class="o">.</span><span class="na">headers</span><span class="o">.</span><span class="na">subject</span><span class="o">.</span><span class="na">contains</span><span class="o">(</span><span class="s1">&#39;camel&#39;</span><span class="o">)}</span>
-</span><span class='line'>    <span class="o">.</span><span class="na">to</span><span class="o">(</span><span class="s2">&quot;log:groovymail?showAll=true&amp;multiline=true&quot;</span><span class="o">)</span>
-</span><span class='line'>  <span class="o">}</span>
-</span><span class='line'><span class="o">})</span>
-</span><span class='line'><span class="n">camelContext</span><span class="o">.</span><span class="na">start</span><span class="o">()</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">addShutdownHook</span><span class="o">{</span> <span class="n">camelContext</span><span class="o">.</span><span class="na">stop</span><span class="o">()</span> <span class="o">}</span>
-</span><span class='line'><span class="kd">synchronized</span><span class="o">(</span><span class="k">this</span><span class="o">){</span> <span class="k">this</span><span class="o">.</span><span class="na">wait</span><span class="o">()</span> <span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Notaran que al final del script hay una declaración <code>camelContext.start()</code>. El <em>CamelContext</em> representa una sola base de reglas de enrutamiento Camel. Se utiliza el CamelContext de una manera similar al ApplicationContext. Y asi tenemos un pequeño ejemplo de lectura de correo con ayuda de Camel.</p>
-
-<p>Como vemos Camel nos permite integrar sistemas muy facilmente. Espero les agradece este pequeño articulo y les sea de gran ayuda, dudas y comentarios son bienvenidas. Salu2</p>
 </div>
   
+  
+    <footer>
+      <a rel="full-article" href="/2014/08/26/lectura-de-correo-con-apache-camel-plus-groovy/">Read on &rarr;</a>
+    </footer>
   
 
 
@@ -442,6 +253,9 @@
 
 <time class='entry-date' datetime='2014-08-19T00:34:28-05:00'><span class='date'><span class='date-month'>Aug</span> <span class='date-day'>19</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>12:34 am</span></time>
         
+           | <a href="/2014/08/19/introduccion-a-ratpack/#disqus_thread"
+             data-disqus-identifier="http://makingdevs.github.io/2014/08/19/introduccion-a-ratpack/">Comments</a>
+        
       </p>
     
   </header>
@@ -460,43 +274,9 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/2014/07/29/bienvenido-a-makingdevs/">Bienvenido a MakingDevs</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2014-07-29T00:21:37-05:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>29</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>12:21 am</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Bienvenido seas a nuestro blog en MakingDevs!</p>
-
-<p>Ya hace más de un año que comenzamos con un gran reto: impulsar la carrera de los profesionales de software. ¿Para qué? Para crear grupos de desarrolladores que puedan generar productos de software de calidad, que permitan ofrecer las soluciones tecnológicas que necesitamos actualmente.</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/2014/07/29/bienvenido-a-makingdevs/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
+    
+      <a class="prev" href="/posts/2">&larr; Older</a>
     
     <a href="/blog/archives">Blog Archives</a>
     
@@ -531,7 +311,45 @@
   </ul>
 </section>
 
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating&#8230;</li>
+  </ul>
+  
+  <a href="https://github.com/makingdevs">@makingdevs</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
 
+        github.showRepos({
+            user: 'makingdevs',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+<section class="googleplus">
+  <h1>
+    <a href="https://plus.google.com/makingdevs?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
 
 
 
@@ -548,7 +366,29 @@
 </footer>
   
 
+<script type="text/javascript">
+      var disqus_shortname = 'makingdevs';
+      
+        
+        var disqus_script = 'count.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
 
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
 
 
 

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Continuous Integration | Blog de MakingDevs]]></title>
   <link href="http://makingdevs.github.io/blog/categories/continuous-integration/atom.xml" rel="self"/>
   <link href="http://makingdevs.github.io/"/>
-  <updated>2015-05-02T15:33:04-05:00</updated>
+  <updated>2015-05-02T16:15:17-05:00</updated>
   <id>http://makingdevs.github.io/</id>
   <author>
     <name><![CDATA[MakingDevs]]></name>
@@ -23,6 +23,9 @@
 <p>Por esta razón te recomiendo personalizar las notificaciones por defecto de <strong>Jenkins</strong>.</p>
 
 <p>Objetivo: Informar los despliegues desde Jenkins por correo, usando el <a href="https://wiki.jenkins-ci.org/display/JENKINS/Email-ext+plugin">plugin: Email-ext</a></p>
+
+<!-- more -->
+
 
 <p>Procedimiento:</p>
 

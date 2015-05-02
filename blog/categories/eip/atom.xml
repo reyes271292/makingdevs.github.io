@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Eip | Blog de MakingDevs]]></title>
   <link href="http://makingdevs.github.io/blog/categories/eip/atom.xml" rel="self"/>
   <link href="http://makingdevs.github.io/"/>
-  <updated>2015-05-02T15:33:04-05:00</updated>
+  <updated>2015-05-02T16:15:17-05:00</updated>
   <id>http://makingdevs.github.io/</id>
   <author>
     <name><![CDATA[MakingDevs]]></name>
@@ -25,6 +25,9 @@
 <li>Misma JVM pero diferente CamelContext</li>
 <li>Diferente JVM y CamelContext</li>
 </ul>
+
+
+<!-- more -->
 
 
 <p>El problema que me vi envuelto fue de estas tres, la ultima, el clusterizar camel que se encontraban en diferentes JVM y CamelContext. Y en particular tuve un problema de mensajes duplicados. Para esto camel ofrece ciertas soluciones, un componente llamado <strong>Idempotent Consumer</strong>. El Idempotent Consumer pertenece a los patrones de EIP se usa para filtrar los mensajes duplicados. Este modelo se implementa utilizando la clase IdempotentConsumer. Este utiliza una expresión para calcular una cadena de mensaje ID único para un intercambio de mensajes, este ID puede ser consultado en la IdempotentRepository para ver si se ha visto antes, si se tiene no es tomado para ser procesado, en cambio si no se tiene, entonces el mensaje se procesa y la ID se añade al repositorio.</p>
