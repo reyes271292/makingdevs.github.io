@@ -15,36 +15,15 @@ En esta ocasión les quiero compartir la solución a un problema que tuve al bor
 <!-- more -->
 La necesidad era borrar un grupo de objetos en donde el contenido de su relación estuviera vacío, ejemplifico con la estructura de unas clases:
 
-```groovy
-class Group {
-  String name
-
-  static hasMany = [members : Member]
-}
-
-class Member {
-  String name
-}
-```
+{% gist 54953d90cc778b71548a domains.groovy %}
 
 El primer acercamiento que tuve fue obtener la lista de elementos y hacer una condicional buscando los elementos vacíos, después borrar...
 
-```groovy
-groupsToDelete = []
-Group.list().each { group ->
-  if(group.members.isEmpty())
-    groupsToDelete << link
-}
-groupsToDelete*.delete()
-```
+{% gist 54953d90cc778b71548a delete1.groovy %}
 
 Una vez hecho, mejoramos intentamos mejorar el código con una búsqueda mucho más refinada y ejecutando el borrado, para ello nos apoyamos de los **where queries**:
 
-```groovy
-Group.where {
-  members.size() == 0
-}.deleteAll()
-```
+{% gist 54953d90cc778b71548a delete2.groovy %}
 
 Basado en la documentación de Grails:
 
@@ -62,15 +41,7 @@ Usamos **Detached Criteria** para resolver este problema, por que:
 
 Finalmente nuestra solución es:
 
-```groovy
-import grails.gorm.*
-
-def criteria = new DetachedCriteria(Group).build {
-  isEmpty 'members'
-}
-criteria.deleteAll()
-// criteria.count()
-```
+{% gist 54953d90cc778b71548a delete3.groovy %}
 
 Con esto, tenemos una búsqueda refinada y el borrado de los elementos directo, inclusive el método `deleteAll` regresa un entero con la cantidad de registros afectados.
 
