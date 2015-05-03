@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>http://makingdevs.github.io/2015/05/01/borrado-batch-en-grails/</loc>
+    <lastmod>2015-05-01T20:58:30-05:00</lastmod>
+  </url>
+  <url>
     <loc>http://makingdevs.github.io/2015/04/07/clusterizacion-con-camel/</loc>
     <lastmod>2015-04-07T19:56:54-05:00</lastmod>
   </url>
@@ -41,5 +45,8 @@
   </url>
   <url>
     <loc>http://makingdevs.github.io/blog/categories/eip/</loc>
+  </url>
+  <url>
+    <loc>http://makingdevs.github.io/blog/categories/grails/</loc>
   </url>
 </urlset>

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Development | Blog de MakingDevs]]></title>
   <link href="http://makingdevs.github.io/blog/categories/development/atom.xml" rel="self"/>
   <link href="http://makingdevs.github.io/"/>
-  <updated>2015-05-02T16:44:14-05:00</updated>
+  <updated>2015-05-02T22:34:29-05:00</updated>
   <id>http://makingdevs.github.io/</id>
   <author>
     <name><![CDATA[MakingDevs]]></name>
@@ -12,6 +12,80 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Borrado Batch en Grails]]></title>
+    <link href="http://makingdevs.github.io/2015/05/01/borrado-batch-en-grails/"/>
+    <updated>2015-05-01T20:58:30-05:00</updated>
+    <id>http://makingdevs.github.io/2015/05/01/borrado-batch-en-grails</id>
+    <content type="html"><![CDATA[<p>En esta ocasión les quiero compartir la solución a un problema que tuve al borrar una colección de objetos en grails y con el GORM, si bien podría hacerlo con HQL o con SQL usando las bondades de Hibernate me gusto más el acercamiento que les quiero presentar.</p>
+
+<!-- more -->
+
+
+<p>La necesidad era borrar un grupo de objetos en donde el contenido de su relación estuviera vacío, ejemplifico con la estructura de unas clases:</p>
+
+<pre><code class="groovy">class Group {
+  String name
+
+  static hasMany = [members : Member]
+}
+
+class Member {
+  String name
+}
+</code></pre>
+
+<p>El primer acercamiento que tuve fue obtener la lista de elementos y hacer una condicional buscando los elementos vacíos, después borrar&hellip;</p>
+
+<pre><code class="groovy">groupsToDelete = []
+Group.list().each { group -&gt;
+  if(group.members.isEmpty())
+    groupsToDelete &lt;&lt; link
+}
+groupsToDelete*.delete()
+</code></pre>
+
+<p>Una vez hecho, mejoramos intentamos mejorar el código con una búsqueda mucho más refinada y ejecutando el borrado, para ello nos apoyamos de los <strong>where queries</strong>:</p>
+
+<pre><code class="groovy">Group.where {
+  members.size() == 0
+}.deleteAll()
+</code></pre>
+
+<p>Basado en la documentación de Grails:</p>
+
+<blockquote><p>Since each where method call returns a DetachedCriteria instance, you can use where queries to execute batch operations such as batch updates and deletes.</p></blockquote>
+
+<p>Sin embargo, este acercamiento tiene un problema, manda un error cuando se busca por las relaciones del objeto y no permite el borrado. El error: <code>org.springframework.dao.InvalidDataAccessResourceUsageException: Queries of type SizeEquals are not supported by this implementation</code></p>
+
+<h3>La solución que me gustó</h3>
+
+<p>Usamos <strong>Detached Criteria</strong> para resolver este problema, por que:</p>
+
+<ul>
+<li>No están asociados con una sesión o conexión, lo cual permite formularlos y reusarlos.</li>
+<li>También cuenta con métodos batch: <code>deleteAll</code>, <code>updateAll</code></li>
+<li>Permiten proyecciones y subqueries, que es lo que estamos buscando para resolver nuestro problema</li>
+</ul>
+
+
+<p>Finalmente nuestra solución es:</p>
+
+<pre><code class="groovy">import grails.gorm.*
+
+def criteria = new DetachedCriteria(Group).build {
+  isEmpty 'members'
+}
+criteria.deleteAll()
+// criteria.count()
+</code></pre>
+
+<p>Con esto, tenemos una búsqueda refinada y el borrado de los elementos directo, inclusive el método <code>deleteAll</code> regresa un entero con la cantidad de registros afectados.</p>
+
+<p>Esto me fue de mucha utilidad y ojalá también lo sea para ustedes en algún momento.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Clusterizacion Con Camel]]></title>
@@ -222,504 +296,6 @@ synchronized(this){ this.wait() }
 <p>Notaran que al final del script hay una declaración <code>camelContext.start()</code>. El <em>CamelContext</em> representa una sola base de reglas de enrutamiento Camel. Se utiliza el CamelContext de una manera similar al ApplicationContext. Y asi tenemos un pequeño ejemplo de lectura de correo con ayuda de Camel.</p>
 
 <p>Como vemos Camel nos permite integrar sistemas muy facilmente. Espero les agradece este pequeño articulo y les sea de gran ayuda, dudas y comentarios son bienvenidas. Salu2</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Introduccion a Ratpack]]></title>
-    <link href="http://makingdevs.github.io/2014/08/19/introduccion-a-ratpack/"/>
-    <updated>2014-08-19T00:34:28-05:00</updated>
-    <id>http://makingdevs.github.io/2014/08/19/introduccion-a-ratpack</id>
-    <content type="html"><![CDATA[<p>Es bueno estar de vuelta escribiendo, ya ha pasado bastante tiempo desde que hice un post así que vamos a ver algo que me ayudó en un curso. El día de hoy hablaremos de Ratpack y para ello primero vamos a dar una pequeña introducción de lo que es. Ratpack, como su página lo dice, es un conjunto de librerías de JAVA que facilita la rapidez, eficiencia, evolución y pruebas de aplicaciones HTTP, está construida sobre Netty y por ello posee muchos de los beneficios del motor del mismo. Ratpack se enfoca en permitir applicaciones HTTP para ser eficientes, modulares y adaptativas a los nuevos requerimientos, tecnologías y buenas pruebas sobre el tiempo. Bueno vamos a dejar de momento las definiciones y vamos a lo bonito, el código.</p>
-
-<!-- more -->
-
-
-<p>Para este post vamos a hacer uso de gvm y de lazybones, para ello procederemos a instalar <a href="http://gvmtool.net/" title="gvm">gvm</a> Una vez listo procedemos a ejecutar el siguiente comando :</p>
-
-<pre><code class="bash">gvm install lazybones
-</code></pre>
-
-<p>Y con ello tendremos lazybones instalado en nuestra máquina&hellip; bueno y ¿para que necesitamos lazybones si es un post sobre Ratpack? Lazybones es una herramienta de línea de comandos que nos permite generar una estructura de un proyecto para cualquier framework basado en plantillas predefinidas. Y Ratpack tiene varias plantillas para lazybones que pueden ser encontradas en</p>
-
-<p><a href="https://bintray.com/">Bintray</a> en el apartado de <a href="https://bintray.com/ratpack/lazybones">ratpack/lazybones repository</a>. Si desean saber un poco más de Lazybones pueden encontrarlo en la <a href="https://github.com/pledbrook/lazybones#running-it">documentación</a> Para crear la estructura del proyecto ejecutaremos la siguiente sentencia :</p>
-
-<pre><code class="bash">lazybones create ratpack contact-book
-</code></pre>
-
-<p>Al ejecutar la instrucción nos aparecerá en pantalla una serie de instrucciones y también lo que ganamos al ejecutarla. A parte nos da la estructura de directorios que se genera y nos dice como levantar nuestra aplicación.</p>
-
-<pre><code class="bash">  &lt;proj&gt;
-    |
-    +- src
-        |
-        +- ratpack
-        |     |
-        |     +- ratpack.groovy
-        |     +- ratpack.properties
-        |     +- public          // Static assets in here
-        |          |
-        |          +- images
-        |          +- lib
-        |          +- scripts
-        |          +- styles
-        |
-        +- main
-        |   |
-        |   +- groovy
-                 |
-                 +- // App classes in here!
-        |
-        +- test
-            |
-            +- groovy
-                 |
-                 +- // Spock tests in here!
-</code></pre>
-
-<p>Para levantar el ejemplo nos movemos a la carpeta con cd, ejecutamos lo siguiente y nos preparamos un café porque va a descargar dependencias XD:
-<code>./gradlew run</code></p>
-
-<p>Una vez que terminó de ejecutarse podemos ver lo que se creó en la url <a href="http://localhost:5050">http://localhost:5050</a> como podrán observar la página que se creó no es gran cosa pero ya tenemos lo necesario para trabajar en una aplicación un poco más compleja como iremos viendo a lo largo de este post. Como podremos ver en el <strong>README.md</strong> existen prácticamente tres archivos principales:</p>
-
-<ul>
-<li><strong>build.gradle</strong></li>
-<li><strong>Ratpack.groovy</strong></li>
-<li><strong>index.html</strong></li>
-</ul>
-
-
-<p>El primero es un archivo de gradle (para los que no lo han manejado o conocen de él pueden revisar el siguiente <a href="http://www.gradle.org/documentation">link</a> pero a grandes rasgos gradle vendría siendo lo mismo que Maven pero con drogas XD. El segundo archivo es donde usualmente sucede la magia ya que es donde se resuelven las urls y se hace todo el show necesario. Y el tercer archivo no es más que una plantilla html que se visualiza a través del segundo archivo. Con los arvhivos que vamos a estar trabajando de momento son <strong>index.html</strong> y <strong>Ratpack.groovy</strong>. En el tag body del html dejamos lo siguiente:</p>
-
-<pre><code class="html">&lt;body&gt;
-  &lt;section&gt;
-    &lt;h1&gt;${model.title}&lt;/h1&gt;
-    &lt;p&gt;This is the main page of your contacts&lt;/p&gt;
-  &lt;/section&gt;
-
-  &lt;footer class="site-footer"&gt;&lt;/footer&gt;
-&lt;/body&gt;
-</code></pre>
-
-<p>Y en el <strong>Ratpack.groovy</strong> dejamos lo siguiente:</p>
-
-<pre><code class="groovy">import static ratpack.groovy.Groovy.groovyTemplate
-import static ratpack.groovy.Groovy.ratpack
-
-ratpack {
-  handlers {
-    get {
-      render groovyTemplate("index.html", title: "Contact book")
-    }
-
-    assets "public"
-  }
-}
-</code></pre>
-
-<p>Recargamos la página y vemos el cambio. Ahora vamos a añadir un form para poder agregar a un elemento a la lista de contactos. Para ello agregamos un link a nuestro <em>index.html</em></p>
-
-<pre><code class="html">  &lt;body&gt;
-    &lt;section&gt;
-      &lt;h1&gt;${model.title}&lt;/h1&gt;
-      &lt;p&gt;This is the main page of your contacts&lt;/p&gt;
-    &lt;/section&gt;
-
-    &lt;a href="create"&gt;Create contact&lt;/a&gt;
-
-    &lt;footer class="site-footer"&gt;&lt;/footer&gt;
-
-    &lt;!-- build:js scripts/jquery.js --&gt;
-    &lt;script src="lib/jquery/jquery.min.js"&gt;&lt;/script&gt;
-    &lt;!-- endbuild --&gt;
-  &lt;/body&gt;
-</code></pre>
-
-<p>Ahora para visualizar la nueva página le agregamos al archivo <strong>Ratpack.groovy</strong> lo siguiente :</p>
-
-<pre><code class="groovy">get('contacts/new') {
-  render groovyTemplate("contacts/new.html", title: "New contact")
-}
-</code></pre>
-
-<p>Y dentro de la carpeta de templates creamos una carpeta llamada contacts y dentro de ella agregamos un archivo llamado <strong>new.html</strong></p>
-
-<pre><code class="html">&lt;!doctype html&gt;
-  &lt;!--[if lt IE 7]&gt;      &lt;html class="no-js lt-ie9 lt-ie8 lt-ie7"&gt; &lt;![endif]--&gt;
-  &lt;!--[if IE 7]&gt;         &lt;html class="no-js lt-ie9 lt-ie8"&gt; &lt;![endif]--&gt;
-  &lt;!--[if IE 8]&gt;         &lt;html class="no-js lt-ie9"&gt; &lt;![endif]--&gt;
-  &lt;!--[if gt IE 8]&gt;&lt;!--&gt; &lt;html class="no-js"&gt; &lt;!--&lt;![endif]--&gt;
-  &lt;head&gt;
-    &lt;meta charset="utf-8"&gt;
-    &lt;meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"&gt;
-    &lt;title&gt;Ratpack: ${model.title}&lt;/title&gt;
-    &lt;meta name="description" content=""&gt;
-    &lt;meta name="viewport" content="width=device-width"&gt;
-  &lt;/head&gt;
-
-  &lt;body&gt;
-    &lt;section&gt;
-      &lt;h1&gt;${model.title}&lt;/h1&gt;
-    &lt;/section&gt;
-
-    &lt;a href="http://makingdevs.github.io/"&gt;Home&lt;/a&gt;
-
-    &lt;footer class="site-footer"&gt;&lt;/footer&gt;
-  &lt;/body&gt;
-&lt;/html&gt;
-</code></pre>
-
-<p>Así para cuando regresemos a la página y la recarguemos podemos ver el link y hasta el momento navegar la página sin problemas. Ahora vamos a agregar un pequeño formulario para poder capturar los datos del contacto, como son:</p>
-
-<ul>
-<li><strong>Nombre</strong></li>
-<li><strong>Apellidos</strong></li>
-<li><strong>Correo</strong></li>
-<li><strong>Alias</strong></li>
-<li><strong>Teléfono</strong></li>
-</ul>
-
-
-<p>Para ello vamos a hacer un formulario común y silvestre en el html:</p>
-
-<pre><code class="html">  &lt;body&gt;
-    &lt;section&gt;
-      &lt;h1&gt;${model.title}&lt;/h1&gt;
-    &lt;/section&gt;
-
-    &lt;form action="/contacts" method="post"&gt;
-      &lt;div&gt;
-        &lt;label for="name"/&gt;Name&lt;/label&gt;
-        &lt;input type="text" name="name" /&gt;
-      &lt;/div&gt;
-
-      &lt;div&gt;
-        &lt;label for="lastName"/&gt;Last name&lt;/label&gt;
-        &lt;input type="text" name="lastName" /&gt;
-      &lt;/div&gt;
-
-      &lt;div&gt;
-        &lt;label for="email"/&gt;Email&lt;/label&gt;
-        &lt;input type="text" name="email" /&gt;
-      &lt;/div&gt;
-
-      &lt;div&gt;
-        &lt;label for="nickname"/&gt;Nickname&lt;/label&gt;
-        &lt;input type="text" name="nickname" /&gt;
-      &lt;/div&gt;
-
-      &lt;div&gt;
-        &lt;label for="phone"/&gt;Phone&lt;/label&gt;
-        &lt;input type="text" name="phone" /&gt;
-      &lt;/div&gt;
-
-      &lt;button type="submit"&gt; Create &lt;/button&gt;
-    &lt;/form&gt;
-
-    &lt;a href="http://makingdevs.github.io/"&gt;Home&lt;/a&gt;
-
-    &lt;footer class="site-footer"&gt;&lt;/footer&gt;
-  &lt;/body&gt;
-</code></pre>
-
-<p>Una vez que tenemos eso lo demás es cuestión de recibirlo y procesarlo para ello hacemos uso del handler post con el path al que va a responder y vamos a agregarlo a una variable global (esto es para efectos de ejemplo no intenten esto en casa o sus trabajos XD)</p>
-
-<pre><code class="groovy">ratpack {
-  def contacts = []
-
-  handlers {
-    get {
-      render groovyTemplate("index.html", title: "Contact book")
-    }
-
-    post('contacts') {
-      Form form = context.parse(Form)
-      def contact = [:]
-      contact.id = contacts ? contacts.id.max() + 1 : 1
-      contact.name = form.name
-      contact.lastName = form.lastName
-      contact.email = form.email
-      contact.nickname = form.nickname
-      contact.phone = form.phone
-      contacts &lt;&lt; contact
-      redirect "/contacts/${contact.id}"
-    }
-
-    get('contacts/new') {
-      render groovyTemplate("contacts/new.html", title: "New contact")
-    }
-
-    assets "public"
-  }
-}
-</code></pre>
-
-<p>Como podrán observar mediante el <code>context.parse(Form)</code> obtenemos los datos enviados en la petición y de esa manera podemos acceder a los datos enviados como si fuera un mapa de groovy. Al final de la petición hacemos un redirect para ver los datos que se han creado con esa petición, pero de momento esto no funciona así que vamos a agregar un nuevo handler con algo que se le llama <em>pathTokens</em> y para ello agregamos lo siguiente:</p>
-
-<pre><code class="groovy">  get('contacts/:id') {
-    def id = pathTokens.asLong('id')
-    def contact = contacts.find {
-      it.id == id
-    }
-    render groovyTemplate("contacts/show.html", contact:contact)
-  }
-</code></pre>
-
-<p>Así mismo agregamos la página que va a visualizar los datos del contacto dentro de la carpeta <em>contacts</em>:</p>
-
-<pre><code class="html">&lt;html&gt;
-  &lt;head&gt;
-    &lt;title&gt;Ratpack: Show contact&lt;/title&gt;
-  &lt;/head&gt;
-
-  &lt;body&gt;
-    &lt;section&gt;
-      &lt;h1&gt;Show contact&lt;/h1&gt;
-    &lt;/section&gt;
-
-    &lt;div&gt;
-      &lt;div&gt;
-        &lt;label for="name"/&gt;Name : &lt;/label&gt;
-        &lt;span&gt;&lt;strong&gt; ${model.contact.name} &lt;/strong&gt;&lt;/span&gt;
-      &lt;/div&gt;
-
-      &lt;div&gt;
-        &lt;label for="lastName"/&gt;Last name : &lt;/label&gt;
-        &lt;span&gt;&lt;strong&gt; ${model.contact.lastName} &lt;/strong&gt;&lt;/span&gt;
-      &lt;/div&gt;
-
-      &lt;div&gt;
-        &lt;label for="email"/&gt;Email : &lt;/label&gt;
-        &lt;span&gt;&lt;strong&gt; ${model.contact.email} &lt;/strong&gt;&lt;/span&gt;
-      &lt;/div&gt;
-
-      &lt;div&gt;
-        &lt;label for="nickname"/&gt;Nickname : &lt;/label&gt;
-        &lt;span&gt;&lt;strong&gt; ${model.contact.nickname} &lt;/strong&gt;&lt;/span&gt;
-      &lt;/div&gt;
-
-      &lt;div&gt;
-        &lt;label for="phone"/&gt;Phone : &lt;/label&gt;
-        &lt;span&gt;&lt;strong&gt; ${model.contact.phone} &lt;/strong&gt;&lt;/span&gt;
-      &lt;/div&gt;
-    &lt;/div&gt;
-
-    &lt;ul&gt;
-      &lt;li&gt; &lt;a href="http://makingdevs.github.io/"&gt;Home&lt;/a&gt; &lt;/li&gt;
-      &lt;li&gt; &lt;a href="contacts/new"&gt;New contact&lt;/a&gt; &lt;/li&gt;
-    &lt;/ul&gt;
-
-  &lt;/body&gt;
-&lt;/html&gt;
-</code></pre>
-
-<p>Ahora vamos a visualizar nuestra lista de contactos y para ello agregaremos un nuevo <em>handler</em> y un nuevo elemento llamado <em>byMethod</em>:</p>
-
-<pre><code class="groovy">  handler("contacts") {
-    byMethod {
-      get {
-        render groovyTemplate("contacts/list.html", contacts: contacts)
-      }
-
-      post {
-        Form form = context.parse(Form)
-        def contact = [:]
-        contact.id = contacts ? contacts.id.max() + 1 : 1
-        contact.name = form.name
-        contact.lastName = form.lastName
-        contact.email = form.email
-        contact.nickname = form.nickname
-        contact.phone = form.phone
-        contacts &lt;&lt; contact
-        redirect "/contacts/${contact.id}"
-      }
-    }
-  }
-</code></pre>
-
-<p>Lo que hará el <em>handler</em> es manejar la url &ldquo;contacts&rdquo; y delegarla por al método por el cual se haya realizado la petición en el caso de GET visualizará la lista de contactos pero si es por POST agregará los datos del contacto y después de agregarse se visualizará la información de dicho contacto. También agregaremos un link a la lista de contactos para poder visualizar cada uno de los datos de manera individual esto es por si se tiene información extra que no se muestre en el detalle general de la lista de contactos.</p>
-
-<pre><code class="html">&lt;html&gt;
-  &lt;head&gt;
-    &lt;title&gt;Ratpack: Contact list&lt;/title&gt;
-  &lt;/head&gt;
-
-  &lt;body&gt;
-    &lt;section&gt;
-      &lt;h1&gt;Contact list&lt;/h1&gt;
-    &lt;/section&gt;
-
-    &lt;div&gt;
-      &lt;table border="1"&gt;
-        &lt;thead&gt;
-          &lt;tr&gt;
-            &lt;th&gt;Name&lt;/th&gt;
-            &lt;th&gt;Last name&lt;/th&gt;
-            &lt;th&gt;Phone&lt;/th&gt;
-            &lt;th&gt;Email&lt;/th&gt;
-            &lt;th&gt;Nickname&lt;/th&gt;
-            &lt;th&gt;Show&lt;/th&gt;
-          &lt;/tr&gt;
-        &lt;/thead&gt;
-        &lt;tbody&gt;
-          &lt;% model.contacts.each { %&gt;
-            &lt;tr&gt;
-              &lt;td&gt;${it.name}&lt;/td&gt;
-              &lt;td&gt;${it.lastName}&lt;/td&gt;
-              &lt;td&gt;${it.phone}&lt;/td&gt;
-              &lt;td&gt;${it.email}&lt;/td&gt;
-              &lt;td&gt;${it.nickname}&lt;/td&gt;
-              &lt;td&gt; &lt;a href="http://makingdevs.github.io/contacts/${it.id}"&gt;Show&lt;/a&gt; &lt;/td&gt;
-            &lt;/tr&gt;
-          &lt;% } %&gt;
-        &lt;/tbody&gt;
-      &lt;/table&gt;
-    &lt;/div&gt;
-
-    &lt;ul&gt;
-      &lt;li&gt; &lt;a href="http://makingdevs.github.io/"&gt;Home&lt;/a&gt; &lt;/li&gt;
-      &lt;li&gt; &lt;a href="contacts/new"&gt;New contact&lt;/a&gt; &lt;/li&gt;
-    &lt;/ul&gt;
-
-  &lt;/body&gt;
-&lt;/html&gt;
-</code></pre>
-
-<p>Ya nos falta poco para poder tener un <em>CRUD</em> completo, solo nos falta eliminar y actualizar (casi nada XD). Así que para ello vamos a agregar un <em>handler</em> más y anidar un <em>byMethod</em> como lo hicimos con el POST de <em>contacts</em>. Para ello hacemos lo siguiente:</p>
-
-<pre><code class="groovy">  handler("contacts/:id") {
-    byMethod {
-      get {
-        def id = pathTokens.asLong('id')
-        def contact = contacts.find {
-          it.id == id
-        }
-        render groovyTemplate("contacts/show.html", contact:contact)
-      }
-
-        delete {
-          def id = pathTokens.asLong('id')
-          contacts = contacts.findAll {
-            it.id != id
-          }
-          render "ok"
-        }
-    }
-  }
-</code></pre>
-
-<p>Ahora una pregunta, ¿Cómo hacemos para llamar a ese método desde la página? bueno para hacer eso vamos a requerir a jQuery y para ello ocuparemos <a href="http://bower.io/]">Bower</a> y para instalar jquery usamos el siguiente comando: <code>bower install jquery</code>.</p>
-
-<p>Esto nos creará una carpeta llamada <em>bower_components</em> que de momento moveremos a la carpeta de <strong>src/ratpack/public/lib</strong> para tenerla disponible en la aplicación:  <code>mv bower_components src/ratpack/public/lib/</code>.</p>
-
-<p>Una vez hecho procedemos a incluir el script en la app en la lista de contactos y agregamos un archivo más que es el que se encargará de eliminar el elemento.</p>
-
-<pre><code class="html">  &lt;script src="lib/bower_components/jquery/dist/jquery.js"&gt;&lt;/script&gt;
-  &lt;script src="scripts/delete.js"&gt;&lt;/script&gt;
-</code></pre>
-
-<p>El código de eliminar es relativamente sencillo ya que lo que vamos a hacer es que cada elemento con la clase delete vamos a añadir el evento click y vamos a realizar la llamada al server con los datos del href.</p>
-
-<pre><code class="javascript">  $(function() {
-    $(".delete").click(function(event) {
-      event.preventDefault();
-      var url = $(event.target).attr('href');
-      $.ajax({
-        type: "DELETE",
-        url: url,
-      }).success(function(data) {
-        location.reload();
-      });
-    });
-  });
-</code></pre>
-
-<p>Una vez realizado esto podremos ver como nuestros datos cambian al eliminar un elemento de la lista de contactos. Veamos ahora como editar un elemento. Para la edición vamos a hacerlo de la manera más fácil que podamos esto es agregaremos en el <em>byMethod</em> anterior el método POST, agregamos otro GET más para visualizar la pantalla de edición y actualizaremos los datos de ese elemento, para ello requerimos crear una pantalla nueva y agregarla a la navegación:</p>
-
-<pre><code class="groovy">  get("contacts/:id/edit") {
-    def id = pathTokens.asLong('id')
-    def contact = contacts.find {
-      it.id == id
-    }
-    render groovyTemplate("contacts/edit.html", title:"Editing contact", contact:contact)
-  }
-
-  handler("contacts/:id") {
-    byMethod {
-      post {
-        def id = pathTokens.asLong('id')
-        def contact = contacts.find {
-          it.id == id
-        }
-
-        Form form = context.parse(Form)
-        contact.name = form.name
-        contact.lastName = form.lastName
-        contact.email = form.email
-        contact.nickname = form.nickname
-        contact.phone = form.phone
-
-        render groovyTemplate("contacts/show.html", contact:contact)
-      }
-    }
-  }
-</code></pre>
-
-<pre><code class="html">  &lt;!doctype html&gt;
-  &lt;html&gt;
-    &lt;head&gt;
-      &lt;meta charset="utf-8"&gt;
-      &lt;meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"&gt;
-    &lt;/head&gt;
-
-    &lt;body&gt;
-      &lt;section&gt;
-        &lt;h1&gt;${model.title}&lt;/h1&gt;
-      &lt;/section&gt;
-
-      &lt;form action="/contacts/${model.contact.id}" method="post"&gt;
-        &lt;div&gt;
-          &lt;label for="name"/&gt;Name&lt;/label&gt;
-          &lt;input type="text" name="name" value="${model.contact.name}" /&gt;
-        &lt;/div&gt;
-
-        &lt;div&gt;
-          &lt;label for="lastName"/&gt;Last name&lt;/label&gt;
-          &lt;input type="text" name="lastName" value="${model.contact.lastName}"/&gt;
-        &lt;/div&gt;
-
-        &lt;div&gt;
-          &lt;label for="email"/&gt;Email&lt;/label&gt;
-          &lt;input type="text" name="email" value="${model.contact.email}"/&gt;
-        &lt;/div&gt;
-
-        &lt;div&gt;
-          &lt;label for="nickname"/&gt;Nickname&lt;/label&gt;
-          &lt;input type="text" name="nickname" value="${model.contact.nickname}"/&gt;
-        &lt;/div&gt;
-
-        &lt;div&gt;
-          &lt;label for="phone"/&gt;Phone&lt;/label&gt;
-          &lt;input type="text" name="phone" value="${model.contact.phone}"/&gt;
-        &lt;/div&gt;
-
-        &lt;button type="submit"&gt; Update &lt;/button&gt;
-      &lt;/form&gt;
-
-      &lt;ul&gt;
-        &lt;li&gt; &lt;a href="http://makingdevs.github.io/"&gt;Home&lt;/a&gt; &lt;/li&gt;
-        &lt;li&gt; &lt;a href="http://makingdevs.github.io/contacts"&gt;Contact list&lt;/a&gt; &lt;/li&gt;
-        &lt;li&gt; &lt;a href="http://makingdevs.github.io/contacts/new"&gt;New contact&lt;/a&gt; &lt;/li&gt;
-      &lt;/ul&gt;
-
-      &lt;footer class="site-footer"&gt;&lt;/footer&gt;
-    &lt;/body&gt;
-  &lt;/html&gt;
-</code></pre>
-
-<p>Y de esta manera tenemos un pequeño CRUD con llamadas normales y un poco de jquery. En POST posteriores vamos a tomar este código y vamos a hacerle algunas mejoras. Para empezar haremos uso de los groovyTemplates como tal y ajustaremos esto a que se maneja más por REST. Espero les haya gustado y cualquier duda o comentario ya saben donde encontrarnos.</p>
-
-<p><strong>Saludos. GLHF.</strong></p>
 ]]></content>
   </entry>
   
