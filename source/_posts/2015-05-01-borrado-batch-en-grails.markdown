@@ -2,19 +2,76 @@
 layout: post
 title: "Borrado batch en Grails"
 date: 2015-05-01 20:58:30 -0500
-published: false
 comments: true
+tags: groovy, grails, gorm
 categories:
+- groovy
+- grails
+- development
 ---
 
-import org.hibernate.FetchMode as FM import grails.gorm.*
+En esta ocasión les quiero compartir la solución a un problema que tuve al borrar una colección de objetos en grails y con el GORM, si bien podría hacerlo con HQL o con SQL usando las bondades de Hibernate me gusto más el acercamiento que les quiero presentar.
 
-all = [] CollaborationLink.list().each { link -> if(link.participants.isEmpty()) all << link } all*.delete() println all.size()
+<!-- more -->
+La necesidad era borrar un grupo de objetos en donde el contenido de su relación estuviera vacío, ejemplifico con la estructura de unas clases:
 
-// ****************************
+```groovy
+class Group {
+  String name
 
-CollaborationLink.where { participants.size() == 0 }.deleteAll() // No soporta el método cuando se busca por la relación
+  static hasMany = [members : Member]
+}
 
-// **************************** def criteria = new DetachedCriteria(CollaborationLink).build { isEmpty 'participants' }
+class Member {
+  String name
+}
+```
 
-println criteria.deleteAll() println criteria.count()
+El primer acercamiento que tuve fue obtener la lista de elementos y hacer una condicional buscando los elementos vacíos, después borrar...
+
+```groovy
+groupsToDelete = []
+Group.list().each { group ->
+  if(group.members.isEmpty())
+    groupsToDelete << link
+}
+groupsToDelete*.delete()
+```
+
+Una vez hecho, mejoramos intentamos mejorar el código con una búsqueda mucho más refinada y ejecutando el borrado, para ello nos apoyamos de los **where queries**:
+
+```groovy
+Group.where {
+  members.size() == 0
+}.deleteAll()
+```
+
+Basado en la documentación de Grails:
+
+> Since each where method call returns a DetachedCriteria instance, you can use where queries to execute batch operations such as batch updates and deletes.
+
+Sin embargo, este acercamiento tiene un problema, manda un error cuando se busca por las relaciones del objeto y no permite el borrado. El error: `org.springframework.dao.InvalidDataAccessResourceUsageException: Queries of type SizeEquals are not supported by this implementation`
+
+### La solución que me gustó
+
+Usamos **Detached Criteria** para resolver este problema, por que:
+
+- No están asociados con una sesión o conexión, lo cual permite formularlos y reusarlos.
+- También cuenta con métodos batch: `deleteAll`, `updateAll`
+- Permiten proyecciones y subqueries, que es lo que estamos buscando para resolver nuestro problema
+
+Finalmente nuestra solución es:
+
+```groovy
+import grails.gorm.*
+
+def criteria = new DetachedCriteria(Group).build {
+  isEmpty 'members'
+}
+criteria.deleteAll()
+// criteria.count()
+```
+
+Con esto, tenemos una búsqueda refinada y el borrado de los elementos directo, inclusive el método `deleteAll` regresa un entero con la cantidad de registros afectados.
+
+Esto me fue de mucha utilidad y ojalá también lo sea para ustedes en algún momento.
