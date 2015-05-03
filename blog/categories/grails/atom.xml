@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Grails | Blog de MakingDevs]]></title>
   <link href="http://makingdevs.github.io/blog/categories/grails/atom.xml" rel="self"/>
   <link href="http://makingdevs.github.io/"/>
-  <updated>2015-05-02T22:34:29-05:00</updated>
+  <updated>2015-05-02T22:41:14-05:00</updated>
   <id>http://makingdevs.github.io/</id>
   <author>
     <name><![CDATA[MakingDevs]]></name>
@@ -25,33 +25,36 @@
 
 <p>La necesidad era borrar un grupo de objetos en donde el contenido de su relación estuviera vacío, ejemplifico con la estructura de unas clases:</p>
 
-<pre><code class="groovy">class Group {
+<p><div><script src='https://gist.github.com/54953d90cc778b71548a.js?file=domains.groovy'></script>
+<noscript><pre><code>class Group {
   String name
-
+  
   static hasMany = [members : Member]
 }
 
 class Member {
   String name
-}
-</code></pre>
+}</code></pre></noscript></div>
+</p>
 
 <p>El primer acercamiento que tuve fue obtener la lista de elementos y hacer una condicional buscando los elementos vacíos, después borrar&hellip;</p>
 
-<pre><code class="groovy">groupsToDelete = []
-Group.list().each { group -&gt;
-  if(group.members.isEmpty())
+<p><div><script src='https://gist.github.com/54953d90cc778b71548a.js?file=delete1.groovy'></script>
+<noscript><pre><code>groupsToDelete = [] 
+Group.list().each { group -&gt; 
+  if(group.members.isEmpty()) 
     groupsToDelete &lt;&lt; link
-}
-groupsToDelete*.delete()
-</code></pre>
+} 
+groupsToDelete*.delete() </code></pre></noscript></div>
+</p>
 
 <p>Una vez hecho, mejoramos intentamos mejorar el código con una búsqueda mucho más refinada y ejecutando el borrado, para ello nos apoyamos de los <strong>where queries</strong>:</p>
 
-<pre><code class="groovy">Group.where {
-  members.size() == 0
-}.deleteAll()
-</code></pre>
+<p><div><script src='https://gist.github.com/54953d90cc778b71548a.js?file=delete2.groovy'></script>
+<noscript><pre><code>Group.where { 
+  members.size() == 0 
+}.deleteAll()</code></pre></noscript></div>
+</p>
 
 <p>Basado en la documentación de Grails:</p>
 
@@ -72,14 +75,15 @@ groupsToDelete*.delete()
 
 <p>Finalmente nuestra solución es:</p>
 
-<pre><code class="groovy">import grails.gorm.*
+<p><div><script src='https://gist.github.com/54953d90cc778b71548a.js?file=delete3.groovy'></script>
+<noscript><pre><code>import grails.gorm.*
 
-def criteria = new DetachedCriteria(Group).build {
-  isEmpty 'members'
+def criteria = new DetachedCriteria(Group).build { 
+  isEmpty &#39;members&#39;
 }
 criteria.deleteAll()
-// criteria.count()
-</code></pre>
+// criteria.count()</code></pre></noscript></div>
+</p>
 
 <p>Con esto, tenemos una búsqueda refinada y el borrado de los elementos directo, inclusive el método <code>deleteAll</code> regresa un entero con la cantidad de registros afectados.</p>
 

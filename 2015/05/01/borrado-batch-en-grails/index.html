@@ -95,53 +95,35 @@
 
 <p>La necesidad era borrar un grupo de objetos en donde el contenido de su relación estuviera vacío, ejemplifico con la estructura de unas clases:</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="kd">class</span> <span class="nc">Group</span> <span class="o">{</span>
-</span><span class='line'>  <span class="n">String</span> <span class="n">name</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kd">static</span> <span class="n">hasMany</span> <span class="o">=</span> <span class="o">[</span><span class="n">members</span> <span class="o">:</span> <span class="n">Member</span><span class="o">]</span>
-</span><span class='line'><span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">class</span> <span class="nc">Member</span> <span class="o">{</span>
-</span><span class='line'>  <span class="n">String</span> <span class="n">name</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
+<div><script src='https://gist.github.com/54953d90cc778b71548a.js?file=domains.groovy'></script>
+<noscript><pre><code>class Group {
+  String name
+  
+  static hasMany = [members : Member]
+}
+
+class Member {
+  String name
+}</code></pre></noscript></div>
 
 
 <p>El primer acercamiento que tuve fue obtener la lista de elementos y hacer una condicional buscando los elementos vacíos, después borrar&hellip;</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">groupsToDelete</span> <span class="o">=</span> <span class="o">[]</span>
-</span><span class='line'><span class="n">Group</span><span class="o">.</span><span class="na">list</span><span class="o">().</span><span class="na">each</span> <span class="o">{</span> <span class="n">group</span> <span class="o">-&gt;</span>
-</span><span class='line'>  <span class="k">if</span><span class="o">(</span><span class="n">group</span><span class="o">.</span><span class="na">members</span><span class="o">.</span><span class="na">isEmpty</span><span class="o">())</span>
-</span><span class='line'>    <span class="n">groupsToDelete</span> <span class="o">&lt;&lt;</span> <span class="n">link</span>
-</span><span class='line'><span class="o">}</span>
-</span><span class='line'><span class="n">groupsToDelete</span><span class="o">*.</span><span class="na">delete</span><span class="o">()</span>
-</span></code></pre></td></tr></table></div></figure>
+<div><script src='https://gist.github.com/54953d90cc778b71548a.js?file=delete1.groovy'></script>
+<noscript><pre><code>groupsToDelete = [] 
+Group.list().each { group -&gt; 
+  if(group.members.isEmpty()) 
+    groupsToDelete &lt;&lt; link
+} 
+groupsToDelete*.delete() </code></pre></noscript></div>
 
 
 <p>Una vez hecho, mejoramos intentamos mejorar el código con una búsqueda mucho más refinada y ejecutando el borrado, para ello nos apoyamos de los <strong>where queries</strong>:</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">Group</span><span class="o">.</span><span class="na">where</span> <span class="o">{</span>
-</span><span class='line'>  <span class="n">members</span><span class="o">.</span><span class="na">size</span><span class="o">()</span> <span class="o">==</span> <span class="mi">0</span>
-</span><span class='line'><span class="o">}.</span><span class="na">deleteAll</span><span class="o">()</span>
-</span></code></pre></td></tr></table></div></figure>
+<div><script src='https://gist.github.com/54953d90cc778b71548a.js?file=delete2.groovy'></script>
+<noscript><pre><code>Group.where { 
+  members.size() == 0 
+}.deleteAll()</code></pre></noscript></div>
 
 
 <p>Basado en la documentación de Grails:</p>
@@ -163,21 +145,14 @@
 
 <p>Finalmente nuestra solución es:</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="kn">import</span> <span class="nn">grails.gorm.*</span>
-</span><span class='line'>
-</span><span class='line'><span class="kt">def</span> <span class="n">criteria</span> <span class="o">=</span> <span class="k">new</span> <span class="n">DetachedCriteria</span><span class="o">(</span><span class="n">Group</span><span class="o">).</span><span class="na">build</span> <span class="o">{</span>
-</span><span class='line'>  <span class="n">isEmpty</span> <span class="s1">&#39;members&#39;</span>
-</span><span class='line'><span class="o">}</span>
-</span><span class='line'><span class="n">criteria</span><span class="o">.</span><span class="na">deleteAll</span><span class="o">()</span>
-</span><span class='line'><span class="c1">// criteria.count()</span>
-</span></code></pre></td></tr></table></div></figure>
+<div><script src='https://gist.github.com/54953d90cc778b71548a.js?file=delete3.groovy'></script>
+<noscript><pre><code>import grails.gorm.*
+
+def criteria = new DetachedCriteria(Group).build { 
+  isEmpty &#39;members&#39;
+}
+criteria.deleteAll()
+// criteria.count()</code></pre></noscript></div>
 
 
 <p>Con esto, tenemos una búsqueda refinada y el borrado de los elementos directo, inclusive el método <code>deleteAll</code> regresa un entero con la cantidad de registros afectados.</p>
