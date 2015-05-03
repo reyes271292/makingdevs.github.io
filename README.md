@@ -30,6 +30,8 @@ La herramienta que usamos se llama [Octopress][1], y es la misma herramienta que
   - `rake deploy` sube al master sus cambios y por ende lo publica
 - No olviden de subir sus cambios de sus archivos markdown al branch **source** del repo
 
+Nota: Les recomiendo que sus snippets de código los hagan en sus gist de github y los referencien, es muy sencillo hacerlo.
+
 [1]: http://octopress.org/
 [2]: https://github.com/sstephenson/rbenv
 [3]: http://bundler.io/
