@@ -1,4 +1,0 @@
-User-agent: *
-Disallow: 
-
-Sitemap: http://makingdevs.github.io/sitemap.xml 
