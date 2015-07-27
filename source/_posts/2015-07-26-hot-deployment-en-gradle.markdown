@@ -14,6 +14,7 @@ categories:
 Durante un tiempo estuve buscando de la forma de tener una aplicación web con Gradle y tener características como el hot deploy, Grails lo tiene y viendólo de forma interna usa un elemento de nombre [SpringLoaded][1].
 
 Después me di cuenta que frameworks como [Dropwizard][2] lo usan, y que incluso SpringBoot a través del uso del CLI también, investigando un poco más al respecto y por la necesidad de tenerlo listo para algunos proyectos encontré [un artículo][3] en donde explica como ponerlo en acción usando propiamente [Dropwizard][2]. Fue un buen acercamiento, el problema es el siguiente bloque de código en configuración de gradle:
+<!-- more -->
 
 ```groovy
 run {
