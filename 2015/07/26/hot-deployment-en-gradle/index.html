@@ -1,0 +1,458 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Hot Deployment en Gradle - Blog de MakingDevs</title>
+  <meta name="author" content="MakingDevs">
+
+  
+  <meta name="description" content="Durante un tiempo estuve buscando de la forma de tener una aplicación web con Gradle y tener características como el hot deploy, Grails lo tiene y &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://makingdevs.github.io/2015/07/26/hot-deployment-en-gradle/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Blog de MakingDevs" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Fjalla+One' rel='stylesheet' type='text/css'>
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Blog de MakingDevs</a></h1>
+  
+    <h2>El código que a veces olvidamos y no documentamos.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="makingdevs.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Hot Deployment en Gradle</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-07-26T23:19:13-05:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>26</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>11:19 pm</span></time>
+        
+           | <a href="#disqus_thread"
+             data-disqus-identifier="http://makingdevs.github.io">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>Durante un tiempo estuve buscando de la forma de tener una aplicación web con Gradle y tener características como el hot deploy, Grails lo tiene y viendólo de forma interna usa un elemento de nombre <a href="https://github.com/spring-projects/spring-loaded" title="springloaded">SpringLoaded</a>.</p>
+
+<p>Después me di cuenta que frameworks como <a href="https://github.com/spring-projects/spring-loaded" title="dropwizard">Dropwizard</a> lo usan, y que incluso SpringBoot a través del uso del CLI también, investigando un poco más al respecto y por la necesidad de tenerlo listo para algunos proyectos encontré <a href="http://www.cholick.com/entry/show/280" title="tomcat">un artículo</a> en donde explica como ponerlo en acción usando propiamente <a href="https://github.com/spring-projects/spring-loaded" title="dropwizard">Dropwizard</a>. Fue un buen acercamiento, el problema es el siguiente bloque de código en configuración de gradle:</p>
+
+<!-- more -->
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">run</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">args</span> <span class="o">=</span> <span class="o">[</span><span class="s1">&#39;server&#39;</span><span class="o">,</span> <span class="s1">&#39;app.yaml&#39;</span><span class="o">]</span>
+</span><span class='line'>  <span class="n">jvmArgs</span> <span class="o">=</span> <span class="o">[</span><span class="s2">&quot;-javaagent:${new File(&quot;</span><span class="n">$buildDir</span><span class="s">/agent/</span><span class="n">springloaded</span><span class="o">-</span><span class="n">$</span><span class="o">{</span><span class="n">springloadedVersion</span><span class="o">}.</span><span class="na">jar</span><span class="s2">&quot;).absolutePath}&quot;</span><span class="o">,</span> <span class="s1">&#39;-noverify&#39;</span><span class="o">]</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>En donde, el atributo <code>jvmArgs</code> es sólo aplicable a tareas del tipo <code>JavaExec</code>, más específico, que implementan <code>JavaExecSpec</code> o <code>JavaForkOptions</code>. Es aquí en donde <a href="https://github.com/bmuschko/gradle-tomcat-plugin" title="tomcat">el plugin de tomcat</a> que se puede encontrar para Gradle tiene el problema, pues su tarea no lo hace.</p>
+
+<p>La combinación se haría en conjunto con un plugin de gradle, <a href="https://github.com/bluepapa32/gradle-watch-plugin" title="gradle watch">el watch</a>, el actúa con cada cambio en la aplicación realizando las tareas que se le digan. Sin embargo, lo que encontré funcionaba para la cmbinación de SpringBooy e IntelliJ Idea, lo cual no veía mal, pero no era mi caso. De cualquier forma pongo disponible la configuración que independiente me sirvió para hacer un hot deploy usando ambos elementos:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">apply</span> <span class="nl">plugin:</span> <span class="s1">&#39;groovy&#39;</span>
+</span><span class='line'><span class="n">apply</span> <span class="nl">plugin:</span> <span class="s1">&#39;spring-boot&#39;</span>
+</span><span class='line'><span class="n">apply</span> <span class="nl">plugin:</span> <span class="s1">&#39;com.bluepapa32.watch&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">sourceCompatibility</span> <span class="o">=</span> <span class="mf">1.8</span>
+</span><span class='line'><span class="n">targetCompatibility</span> <span class="o">=</span> <span class="mf">1.8</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">ext</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">springLoadedVersion</span> <span class="o">=</span> <span class="s1">&#39;1.2.1.RELEASE&#39;</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">mainClassName</span><span class="o">=</span><span class="s1">&#39;com.makingdevs.Application&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">repositories</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">mavenCentral</span><span class="o">()</span>
+</span><span class='line'>  <span class="n">maven</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">url</span> <span class="s2">&quot;https://code.lds.org/nexus/content/groups/main-repo&quot;</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">dependencies</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">compile</span><span class="o">(</span><span class="s2">&quot;org.springframework.boot:spring-boot-starter-web&quot;</span><span class="o">)</span>
+</span><span class='line'>  <span class="n">compile</span> <span class="s1">&#39;org.codehaus.groovy:groovy-all:2.4.3&#39;</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">buildscript</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">repositories</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">mavenCentral</span><span class="o">()</span>
+</span><span class='line'>    <span class="n">jcenter</span><span class="o">()</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>  <span class="n">dependencies</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">classpath</span> <span class="s2">&quot;org.springframework.boot:spring-boot-gradle-plugin:1.2.4.RELEASE&quot;</span>
+</span><span class='line'>    <span class="n">classpath</span> <span class="s1">&#39;org.springframework:springloaded:1.2.0.RELEASE&#39;</span>
+</span><span class='line'>    <span class="n">classpath</span> <span class="s1">&#39;com.bluepapa32:gradle-watch-plugin:0.1.5&#39;</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">jar</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">baseName</span> <span class="o">=</span> <span class="s1">&#39;meerkat-mymapmanager&#39;</span>
+</span><span class='line'>  <span class="n">version</span> <span class="o">=</span>  <span class="s1">&#39;0.1.0&#39;</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">compileGroovy</span> <span class="o">{</span>
+</span><span class='line'>  <span class="c1">//enable compilation in a separate daemon process</span>
+</span><span class='line'>  <span class="n">options</span><span class="o">.</span><span class="na">fork</span> <span class="o">=</span> <span class="kc">true</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">watch</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">groovy</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">files</span> <span class="nf">files</span><span class="o">(</span><span class="s1">&#39;src/main/groovy&#39;</span><span class="o">)</span>
+</span><span class='line'>    <span class="n">tasks</span> <span class="s1">&#39;compileGroovy&#39;</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Al final del día, lo que encontre fue <a href="http://akhikhl.github.io/gretty-doc/index.html" title="gretty">el plugin de Gretty</a>, con el que fácilmente podemos usar un contenedor de Tomcat o Jetty y tener disponible el Hot deploy, creo que tiene algunos detalles de rendimiento pero es útil. Finalmente la configuración se reduce mucho y hay varias tareas disponibles, entre ellas <code>appRun</code>, que es la que levanta el elemento configuraco y lo dijo listo para los cambios:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="c1">// Using the new mechanism to include plugins</span>
+</span><span class='line'><span class="n">plugins</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">id</span> <span class="s1">&#39;groovy&#39;</span>
+</span><span class='line'>  <span class="n">id</span> <span class="s1">&#39;war&#39;</span>
+</span><span class='line'>  <span class="n">id</span> <span class="s2">&quot;org.akhikhl.gretty&quot;</span> <span class="n">version</span> <span class="s2">&quot;1.2.4&quot;</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">repositories</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">mavenCentral</span><span class="o">()</span>
+</span><span class='line'>  <span class="n">jcenter</span><span class="o">()</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">dependencies</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">compile</span> <span class="s1">&#39;org.codehaus.groovy:groovy-all:2.3.4&#39;</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">gretty</span> <span class="o">{</span>
+</span><span class='line'>  <span class="c1">// &#39;jetty7&#39;, &#39;jetty8&#39;, &#39;jetty9&#39;, &#39;tomcat7&#39;, &#39;tomcat8&#39;</span>
+</span><span class='line'>  <span class="n">servletContainer</span> <span class="o">=</span> <span class="s1">&#39;tomcat7&#39;</span>
+</span><span class='line'>  <span class="n">httpPort</span> <span class="o">=</span> <span class="mi">9091</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Creo que nos servirá bien un rato para las cosas que tenemos que hcaer, por que incluso soporta SpringBoot.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">José Juan Reyes Zuñiga</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2015-07-26T23:19:13-05:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>26</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>11:19 pm</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/gradle/'>gradle</a>, <a class='category' href='/blog/categories/groovy/'>groovy</a>, <a class='category' href='/blog/categories/web/'>web</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://makingdevs.github.io/2015/07/26/hot-deployment-en-gradle/" data-via="makingdevs" data-counturl="http://makingdevs.github.io/2015/07/26/hot-deployment-en-gradle/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/2015/05/01/borrado-batch-en-grails/" title="Previous Post: Borrado batch en Grails">&laquo; Borrado batch en Grails</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2015/07/26/hot-deployment-en-gradle/">Hot Deployment en Gradle</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2015/05/01/borrado-batch-en-grails/">Borrado Batch en Grails</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2015/04/07/clusterizacion-con-camel/">Clusterizacion Con Camel</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2014/11/06/personalizar-notificaciones-de-correo-en-jenkins/">Personalizar Notificaciones De Correo en Jenkins</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2014/09/16/inyeccion-de-metodos-por-categorias-y-timecategory/">Inyección De Métodos Por Categorías Y TimeCategory</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating&#8230;</li>
+  </ul>
+  
+  <a href="https://github.com/makingdevs">@makingdevs</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'makingdevs',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+<section class="googleplus">
+  <h1>
+    <a href="https://plus.google.com/makingdevs?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - MakingDevs -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'makingdevs';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://makingdevs.github.io/2015/07/26/hot-deployment-en-gradle/';
+        var disqus_url = 'http://makingdevs.github.io/2015/07/26/hot-deployment-en-gradle/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

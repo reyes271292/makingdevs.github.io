@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Continuous Integration | Blog de MakingDevs]]></title>
+  <link href="http://makingdevs.github.io/blog/categories/continuous-integration/atom.xml" rel="self"/>
+  <link href="http://makingdevs.github.io/"/>
+  <updated>2015-07-27T09:02:36-05:00</updated>
+  <id>http://makingdevs.github.io/</id>
+  <author>
+    <name><![CDATA[MakingDevs]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Personalizar Notificaciones De Correo en Jenkins]]></title>
+    <link href="http://makingdevs.github.io/2014/11/06/personalizar-notificaciones-de-correo-en-jenkins/"/>
+    <updated>2014-11-06T18:08:56-06:00</updated>
+    <id>http://makingdevs.github.io/2014/11/06/personalizar-notificaciones-de-correo-en-jenkins</id>
+    <content type="html"><![CDATA[<p>Las <strong>notificaciones</strong> son básicas para la correcta comunicación de los involucrados de nuestros proyectos como: <em>Stakeholders/ Key Users / Developers / Clientes / Testers</em>.</p>
+
+<p>Por esta razón te recomiendo personalizar las notificaciones por defecto de <strong>Jenkins</strong>.</p>
+
+<p>Objetivo: Informar los despliegues desde Jenkins por correo, usando el <a href="https://wiki.jenkins-ci.org/display/JENKINS/Email-ext+plugin">plugin: Email-ext</a></p>
+
+<!-- more -->
+
+
+<p>Procedimiento:</p>
+
+<ol>
+<li><p>Instalar el plugin desde la consola de administración de Jenkins. <img src="/images/IC-Jenkins-PlugIn-Email-Ext_01.jpg" alt="Screenshot 1" /></p></li>
+<li><p>Configurar la cuenta de correo saliente SMTP, te recomiendo que uses el autenticado.<img src="/images/IC-Jenkins-PlugIn-Email-Ext_02.jpg" alt="Screenshot 2" /></p></li>
+<li><p>Configurar el plugin: Email-ext con información base de los usuarios a notificar ( <em>Stake Holders/ Key Users / Developers / Clientes / Testers</em> ) en las listas por DEFAULT de la configuración general a nivel. Esto te permitirá contar con la misma configuración para tus N tareas de despliegue. <img src="/images/IC-Jenkins-PlugIn-Email-Ext_03.jpg" alt="Screenshot 3" /></p></li>
+<li><p>Para personalizar el correo que se enviará, copiaremos un<strong>Template</strong> dentro del Home de Jenkins, <em>static-analysis.jelly</em> y asignando nombre relacionado al proyecto. Si requieres más información, consulta la <a href="https://github.com/jenkinsci/email-ext-plugin/tree/master/src/main/resources/hudson/plugins/emailext/templates">documentación del plugin en GitHub</a>. Este template es un <strong>HTML el cual puedes editar su contenido</strong>, incluyendo titulo del proyecto, una imagen, etc. <img src="/images/IC-Jenkins-PlugIn-Email-Ext_04.jpg" alt="Screenshot 4" /></p></li>
+<li><p>Añade en una tarea de Jenkins, un paso al finalizar, usando Email notification. <img src="/images/IC-Jenkins-PlugIn-Email-Ext_05.jpg" alt="Screenshot 5" /></p></li>
+<li><p>Ejecuta tu tarea y verifica el correo recibido. <img src="/images/IC-Jenkins-PlugIn-Email-Ext_06.jpg" alt="Screenshot 6" /></p></li>
+</ol>
+
+]]></content>
+  </entry>
+  
+</feed>

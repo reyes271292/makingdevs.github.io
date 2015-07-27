@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Development | Blog de MakingDevs]]></title>
+  <link href="http://makingdevs.github.io/blog/categories/development/atom.xml" rel="self"/>
+  <link href="http://makingdevs.github.io/"/>
+  <updated>2015-07-27T09:02:36-05:00</updated>
+  <id>http://makingdevs.github.io/</id>
+  <author>
+    <name><![CDATA[MakingDevs]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Borrado Batch en Grails]]></title>
+    <link href="http://makingdevs.github.io/2015/05/01/borrado-batch-en-grails/"/>
+    <updated>2015-05-01T20:58:30-05:00</updated>
+    <id>http://makingdevs.github.io/2015/05/01/borrado-batch-en-grails</id>
+    <content type="html"><![CDATA[<p>En esta ocasión les quiero compartir la solución a un problema que tuve al borrar una colección de objetos en grails y con el GORM, si bien podría hacerlo con HQL o con SQL usando las bondades de Hibernate me gusto más el acercamiento que les quiero presentar.</p>
+
+<!-- more -->
+
+
+<p>La necesidad era borrar un grupo de objetos en donde el contenido de su relación estuviera vacío, ejemplifico con la estructura de unas clases:</p>
+
+<p><div><script src='https://gist.github.com/54953d90cc778b71548a.js?file=domains.groovy'></script>
+<noscript><pre><code>class Group {
+  String name
+  
+  static hasMany = [members : Member]
+}
+
+class Member {
+  String name
+}</code></pre></noscript></div>
+</p>
+
+<p>El primer acercamiento que tuve fue obtener la lista de elementos y hacer una condicional buscando los elementos vacíos, después borrar&hellip;</p>
+
+<p><div><script src='https://gist.github.com/54953d90cc778b71548a.js?file=delete1.groovy'></script>
+<noscript><pre><code>groupsToDelete = [] 
+Group.list().each { group -&gt; 
+  if(group.members.isEmpty()) 
+    groupsToDelete &lt;&lt; link
+} 
+groupsToDelete*.delete() </code></pre></noscript></div>
+</p>
+
+<p>Una vez hecho, mejoramos intentamos mejorar el código con una búsqueda mucho más refinada y ejecutando el borrado, para ello nos apoyamos de los <strong>where queries</strong>:</p>
+
+<p><div><script src='https://gist.github.com/54953d90cc778b71548a.js?file=delete2.groovy'></script>
+<noscript><pre><code>Group.where { 
+  members.size() == 0 
+}.deleteAll()</code></pre></noscript></div>
+</p>
+
+<p>Basado en la documentación de Grails:</p>
+
+<blockquote><p>Since each where method call returns a DetachedCriteria instance, you can use where queries to execute batch operations such as batch updates and deletes.</p></blockquote>
+
+<p>Sin embargo, este acercamiento tiene un problema, manda un error cuando se busca por las relaciones del objeto y no permite el borrado. El error: <code>org.springframework.dao.InvalidDataAccessResourceUsageException: Queries of type SizeEquals are not supported by this implementation</code></p>
+
+<h3>La solución que me gustó</h3>
+
+<p>Usamos <strong>Detached Criteria</strong> para resolver este problema, por que:</p>
+
+<ul>
+<li>No están asociados con una sesión o conexión, lo cual permite formularlos y reusarlos.</li>
+<li>También cuenta con métodos batch: <code>deleteAll</code>, <code>updateAll</code></li>
+<li>Permiten proyecciones y subqueries, que es lo que estamos buscando para resolver nuestro problema</li>
+</ul>
+
+
+<p>Finalmente nuestra solución es:</p>
+
+<p><div><script src='https://gist.github.com/54953d90cc778b71548a.js?file=delete3.groovy'></script>
+<noscript><pre><code>import grails.gorm.*
+
+def criteria = new DetachedCriteria(Group).build { 
+  isEmpty &#39;members&#39;
+}
+criteria.deleteAll()
+// criteria.count()</code></pre></noscript></div>
+</p>
+
+<p>Con esto, tenemos una búsqueda refinada y el borrado de los elementos directo, inclusive el método <code>deleteAll</code> regresa un entero con la cantidad de registros afectados.</p>
+
+<p>Esto me fue de mucha utilidad y ojalá también lo sea para ustedes en algún momento.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Clusterizacion Con Camel]]></title>
+    <link href="http://makingdevs.github.io/2015/04/07/clusterizacion-con-camel/"/>
+    <updated>2015-04-07T19:56:54-05:00</updated>
+    <id>http://makingdevs.github.io/2015/04/07/clusterizacion-con-camel</id>
+    <content type="html"><![CDATA[<p>Camel ofrece distintas soluciones para ser escalado o para distribuir la carga en diferentes instancias, la soluciones que ofrece dependerá de como se encuentra nuestra infraestructura ( y configuración).</p>
+
+<ul>
+<li>Misma JVM y CamelContext</li>
+<li>Misma JVM pero diferente CamelContext</li>
+<li>Diferente JVM y CamelContext</li>
+</ul>
+
+
+<!-- more -->
+
+
+<p>El problema que me vi envuelto fue de estas tres, la ultima, el clusterizar camel que se encontraban en diferentes JVM y CamelContext. Y en particular tuve un problema de mensajes duplicados. Para esto camel ofrece ciertas soluciones, un componente llamado <strong>Idempotent Consumer</strong>. El Idempotent Consumer pertenece a los patrones de EIP se usa para filtrar los mensajes duplicados. Este modelo se implementa utilizando la clase IdempotentConsumer. Este utiliza una expresión para calcular una cadena de mensaje ID único para un intercambio de mensajes, este ID puede ser consultado en la IdempotentRepository para ver si se ha visto antes, si se tiene no es tomado para ser procesado, en cambio si no se tiene, entonces el mensaje se procesa y la ID se añade al repositorio.</p>
+
+<p>Hay varios tipos de IdempotentRepository:</p>
+
+<ul>
+<li>MemoryIdempotentRepository</li>
+<li>FileIdempotentRepository</li>
+<li>HazelcastIdempotentRepository (Available as of Camel 2.8)</li>
+<li>JdbcMessageIdRepository (Available as of Camel 2.7)</li>
+<li>JpaMessageIdRepository</li>
+</ul>
+
+
+<pre><code class="groovy">@Grab(group='org.slf4j', module='slf4j-api', version='1.7.10')
+@Grab(group='org.apache.camel', module='camel-core', version='2.12.0')
+@Grab(group='org.apache.camel', module='camel-mail', version='2.12.0')
+
+import org.apache.camel.impl.DefaultCamelContext
+import org.apache.camel.builder.RouteBuilder
+import org.apache.camel.processor.idempotent.FileIdempotentRepository
+
+def camelContext = new DefaultCamelContext()
+camelContext.addRoutes(new RouteBuilder() {
+  def void configure() {
+    from("imaps://imap.gmail.com?username=jorge@makingdevs.com"
+      + "&amp;password=m4k1ngd3vs"
+      + "&amp;consumer.delay=6000")
+    .idempotentConsumer( header("Message-ID"),
+      FileIdempotentRepository.fileIdempotentRepository(
+        new File("idempotentRepository.txt")))
+    .to("log:groovymail?showAll=true&amp;multiline=true") } })
+
+camelContext.start()
+addShutdownHook{ camelContext.stop() }
+synchronized(this){ this.wait() }
+</code></pre>
+
+<p>Este es un script ejemplo el cual utiliza <code>FileIdempotentRepository</code> utilizando un archivo ejemplo para llevar el control, si exploramos el archivo ahí se encuentra los id de los mensajes procesados.</p>
+
+<p><img src="/images/camel_output.png" alt="Camel output" /></p>
+
+<p>Asi si hay un mensaje el cual ya se encuentra dentro de este archivo se ignora y no es procesado. En mi caso utilize JpaMessageIdRepository dentro de grails y fue muy simple utilizar este componente solo agregue la dependencia de camel sql en el buildConfig.groovy</p>
+
+<pre><code class="groovy">runtime 'org.apache.camel:camel-sql:2.13.0’
+</code></pre>
+
+<p>y agregue el bean en resources.groovy</p>
+
+<pre><code class="groovy">import org.apache.camel.processor.idempotent.jdbc.JdbcMessageIdRepository
+
+beans = {
+  messageIdRepository(JdbcMessageIdRepository,ref('dataSource'),'jdbcProcessorName')
+}
+</code></pre>
+
+<p>y por ultimo agregue el <em>idempotentComponent</em>.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Personalizar Notificaciones De Correo en Jenkins]]></title>
+    <link href="http://makingdevs.github.io/2014/11/06/personalizar-notificaciones-de-correo-en-jenkins/"/>
+    <updated>2014-11-06T18:08:56-06:00</updated>
+    <id>http://makingdevs.github.io/2014/11/06/personalizar-notificaciones-de-correo-en-jenkins</id>
+    <content type="html"><![CDATA[<p>Las <strong>notificaciones</strong> son básicas para la correcta comunicación de los involucrados de nuestros proyectos como: <em>Stakeholders/ Key Users / Developers / Clientes / Testers</em>.</p>
+
+<p>Por esta razón te recomiendo personalizar las notificaciones por defecto de <strong>Jenkins</strong>.</p>
+
+<p>Objetivo: Informar los despliegues desde Jenkins por correo, usando el <a href="https://wiki.jenkins-ci.org/display/JENKINS/Email-ext+plugin">plugin: Email-ext</a></p>
+
+<!-- more -->
+
+
+<p>Procedimiento:</p>
+
+<ol>
+<li><p>Instalar el plugin desde la consola de administración de Jenkins. <img src="/images/IC-Jenkins-PlugIn-Email-Ext_01.jpg" alt="Screenshot 1" /></p></li>
+<li><p>Configurar la cuenta de correo saliente SMTP, te recomiendo que uses el autenticado.<img src="/images/IC-Jenkins-PlugIn-Email-Ext_02.jpg" alt="Screenshot 2" /></p></li>
+<li><p>Configurar el plugin: Email-ext con información base de los usuarios a notificar ( <em>Stake Holders/ Key Users / Developers / Clientes / Testers</em> ) en las listas por DEFAULT de la configuración general a nivel. Esto te permitirá contar con la misma configuración para tus N tareas de despliegue. <img src="/images/IC-Jenkins-PlugIn-Email-Ext_03.jpg" alt="Screenshot 3" /></p></li>
+<li><p>Para personalizar el correo que se enviará, copiaremos un<strong>Template</strong> dentro del Home de Jenkins, <em>static-analysis.jelly</em> y asignando nombre relacionado al proyecto. Si requieres más información, consulta la <a href="https://github.com/jenkinsci/email-ext-plugin/tree/master/src/main/resources/hudson/plugins/emailext/templates">documentación del plugin en GitHub</a>. Este template es un <strong>HTML el cual puedes editar su contenido</strong>, incluyendo titulo del proyecto, una imagen, etc. <img src="/images/IC-Jenkins-PlugIn-Email-Ext_04.jpg" alt="Screenshot 4" /></p></li>
+<li><p>Añade en una tarea de Jenkins, un paso al finalizar, usando Email notification. <img src="/images/IC-Jenkins-PlugIn-Email-Ext_05.jpg" alt="Screenshot 5" /></p></li>
+<li><p>Ejecuta tu tarea y verifica el correo recibido. <img src="/images/IC-Jenkins-PlugIn-Email-Ext_06.jpg" alt="Screenshot 6" /></p></li>
+</ol>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Inyección De Métodos Por Categorías Y TimeCategory]]></title>
+    <link href="http://makingdevs.github.io/2014/09/16/inyeccion-de-metodos-por-categorias-y-timecategory/"/>
+    <updated>2014-09-16T18:55:30-05:00</updated>
+    <id>http://makingdevs.github.io/2014/09/16/inyeccion-de-metodos-por-categorias-y-timecategory</id>
+    <content type="html"><![CDATA[<h2>Acerca de las categorías</h2>
+
+<p>En Groovy se pueden inyectar métodos de algunas formas, uno de ellos es a través del uso de categorías, la cual nos da inyección temporal y controlada de dichos elementos. Para hacerlo las clases que son categorías deben de cumplir con cierta estructura:</p>
+
+<ul>
+<li>Los métodos de la clase deben ser definidos como estáticos</li>
+<li>El primer argumento de dicho método define el tipo sobre el cual se inyectarían los nuevos métodos</li>
+<li>Deben de ser usados dentro del alcance de un closure con ayuda de la palabra reservada <code>use</code></li>
+</ul>
+
+
+<!-- more -->
+
+
+<p>Un ejemplo podría ser el siguiente:</p>
+
+<pre><code class="groovy">    class NameUtil{
+        static prettify(String name){
+            name.trim().split(' ').grep { it.size() }*.capitalize().join(' ')
+        }
+    }
+
+    use NameUtil, {
+        println "  josé   juan    reyes    zuñiga   ".prettify()
+    }
+</code></pre>
+
+<p>Adicionalmente, podemos crear dicha inyección de métodos con ayuda de la anotación <code>@Category</code>, que prácticamente nos facilita a que cualquier clase pueda ser usada como categoría, pues no necesariamente los métodos tiene que ser estáticos y el contexto del argumento para la inyección es el objeto <code>this</code> en donde se esté intentando usar.</p>
+
+<h2>Uso de GroovyTime</h2>
+
+<p>La clase <code>TimeCategory</code> es una clase que tiene una serie de métodos de conveniencia para el manejo del tiempo, formando así un DSL, con el que podemos operar. Y con ayuda de la clase <code>Duration</code> complementamos algunas operaciones que se pueden realizar en el contexto de los objetos que estemos usando.</p>
+
+<pre><code class="groovy">    import groovy.time.TimeCategory
+
+    use ( TimeCategory ) {
+        println 2.hours.ago
+        println 30.minutes.from // TimeDuration
+        println 30.minutes.from.now
+        println 40.minutes + 30.minutes.from.now
+        println 30.minutes.ago
+
+        def today = new Date()
+        println today - 3.years
+        println today + 4.weeks
+        println today + 90.minutes
+    }
+</code></pre>
+
+<p>Para que consideres el conjunto de operaciones que tienes disponibles te recomendamos visitar la documentación de <a href="http://groovy.codehaus.org/api/groovy/time/TimeCategory.html">TimeCategory</a> y <a href="http://groovy.codehaus.org/api/groovy/time/Duration.html">Duration</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Lectura De Correo Con Apache Camel + Groovy]]></title>
+    <link href="http://makingdevs.github.io/2014/08/26/lectura-de-correo-con-apache-camel-plus-groovy/"/>
+    <updated>2014-08-26T18:29:26-05:00</updated>
+    <id>http://makingdevs.github.io/2014/08/26/lectura-de-correo-con-apache-camel-plus-groovy</id>
+    <content type="html"><![CDATA[<p>Hola a todos es un gusto contribuir al blog de makingdevs.com y mostrarles un poco de lo que es Apache Camel, para ellos hablaremos primero de su definición.</p>
+
+<p><a href="http://camel.apache.org/">Apache Camel</a> es un framework de integración de código abierto, basado en <a href="http://www.enterpriseintegrationpatterns.com/toc.html">Enterprise Integration Patterns (Patrones de Integración Empresarial)</a>. Camel nos permite definir las reglas de enrutamiento o mediación con ayuda de un lenguaje especifico (DSL), incluyendo un API basada en Java o mediante una configuración XML. El uso de un lenguaje específico del dominio significa que Apache Camel es capaz de soportar un comportamiento automático de las reglas de ruteo en un entorno de desarrollo integrado usando código Java sin gran cantidad de archivos de configuración XML.</p>
+
+<!-- more -->
+
+
+<p>Con ayuda de camel y Mail Component (componente de e-mail de Camel) realize un script para la lectura de un correo Gmail, filtrando el procesamiento de los mismo por su subject y escupiendo el contenido a un endPoint de log.</p>
+
+<p>Pero si son curiosos ustedes se preguntaran <strong>¿Que es un endPoint?</strong>. Un endpoint es la interface a través de la cual los sistemas externos pueden enviar y recibir mensajes, permitiendo así la integración de sistemas en Camel. La función de un endpoint es crear productores y consumidores, lo que nos permite usar este endpoint como to y from dentro de una ruta Camel. Asi se denota un endpoint URIs siguiendo el siguiente formato: <strong>[componente]:[contexto]?[opciones]</strong>.</p>
+
+<h3>Producers y Consumers</h3>
+
+<p>Un productor es el encargado de proveer los mensajes, siendo el puente de comunicación con el sistema externo, no procesa la información solo provee el mensaje, en este ejemplo el correo es el productor. Un consumidor es el encargado de recibir el mensaje que el productor obtiene y así procesar el mensaje o inclusive partir dicho mensaje para que sea procesado por otro consumidor. Bueno después de una pequeña introducción a Camel les muestro mi script en la cual hago lectura del correo filtro los mensajes por su subject y los arrojo a un log y no solo puede ser un log gracias a camel este puede ser un bean, FTP, intancia de amazon, un archivo, <a href="http://camel.apache.org/components.html">casi cualquier cosa</a>. Nota necesitamos las dependencias de camel core y camel mail para el siguiente ejemplo:</p>
+
+<pre><code class="groovy">@Grab(group='org.apache.camel', module='camel-core', version='1.6.0')
+@Grab(group='org.apache.camel', module='camel-mail', version='1.6.0')
+
+import org.apache.camel.impl.DefaultCamelContext
+import org.apache.camel.builder.RouteBuilder
+
+def camelContext = new DefaultCamelContext()
+camelContext.addRoutes(new RouteBuilder() {
+  def void configure() {
+    from("imaps://imap.gmail.com?username=user"
+    + "&amp;password=password"
+    + "&amp;deleteProcessedMessages=false"
+    + "&amp;processOnlyUnseenMessages=true"
+    + "&amp;consumer.delay=6000")
+    .filter {it.in.headers.subject.contains('camel')}
+    .to("log:groovymail?showAll=true&amp;multiline=true")
+  }
+})
+camelContext.start()
+
+addShutdownHook{ camelContext.stop() }
+synchronized(this){ this.wait() }
+</code></pre>
+
+<p>Notaran que al final del script hay una declaración <code>camelContext.start()</code>. El <em>CamelContext</em> representa una sola base de reglas de enrutamiento Camel. Se utiliza el CamelContext de una manera similar al ApplicationContext. Y asi tenemos un pequeño ejemplo de lectura de correo con ayuda de Camel.</p>
+
+<p>Como vemos Camel nos permite integrar sistemas muy facilmente. Espero les agradece este pequeño articulo y les sea de gran ayuda, dudas y comentarios son bienvenidas. Salu2</p>
+]]></content>
+  </entry>
+  
+</feed>
