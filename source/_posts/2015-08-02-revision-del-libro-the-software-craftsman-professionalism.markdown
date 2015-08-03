@@ -14,6 +14,7 @@ categories:
 Libro que al igual que [*The Pragmatic Programmer: From Journeyman to Master*][1] se ganó estar en mis libros de cabecera, y se ha ganado un lugar muy especial en mi librero.
 
 El escritor, y desarrollador de toda la vida [*Sandro Mancuso*][2], plasma muy bien la idea que el tiene acerca de lo que todo desarrollador de software, y en mi opinión personal lo que debería buscar todo desarrollador, para cambiar su entorno de trabajo y ayudarnos a todos (porque estamos en el mismo barco) a cambiar la mentalidad de los clientes, de que no somos la clase de _persona/profesional_ que la mayor parte del mundo cree que somos:
+<!-- more -->
 
   1. Unos micos tirando lineas de código a diestra y siniestra, y haciendo el código lo más ilegible posible para que nada ni nadie pueda entenderlo
   2. Unos personajes que se sientan en el cuarto más oscuro del sótano de la empresa y que nadie conoce (usualmente cuentan leyendas de que terror de ellos)
