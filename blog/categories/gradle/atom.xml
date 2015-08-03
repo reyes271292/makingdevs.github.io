@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Gradle | Blog de MakingDevs]]></title>
+  <link href="http://blog.makingdevs.com/blog/categories/gradle/atom.xml" rel="self"/>
+  <link href="http://blog.makingdevs.com/"/>
+  <updated>2015-08-02T20:51:06-05:00</updated>
+  <id>http://blog.makingdevs.com/</id>
+  <author>
+    <name><![CDATA[MakingDevs]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Hot Deployment en Gradle]]></title>
+    <link href="http://blog.makingdevs.com/2015/07/26/hot-deployment-en-gradle/"/>
+    <updated>2015-07-26T23:19:13-05:00</updated>
+    <id>http://blog.makingdevs.com/2015/07/26/hot-deployment-en-gradle</id>
+    <content type="html"><![CDATA[<p>Durante un tiempo estuve buscando de la forma de tener una aplicación web con Gradle y tener características como el hot deploy, Grails lo tiene y viendólo de forma interna usa un elemento de nombre <a href="https://github.com/spring-projects/spring-loaded" title="springloaded">SpringLoaded</a>.</p>
+
+<p>Después me di cuenta que frameworks como <a href="https://github.com/spring-projects/spring-loaded" title="dropwizard">Dropwizard</a> lo usan, y que incluso SpringBoot a través del uso del CLI también, investigando un poco más al respecto y por la necesidad de tenerlo listo para algunos proyectos encontré <a href="http://www.cholick.com/entry/show/280" title="tomcat">un artículo</a> en donde explica como ponerlo en acción usando propiamente <a href="https://github.com/spring-projects/spring-loaded" title="dropwizard">Dropwizard</a>. Fue un buen acercamiento, el problema es el siguiente bloque de código en configuración de gradle:</p>
+
+<!-- more -->
+
+
+<pre><code class="groovy">run {
+  args = ['server', 'app.yaml']
+  jvmArgs = ["-javaagent:${new File("$buildDir/agent/springloaded-${springloadedVersion}.jar").absolutePath}", '-noverify']
+}
+</code></pre>
+
+<p>En donde, el atributo <code>jvmArgs</code> es sólo aplicable a tareas del tipo <code>JavaExec</code>, más específico, que implementan <code>JavaExecSpec</code> o <code>JavaForkOptions</code>. Es aquí en donde <a href="https://github.com/bmuschko/gradle-tomcat-plugin" title="tomcat">el plugin de tomcat</a> que se puede encontrar para Gradle tiene el problema, pues su tarea no lo hace.</p>
+
+<p>La combinación se haría en conjunto con un plugin de gradle, <a href="https://github.com/bluepapa32/gradle-watch-plugin" title="gradle watch">el watch</a>, el actúa con cada cambio en la aplicación realizando las tareas que se le digan. Sin embargo, lo que encontré funcionaba para la cmbinación de SpringBooy e IntelliJ Idea, lo cual no veía mal, pero no era mi caso. De cualquier forma pongo disponible la configuración que independiente me sirvió para hacer un hot deploy usando ambos elementos:</p>
+
+<pre><code class="groovy">apply plugin: 'groovy'
+apply plugin: 'spring-boot'
+apply plugin: 'com.bluepapa32.watch'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+ext {
+  springLoadedVersion = '1.2.1.RELEASE'
+}
+
+mainClassName='com.makingdevs.Application'
+
+repositories {
+  mavenCentral()
+  maven {
+    url "https://code.lds.org/nexus/content/groups/main-repo"
+  }
+}
+
+dependencies {
+  compile("org.springframework.boot:spring-boot-starter-web")
+  compile 'org.codehaus.groovy:groovy-all:2.4.3'
+}
+
+buildscript {
+  repositories {
+    mavenCentral()
+    jcenter()
+  }
+  dependencies {
+    classpath "org.springframework.boot:spring-boot-gradle-plugin:1.2.4.RELEASE"
+    classpath 'org.springframework:springloaded:1.2.0.RELEASE'
+    classpath 'com.bluepapa32:gradle-watch-plugin:0.1.5'
+  }
+}
+
+jar {
+  baseName = 'meerkat-mymapmanager'
+  version =  '0.1.0'
+}
+
+compileGroovy {
+  //enable compilation in a separate daemon process
+  options.fork = true
+}
+
+watch {
+  groovy {
+    files files('src/main/groovy')
+    tasks 'compileGroovy'
+  }
+}
+</code></pre>
+
+<p>Al final del día, lo que encontre fue <a href="http://akhikhl.github.io/gretty-doc/index.html" title="gretty">el plugin de Gretty</a>, con el que fácilmente podemos usar un contenedor de Tomcat o Jetty y tener disponible el Hot deploy, creo que tiene algunos detalles de rendimiento pero es útil. Finalmente la configuración se reduce mucho y hay varias tareas disponibles, entre ellas <code>appRun</code>, que es la que levanta el elemento configuraco y lo dijo listo para los cambios:</p>
+
+<pre><code class="groovy">// Using the new mechanism to include plugins
+plugins {
+  id 'groovy'
+  id 'war'
+  id "org.akhikhl.gretty" version "1.2.4"
+}
+
+repositories {
+  mavenCentral()
+  jcenter()
+}
+
+dependencies {
+  compile 'org.codehaus.groovy:groovy-all:2.3.4'
+}
+
+gretty {
+  // 'jetty7', 'jetty8', 'jetty9', 'tomcat7', 'tomcat8'
+  servletContainer = 'tomcat7'
+  httpPort = 9091
+}
+</code></pre>
+
+<p>Creo que nos servirá bien un rato para las cosas que tenemos que hcaer, por que incluso soporta SpringBoot.</p>
+]]></content>
+  </entry>
+  
+</feed>
