@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: Revisión | Blog de MakingDevs]]></title>
-  <link href="http://blog.makingdevs.com/blog/categories/revision/atom.xml" rel="self"/>
-  <link href="http://blog.makingdevs.com/"/>
-  <updated>2015-08-02T20:58:21-05:00</updated>
-  <id>http://blog.makingdevs.com/</id>
+  <link href="http://makingdevs.github.io/blog/categories/revision/atom.xml" rel="self"/>
+  <link href="http://makingdevs.github.io/"/>
+  <updated>2015-08-02T21:01:43-05:00</updated>
+  <id>http://makingdevs.github.io/</id>
   <author>
     <name><![CDATA[MakingDevs]]></name>
     
@@ -15,12 +15,15 @@
   
   <entry>
     <title type="html"><![CDATA[Revisión Del Libro - the Software Craftsman: Professionalism]]></title>
-    <link href="http://blog.makingdevs.com/2015/08/02/revision-del-libro-the-software-craftsman-professionalism/"/>
+    <link href="http://makingdevs.github.io/2015/08/02/revision-del-libro-the-software-craftsman-professionalism/"/>
     <updated>2015-08-02T18:44:42-05:00</updated>
-    <id>http://blog.makingdevs.com/2015/08/02/revision-del-libro-the-software-craftsman-professionalism</id>
+    <id>http://makingdevs.github.io/2015/08/02/revision-del-libro-the-software-craftsman-professionalism</id>
     <content type="html"><![CDATA[<p>Libro que al igual que <a href="https://pragprog.com/the-pragmatic-programmer" title="the-pragmatic-programmer"><em>The Pragmatic Programmer: From Journeyman to Master</em></a> se ganó estar en mis libros de cabecera, y se ha ganado un lugar muy especial en mi librero.</p>
 
 <p>El escritor, y desarrollador de toda la vida <a href="https://twitter.com/sandromancuso" title="sandromancuso"><em>Sandro Mancuso</em></a>, plasma muy bien la idea que el tiene acerca de lo que todo desarrollador de software, y en mi opinión personal lo que debería buscar todo desarrollador, para cambiar su entorno de trabajo y ayudarnos a todos (porque estamos en el mismo barco) a cambiar la mentalidad de los clientes, de que no somos la clase de <em>persona/profesional</em> que la mayor parte del mundo cree que somos:</p>
+
+<!-- more -->
+
 
 <ol>
 <li>Unos micos tirando lineas de código a diestra y siniestra, y haciendo el código lo más ilegible posible para que nada ni nadie pueda entenderlo</li>

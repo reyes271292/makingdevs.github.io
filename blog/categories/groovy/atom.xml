@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: Groovy | Blog de MakingDevs]]></title>
-  <link href="http://blog.makingdevs.com/blog/categories/groovy/atom.xml" rel="self"/>
-  <link href="http://blog.makingdevs.com/"/>
-  <updated>2015-08-02T20:58:21-05:00</updated>
-  <id>http://blog.makingdevs.com/</id>
+  <link href="http://makingdevs.github.io/blog/categories/groovy/atom.xml" rel="self"/>
+  <link href="http://makingdevs.github.io/"/>
+  <updated>2015-08-02T21:01:43-05:00</updated>
+  <id>http://makingdevs.github.io/</id>
   <author>
     <name><![CDATA[MakingDevs]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Hot Deployment en Gradle]]></title>
-    <link href="http://blog.makingdevs.com/2015/07/26/hot-deployment-en-gradle/"/>
+    <link href="http://makingdevs.github.io/2015/07/26/hot-deployment-en-gradle/"/>
     <updated>2015-07-26T23:19:13-05:00</updated>
-    <id>http://blog.makingdevs.com/2015/07/26/hot-deployment-en-gradle</id>
+    <id>http://makingdevs.github.io/2015/07/26/hot-deployment-en-gradle</id>
     <content type="html"><![CDATA[<p>Durante un tiempo estuve buscando de la forma de tener una aplicación web con Gradle y tener características como el hot deploy, Grails lo tiene y viendólo de forma interna usa un elemento de nombre <a href="https://github.com/spring-projects/spring-loaded" title="springloaded">SpringLoaded</a>.</p>
 
 <p>Después me di cuenta que frameworks como <a href="https://github.com/spring-projects/spring-loaded" title="dropwizard">Dropwizard</a> lo usan, y que incluso SpringBoot a través del uso del CLI también, investigando un poco más al respecto y por la necesidad de tenerlo listo para algunos proyectos encontré <a href="http://www.cholick.com/entry/show/280" title="tomcat">un artículo</a> en donde explica como ponerlo en acción usando propiamente <a href="https://github.com/spring-projects/spring-loaded" title="dropwizard">Dropwizard</a>. Fue un buen acercamiento, el problema es el siguiente bloque de código en configuración de gradle:</p>
@@ -121,9 +121,9 @@ gretty {
   
   <entry>
     <title type="html"><![CDATA[Borrado Batch en Grails]]></title>
-    <link href="http://blog.makingdevs.com/2015/05/01/borrado-batch-en-grails/"/>
+    <link href="http://makingdevs.github.io/2015/05/01/borrado-batch-en-grails/"/>
     <updated>2015-05-01T20:58:30-05:00</updated>
-    <id>http://blog.makingdevs.com/2015/05/01/borrado-batch-en-grails</id>
+    <id>http://makingdevs.github.io/2015/05/01/borrado-batch-en-grails</id>
     <content type="html"><![CDATA[<p>En esta ocasión les quiero compartir la solución a un problema que tuve al borrar una colección de objetos en grails y con el GORM, si bien podría hacerlo con HQL o con SQL usando las bondades de Hibernate me gusto más el acercamiento que les quiero presentar.</p>
 
 <!-- more -->
@@ -199,9 +199,9 @@ criteria.deleteAll()
   
   <entry>
     <title type="html"><![CDATA[Inyección De Métodos Por Categorías Y TimeCategory]]></title>
-    <link href="http://blog.makingdevs.com/2014/09/16/inyeccion-de-metodos-por-categorias-y-timecategory/"/>
+    <link href="http://makingdevs.github.io/2014/09/16/inyeccion-de-metodos-por-categorias-y-timecategory/"/>
     <updated>2014-09-16T18:55:30-05:00</updated>
-    <id>http://blog.makingdevs.com/2014/09/16/inyeccion-de-metodos-por-categorias-y-timecategory</id>
+    <id>http://makingdevs.github.io/2014/09/16/inyeccion-de-metodos-por-categorias-y-timecategory</id>
     <content type="html"><![CDATA[<h2>Acerca de las categorías</h2>
 
 <p>En Groovy se pueden inyectar métodos de algunas formas, uno de ellos es a través del uso de categorías, la cual nos da inyección temporal y controlada de dichos elementos. Para hacerlo las clases que son categorías deben de cumplir con cierta estructura:</p>

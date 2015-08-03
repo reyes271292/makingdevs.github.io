@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: Eip | Blog de MakingDevs]]></title>
-  <link href="http://blog.makingdevs.com/blog/categories/eip/atom.xml" rel="self"/>
-  <link href="http://blog.makingdevs.com/"/>
-  <updated>2015-08-02T20:58:21-05:00</updated>
-  <id>http://blog.makingdevs.com/</id>
+  <link href="http://makingdevs.github.io/blog/categories/eip/atom.xml" rel="self"/>
+  <link href="http://makingdevs.github.io/"/>
+  <updated>2015-08-02T21:01:43-05:00</updated>
+  <id>http://makingdevs.github.io/</id>
   <author>
     <name><![CDATA[MakingDevs]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Clusterizacion Con Camel]]></title>
-    <link href="http://blog.makingdevs.com/2015/04/07/clusterizacion-con-camel/"/>
+    <link href="http://makingdevs.github.io/2015/04/07/clusterizacion-con-camel/"/>
     <updated>2015-04-07T19:56:54-05:00</updated>
-    <id>http://blog.makingdevs.com/2015/04/07/clusterizacion-con-camel</id>
+    <id>http://makingdevs.github.io/2015/04/07/clusterizacion-con-camel</id>
     <content type="html"><![CDATA[<p>Camel ofrece distintas soluciones para ser escalado o para distribuir la carga en diferentes instancias, la soluciones que ofrece dependerá de como se encuentra nuestra infraestructura ( y configuración).</p>
 
 <ul>

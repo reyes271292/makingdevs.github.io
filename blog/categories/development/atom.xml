@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: Development | Blog de MakingDevs]]></title>
-  <link href="http://blog.makingdevs.com/blog/categories/development/atom.xml" rel="self"/>
-  <link href="http://blog.makingdevs.com/"/>
-  <updated>2015-08-02T20:58:21-05:00</updated>
-  <id>http://blog.makingdevs.com/</id>
+  <link href="http://makingdevs.github.io/blog/categories/development/atom.xml" rel="self"/>
+  <link href="http://makingdevs.github.io/"/>
+  <updated>2015-08-02T21:01:43-05:00</updated>
+  <id>http://makingdevs.github.io/</id>
   <author>
     <name><![CDATA[MakingDevs]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Borrado Batch en Grails]]></title>
-    <link href="http://blog.makingdevs.com/2015/05/01/borrado-batch-en-grails/"/>
+    <link href="http://makingdevs.github.io/2015/05/01/borrado-batch-en-grails/"/>
     <updated>2015-05-01T20:58:30-05:00</updated>
-    <id>http://blog.makingdevs.com/2015/05/01/borrado-batch-en-grails</id>
+    <id>http://makingdevs.github.io/2015/05/01/borrado-batch-en-grails</id>
     <content type="html"><![CDATA[<p>En esta ocasión les quiero compartir la solución a un problema que tuve al borrar una colección de objetos en grails y con el GORM, si bien podría hacerlo con HQL o con SQL usando las bondades de Hibernate me gusto más el acercamiento que les quiero presentar.</p>
 
 <!-- more -->
@@ -93,9 +93,9 @@ criteria.deleteAll()
   
   <entry>
     <title type="html"><![CDATA[Clusterizacion Con Camel]]></title>
-    <link href="http://blog.makingdevs.com/2015/04/07/clusterizacion-con-camel/"/>
+    <link href="http://makingdevs.github.io/2015/04/07/clusterizacion-con-camel/"/>
     <updated>2015-04-07T19:56:54-05:00</updated>
-    <id>http://blog.makingdevs.com/2015/04/07/clusterizacion-con-camel</id>
+    <id>http://makingdevs.github.io/2015/04/07/clusterizacion-con-camel</id>
     <content type="html"><![CDATA[<p>Camel ofrece distintas soluciones para ser escalado o para distribuir la carga en diferentes instancias, la soluciones que ofrece dependerá de como se encuentra nuestra infraestructura ( y configuración).</p>
 
 <ul>
@@ -169,9 +169,9 @@ beans = {
   
   <entry>
     <title type="html"><![CDATA[Personalizar Notificaciones De Correo en Jenkins]]></title>
-    <link href="http://blog.makingdevs.com/2014/11/06/personalizar-notificaciones-de-correo-en-jenkins/"/>
+    <link href="http://makingdevs.github.io/2014/11/06/personalizar-notificaciones-de-correo-en-jenkins/"/>
     <updated>2014-11-06T18:08:56-06:00</updated>
-    <id>http://blog.makingdevs.com/2014/11/06/personalizar-notificaciones-de-correo-en-jenkins</id>
+    <id>http://makingdevs.github.io/2014/11/06/personalizar-notificaciones-de-correo-en-jenkins</id>
     <content type="html"><![CDATA[<p>Las <strong>notificaciones</strong> son básicas para la correcta comunicación de los involucrados de nuestros proyectos como: <em>Stakeholders/ Key Users / Developers / Clientes / Testers</em>.</p>
 
 <p>Por esta razón te recomiendo personalizar las notificaciones por defecto de <strong>Jenkins</strong>.</p>
@@ -197,9 +197,9 @@ beans = {
   
   <entry>
     <title type="html"><![CDATA[Inyección De Métodos Por Categorías Y TimeCategory]]></title>
-    <link href="http://blog.makingdevs.com/2014/09/16/inyeccion-de-metodos-por-categorias-y-timecategory/"/>
+    <link href="http://makingdevs.github.io/2014/09/16/inyeccion-de-metodos-por-categorias-y-timecategory/"/>
     <updated>2014-09-16T18:55:30-05:00</updated>
-    <id>http://blog.makingdevs.com/2014/09/16/inyeccion-de-metodos-por-categorias-y-timecategory</id>
+    <id>http://makingdevs.github.io/2014/09/16/inyeccion-de-metodos-por-categorias-y-timecategory</id>
     <content type="html"><![CDATA[<h2>Acerca de las categorías</h2>
 
 <p>En Groovy se pueden inyectar métodos de algunas formas, uno de ellos es a través del uso de categorías, la cual nos da inyección temporal y controlada de dichos elementos. Para hacerlo las clases que son categorías deben de cumplir con cierta estructura:</p>
@@ -255,9 +255,9 @@ beans = {
   
   <entry>
     <title type="html"><![CDATA[Lectura De Correo Con Apache Camel + Groovy]]></title>
-    <link href="http://blog.makingdevs.com/2014/08/26/lectura-de-correo-con-apache-camel-plus-groovy/"/>
+    <link href="http://makingdevs.github.io/2014/08/26/lectura-de-correo-con-apache-camel-plus-groovy/"/>
     <updated>2014-08-26T18:29:26-05:00</updated>
-    <id>http://blog.makingdevs.com/2014/08/26/lectura-de-correo-con-apache-camel-plus-groovy</id>
+    <id>http://makingdevs.github.io/2014/08/26/lectura-de-correo-con-apache-camel-plus-groovy</id>
     <content type="html"><![CDATA[<p>Hola a todos es un gusto contribuir al blog de makingdevs.com y mostrarles un poco de lo que es Apache Camel, para ellos hablaremos primero de su definición.</p>
 
 <p><a href="http://camel.apache.org/">Apache Camel</a> es un framework de integración de código abierto, basado en <a href="http://www.enterpriseintegrationpatterns.com/toc.html">Enterprise Integration Patterns (Patrones de Integración Empresarial)</a>. Camel nos permite definir las reglas de enrutamiento o mediación con ayuda de un lenguaje especifico (DSL), incluyendo un API basada en Java o mediante una configuración XML. El uso de un lenguaje específico del dominio significa que Apache Camel es capaz de soportar un comportamiento automático de las reglas de ruteo en un entorno de desarrollo integrado usando código Java sin gran cantidad de archivos de configuración XML.</p>
