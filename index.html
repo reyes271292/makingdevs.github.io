@@ -97,102 +97,12 @@
 
 <p>El caso muy puntual que tuve que resolver fue subir un archivo y despúes borrarlo de un bucket muy particular. En este ejemplo muestro primero como listar todos los buckets disponibles en una cuenta de S3.</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="nd">@Grapes</span><span class="o">(</span>
-</span><span class='line'>    <span class="nd">@Grab</span><span class="o">(</span><span class="n">group</span><span class="o">=</span><span class="s1">&#39;net.java.dev.jets3t&#39;</span><span class="o">,</span> <span class="n">module</span><span class="o">=</span><span class="s1">&#39;jets3t&#39;</span><span class="o">,</span> <span class="n">version</span><span class="o">=</span><span class="s1">&#39;0.9.3&#39;</span><span class="o">)</span>
-</span><span class='line'><span class="o">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="kn">import</span> <span class="nn">org.jets3t.service.security.*</span>
-</span><span class='line'><span class="kn">import</span> <span class="nn">org.jets3t.service.*</span>
-</span><span class='line'><span class="kn">import</span> <span class="nn">org.jets3t.service.impl.rest.httpclient.*</span>
-</span><span class='line'><span class="kn">import</span> <span class="nn">org.jets3t.service.model.*</span>
-</span><span class='line'><span class="kn">import</span> <span class="nn">org.jets3t.service.acl.*</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">String</span> <span class="n">awsAccessKey</span> <span class="o">=</span> <span class="s2">&quot;YOURAWSACCESSKEY&quot;</span>
-</span><span class='line'><span class="n">String</span> <span class="n">awsSecretKey</span> <span class="o">=</span> <span class="s2">&quot;YOURAWSSECRETKEY&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">AWSCredentials</span> <span class="n">awsCredentials</span> <span class="o">=</span> <span class="k">new</span> <span class="n">AWSCredentials</span><span class="o">(</span><span class="n">awsAccessKey</span><span class="o">,</span> <span class="n">awsSecretKey</span><span class="o">)</span>
-</span><span class='line'><span class="n">S3Service</span> <span class="n">s3Service</span> <span class="o">=</span> <span class="k">new</span> <span class="n">RestS3Service</span><span class="o">(</span><span class="n">awsCredentials</span><span class="o">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">S3Bucket</span><span class="o">[]</span> <span class="n">myBuckets</span> <span class="o">=</span> <span class="n">s3Service</span><span class="o">.</span><span class="na">listAllBuckets</span><span class="o">()</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Despúes una vez con todos los buckets, podemos listar los archivos contenidos dentro de uno muy particular.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">String</span> <span class="n">bucletName</span> <span class="o">=</span> <span class="s2">&quot;makingdevs-bucket&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">bucket</span> <span class="o">=</span> <span class="n">myBuckets</span><span class="o">.</span><span class="na">find</span> <span class="o">{</span> <span class="n">it</span><span class="o">.</span><span class="na">name</span><span class="o">==</span><span class="n">bucketName</span> <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">s3Objects</span> <span class="o">=</span> <span class="n">s3Service</span><span class="o">.</span><span class="na">listObjects</span><span class="o">(</span><span class="n">bucket</span><span class="o">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Finalmente, podemos subir un archivo en particular hacia el bucket que deseamos.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">file</span> <span class="o">=</span> <span class="k">new</span> <span class="n">File</span><span class="o">(</span><span class="s2">&quot;/some/file/in/your/filesystem.ext&quot;</span><span class="o">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">S3Object</span> <span class="n">s3Object</span> <span class="o">=</span> <span class="k">new</span> <span class="n">S3Object</span><span class="o">()</span>
-</span><span class='line'><span class="n">s3Object</span><span class="o">.</span><span class="na">with</span> <span class="o">{</span>
-</span><span class='line'>  <span class="n">acl</span> <span class="n">AccessControlList</span><span class="o">.</span><span class="na">REST_CANNED_PUBLIC_READ</span>
-</span><span class='line'>  <span class="n">contentLength</span> <span class="n">file</span><span class="o">.</span><span class="na">length</span><span class="o">()</span>
-</span><span class='line'>  <span class="n">contentType</span> <span class="n">file</span><span class="o">.</span><span class="na">toURL</span><span class="o">().</span><span class="na">openConnection</span><span class="o">().</span><span class="na">contentType</span>
-</span><span class='line'>  <span class="n">dataInputFile</span> <span class="n">file</span>
-</span><span class='line'>  <span class="n">key</span> <span class="n">file</span><span class="o">.</span><span class="na">name</span>
-</span><span class='line'>  <span class="n">bucketName</span> <span class="n">bucket</span><span class="o">.</span><span class="na">getName</span><span class="o">()</span> <span class="c1">// we use our previous bucket</span>
-</span><span class='line'><span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">s3Service</span><span class="o">.</span><span class="na">putObject</span> <span class="n">bucket</span><span class="o">,</span> <span class="n">s3Object</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Una vez que llamamos al servicio <code>s3Service</code> el archivo queda colocado en el bucket. Y finalmente si deseamos borrarlo podemos usar <code>s3Service.deleteObject s3Bucket, s3Object.key</code>, en donde sólo mandamos el objeto del bucket y el <em>key</em> del objeto que deseamos borrar.</p>
-
-<p>Finalmente, me gustaría detallar dos líneas que en mi opinión son relevantes:</p>
-
-<ul>
-<li>La parte de <code>acl AccessControlList.REST_CANNED_PUBLIC_READ</code>, la cual indica que el archivo que se sube es de acceso público para quién quiera que tenga la URL y sólo el propietario puede modificar, existen otras constantes que dan combinaciones de permisos distintos en <a href="http://www.jets3t.org/api/org/jets3t/service/acl/AccessControlList.html">la documentación de JetS3t</a>.</li>
-<li>La línea con <code>contentType file.toURL().openConnection().contentType</code> que es una forma de obtener el <em>content type</em> sin la necesidad de una biblioteca adicional, sólo con el uso convencional de las clases Java con las que ya contamos. Les recomiendo tomar cualquier archivo y probar sólo esa línea.</li>
-</ul>
-
-
-<p>Si bien hay más cosas que se pueden hacer, les sugiero se den una vuelta por la documentación de esta biblioteca.</p>
 </div>
   
+  
+    <footer>
+      <a rel="full-article" href="/2015/08/13/amazon-s3-y-groovy/">Read on &rarr;</a>
+    </footer>
   
 
 
