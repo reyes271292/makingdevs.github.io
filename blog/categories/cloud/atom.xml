@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Cloud | Blog de MakingDevs]]></title>
+  <link href="http://blog.makingdevs.com/blog/categories/cloud/atom.xml" rel="self"/>
+  <link href="http://blog.makingdevs.com/"/>
+  <updated>2015-08-16T22:35:34-05:00</updated>
+  <id>http://blog.makingdevs.com/</id>
+  <author>
+    <name><![CDATA[MakingDevs]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Amazon S3 Y Groovy]]></title>
+    <link href="http://blog.makingdevs.com/2015/08/13/amazon-s3-y-groovy/"/>
+    <updated>2015-08-13T22:47:08-05:00</updated>
+    <id>http://blog.makingdevs.com/2015/08/13/amazon-s3-y-groovy</id>
+    <content type="html"><![CDATA[<p>En una de las tareas que realice recientemente, tuve la necesidad de transferir un par de archivos que obtuve de un endpoint(de la cual hablaré en otro post) hacia un Bucket de Amazon S3.</p>
+
+<p>La solución inmediata fue usar una biblioteca que encontré para Java de nombre <a href="http://www.jets3t.org/">jets3t</a>, la cual, provee de un conjunto de herramientas muy simple para operar con Amazon S3, Cloud Front y Google Storage.</p>
+
+<p>El caso muy puntual que tuve que resolver fue subir un archivo y despúes borrarlo de un bucket muy particular. En este ejemplo muestro primero como listar todos los buckets disponibles en una cuenta de S3.</p>
+
+<pre><code class="groovy">@Grapes(
+    @Grab(group='net.java.dev.jets3t', module='jets3t', version='0.9.3')
+)
+
+import org.jets3t.service.security.*
+import org.jets3t.service.*
+import org.jets3t.service.impl.rest.httpclient.*
+import org.jets3t.service.model.*
+import org.jets3t.service.acl.*
+
+String awsAccessKey = "YOURAWSACCESSKEY"
+String awsSecretKey = "YOURAWSSECRETKEY"
+
+AWSCredentials awsCredentials = new AWSCredentials(awsAccessKey, awsSecretKey)
+S3Service s3Service = new RestS3Service(awsCredentials)
+
+S3Bucket[] myBuckets = s3Service.listAllBuckets()
+</code></pre>
+
+<p>Despúes una vez con todos los buckets, podemos listar los archivos contenidos dentro de uno muy particular.</p>
+
+<pre><code class="groovy">String bucletName = "makingdevs-bucket"
+
+bucket = myBuckets.find { it.name==bucketName }
+
+s3Objects = s3Service.listObjects(bucket)
+</code></pre>
+
+<p>Finalmente, podemos subir un archivo en particular hacia el bucket que deseamos.</p>
+
+<pre><code class="groovy">
+file = new File("/some/file/in/your/filesystem.ext")
+
+S3Object s3Object = new S3Object()
+s3Object.with {
+  acl AccessControlList.REST_CANNED_PUBLIC_READ
+  contentLength file.length()
+  contentType file.toURL().openConnection().contentType
+  dataInputFile file
+  key file.name
+  bucketName bucket.getName() // we use our previous bucket
+}
+
+s3Service.putObject bucket, s3Object
+</code></pre>
+
+<p>Una vez que llamamos al servicio <code>s3Service</code> el archivo queda colocado en el bucket. Y finalmente si deseamos borrarlo podemos usar <code>s3Service.deleteObject s3Bucket, s3Object.key</code>, en donde sólo mandamos el objeto del bucket y el <em>key</em> del objeto que deseamos borrar.</p>
+
+<p>Finalmente, me gustaría detallar dos líneas que en mi opinión son relevantes:</p>
+
+<ul>
+<li>La parte de <code>acl AccessControlList.REST_CANNED_PUBLIC_READ</code>, la cual indica que el archivo que se sube es de acceso público para quién quiera que tenga la URL y sólo el propietario puede modificar, existen otras constantes que dan combinaciones de permisos distintos en <a href="http://www.jets3t.org/api/org/jets3t/service/acl/AccessControlList.html">la documentación de JetS3t</a>.</li>
+<li>La línea con <code>contentType file.toURL().openConnection().contentType</code> que es una forma de obtener el <em>content type</em> sin la necesidad de una biblioteca adicional, sólo con el uso convencional de las clases Java con las que ya contamos. Les recomiendo tomar cualquier archivo y probar sólo esa línea.</li>
+</ul>
+
+
+<p>Si bien hay más cosas que se pueden hacer, les sugiero se den una vuelta por la documentación de esta biblioteca.</p>
+]]></content>
+  </entry>
+  
+</feed>
