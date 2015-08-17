@@ -97,8 +97,6 @@
 <!-- more -->
 
 
-
-
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
@@ -136,7 +134,7 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>Despúes, una vez con todos los buckets, podemos listar los archivos contenidos dentro de bucket muy particular.</p>
+<p>Despúes una vez con todos los buckets, podemos listar los archivos contenidos dentro de uno muy particular.</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -151,7 +149,7 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>Finalmente, podemos subir un archivo específico hacia el bucket que deseamos.</p>
+<p>Finalmente, podemos subir un archivo en particular hacia el bucket que deseamos.</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -170,12 +168,12 @@
 </span><span class='line'>
 </span><span class='line'><span class="n">S3Object</span> <span class="n">s3Object</span> <span class="o">=</span> <span class="k">new</span> <span class="n">S3Object</span><span class="o">()</span>
 </span><span class='line'><span class="n">s3Object</span><span class="o">.</span><span class="na">with</span> <span class="o">{</span>
-</span><span class='line'>  <span class="n">setAcl</span> <span class="n">AccessControlList</span><span class="o">.</span><span class="na">REST_CANNED_PUBLIC_READ</span>
-</span><span class='line'>  <span class="n">setContentLength</span> <span class="n">file</span><span class="o">.</span><span class="na">length</span><span class="o">()</span>
-</span><span class='line'>  <span class="n">setContentType</span> <span class="n">file</span><span class="o">.</span><span class="na">toURL</span><span class="o">().</span><span class="na">openConnection</span><span class="o">().</span><span class="na">contentType</span>
-</span><span class='line'>  <span class="n">setDataInputFile</span> <span class="n">file</span>
-</span><span class='line'>  <span class="n">setKey</span> <span class="n">file</span><span class="o">.</span><span class="na">name</span>
-</span><span class='line'>  <span class="n">setBucketName</span> <span class="n">bucket</span><span class="o">.</span><span class="na">getName</span><span class="o">()</span> <span class="c1">// we use our previous bucket</span>
+</span><span class='line'>  <span class="n">acl</span> <span class="n">AccessControlList</span><span class="o">.</span><span class="na">REST_CANNED_PUBLIC_READ</span>
+</span><span class='line'>  <span class="n">contentLength</span> <span class="n">file</span><span class="o">.</span><span class="na">length</span><span class="o">()</span>
+</span><span class='line'>  <span class="n">contentType</span> <span class="n">file</span><span class="o">.</span><span class="na">toURL</span><span class="o">().</span><span class="na">openConnection</span><span class="o">().</span><span class="na">contentType</span>
+</span><span class='line'>  <span class="n">dataInputFile</span> <span class="n">file</span>
+</span><span class='line'>  <span class="n">key</span> <span class="n">file</span><span class="o">.</span><span class="na">name</span>
+</span><span class='line'>  <span class="n">bucketName</span> <span class="n">bucket</span><span class="o">.</span><span class="na">getName</span><span class="o">()</span> <span class="c1">// we use our previous bucket</span>
 </span><span class='line'><span class="o">}</span>
 </span><span class='line'>
 </span><span class='line'><span class="n">s3Service</span><span class="o">.</span><span class="na">putObject</span> <span class="n">bucket</span><span class="o">,</span> <span class="n">s3Object</span>

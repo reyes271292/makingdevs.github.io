@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Groovy | Blog de MakingDevs]]></title>
   <link href="http://blog.makingdevs.com/blog/categories/groovy/atom.xml" rel="self"/>
   <link href="http://blog.makingdevs.com/"/>
-  <updated>2015-08-17T12:41:26-05:00</updated>
+  <updated>2015-08-16T22:41:13-05:00</updated>
   <id>http://blog.makingdevs.com/</id>
   <author>
     <name><![CDATA[MakingDevs]]></name>
@@ -46,7 +46,7 @@ S3Service s3Service = new RestS3Service(awsCredentials)
 S3Bucket[] myBuckets = s3Service.listAllBuckets()
 </code></pre>
 
-<p>Despúes, una vez con todos los buckets, podemos listar los archivos contenidos dentro de bucket muy particular.</p>
+<p>Despúes una vez con todos los buckets, podemos listar los archivos contenidos dentro de uno muy particular.</p>
 
 <pre><code class="groovy">String bucletName = "makingdevs-bucket"
 
@@ -55,19 +55,19 @@ bucket = myBuckets.find { it.name==bucketName }
 s3Objects = s3Service.listObjects(bucket)
 </code></pre>
 
-<p>Finalmente, podemos subir un archivo específico hacia el bucket que deseamos.</p>
+<p>Finalmente, podemos subir un archivo en particular hacia el bucket que deseamos.</p>
 
 <pre><code class="groovy">
 file = new File("/some/file/in/your/filesystem.ext")
 
 S3Object s3Object = new S3Object()
 s3Object.with {
-  setAcl AccessControlList.REST_CANNED_PUBLIC_READ
-  setContentLength file.length()
-  setContentType file.toURL().openConnection().contentType
-  setDataInputFile file
-  setKey file.name
-  setBucketName bucket.getName() // we use our previous bucket
+  acl AccessControlList.REST_CANNED_PUBLIC_READ
+  contentLength file.length()
+  contentType file.toURL().openConnection().contentType
+  dataInputFile file
+  key file.name
+  bucketName bucket.getName() // we use our previous bucket
 }
 
 s3Service.putObject bucket, s3Object
