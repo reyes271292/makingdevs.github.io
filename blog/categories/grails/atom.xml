@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: Grails | Blog de MakingDevs]]></title>
-  <link href="http://makingdevs.github.io/blog/categories/grails/atom.xml" rel="self"/>
-  <link href="http://makingdevs.github.io/"/>
-  <updated>2015-07-27T09:02:36-05:00</updated>
-  <id>http://makingdevs.github.io/</id>
+  <link href="http://blog.makingdevs.com/blog/categories/grails/atom.xml" rel="self"/>
+  <link href="http://blog.makingdevs.com/"/>
+  <updated>2015-08-17T12:38:09-05:00</updated>
+  <id>http://blog.makingdevs.com/</id>
   <author>
     <name><![CDATA[MakingDevs]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Borrado Batch en Grails]]></title>
-    <link href="http://makingdevs.github.io/2015/05/01/borrado-batch-en-grails/"/>
+    <link href="http://blog.makingdevs.com/2015/05/01/borrado-batch-en-grails/"/>
     <updated>2015-05-01T20:58:30-05:00</updated>
-    <id>http://makingdevs.github.io/2015/05/01/borrado-batch-en-grails</id>
+    <id>http://blog.makingdevs.com/2015/05/01/borrado-batch-en-grails</id>
     <content type="html"><![CDATA[<p>En esta ocasión les quiero compartir la solución a un problema que tuve al borrar una colección de objetos en grails y con el GORM, si bien podría hacerlo con HQL o con SQL usando las bondades de Hibernate me gusto más el acercamiento que les quiero presentar.</p>
 
 <!-- more -->

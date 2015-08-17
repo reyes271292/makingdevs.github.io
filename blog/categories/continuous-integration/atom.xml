@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: Continuous Integration | Blog de MakingDevs]]></title>
-  <link href="http://makingdevs.github.io/blog/categories/continuous-integration/atom.xml" rel="self"/>
-  <link href="http://makingdevs.github.io/"/>
-  <updated>2015-07-27T09:02:36-05:00</updated>
-  <id>http://makingdevs.github.io/</id>
+  <link href="http://blog.makingdevs.com/blog/categories/continuous-integration/atom.xml" rel="self"/>
+  <link href="http://blog.makingdevs.com/"/>
+  <updated>2015-08-17T12:38:09-05:00</updated>
+  <id>http://blog.makingdevs.com/</id>
   <author>
     <name><![CDATA[MakingDevs]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Personalizar Notificaciones De Correo en Jenkins]]></title>
-    <link href="http://makingdevs.github.io/2014/11/06/personalizar-notificaciones-de-correo-en-jenkins/"/>
+    <link href="http://blog.makingdevs.com/2014/11/06/personalizar-notificaciones-de-correo-en-jenkins/"/>
     <updated>2014-11-06T18:08:56-06:00</updated>
-    <id>http://makingdevs.github.io/2014/11/06/personalizar-notificaciones-de-correo-en-jenkins</id>
+    <id>http://blog.makingdevs.com/2014/11/06/personalizar-notificaciones-de-correo-en-jenkins</id>
     <content type="html"><![CDATA[<p>Las <strong>notificaciones</strong> son básicas para la correcta comunicación de los involucrados de nuestros proyectos como: <em>Stakeholders/ Key Users / Developers / Clientes / Testers</em>.</p>
 
 <p>Por esta razón te recomiendo personalizar las notificaciones por defecto de <strong>Jenkins</strong>.</p>
