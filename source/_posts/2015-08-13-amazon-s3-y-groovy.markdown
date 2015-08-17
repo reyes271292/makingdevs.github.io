@@ -15,6 +15,7 @@ La solución inmediata fue usar una biblioteca que encontré para Java de nombre
 
 El caso muy puntual que tuve que resolver fue subir un archivo y despúes borrarlo de un bucket muy particular. En este ejemplo muestro primero como listar todos los buckets disponibles en una cuenta de S3.
 
+<!-- more -->
 ```groovy
 @Grapes(
     @Grab(group='net.java.dev.jets3t', module='jets3t', version='0.9.3')
