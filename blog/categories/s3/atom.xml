@@ -4,7 +4,7 @@
   <title><![CDATA[Category: S3 | Blog de MakingDevs]]></title>
   <link href="http://blog.makingdevs.com/blog/categories/s3/atom.xml" rel="self"/>
   <link href="http://blog.makingdevs.com/"/>
-  <updated>2015-08-17T12:38:09-05:00</updated>
+  <updated>2015-08-17T12:41:26-05:00</updated>
   <id>http://blog.makingdevs.com/</id>
   <author>
     <name><![CDATA[MakingDevs]]></name>
@@ -23,6 +23,9 @@
 <p>La solución inmediata fue usar una biblioteca que encontré para Java de nombre <a href="http://www.jets3t.org/">jets3t</a>, la cual, provee de un conjunto de herramientas muy simple para operar con Amazon S3, Cloud Front y Google Storage.</p>
 
 <p>El caso muy puntual que tuve que resolver fue subir un archivo y despúes borrarlo de un bucket muy particular. En este ejemplo muestro primero como listar todos los buckets disponibles en una cuenta de S3.</p>
+
+<!-- more -->
+
 
 <pre><code class="groovy">@Grapes(
     @Grab(group='net.java.dev.jets3t', module='jets3t', version='0.9.3')
