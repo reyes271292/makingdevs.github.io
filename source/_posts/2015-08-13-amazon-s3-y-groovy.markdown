@@ -36,7 +36,7 @@ S3Service s3Service = new RestS3Service(awsCredentials)
 S3Bucket[] myBuckets = s3Service.listAllBuckets()
 ```
 
-Despúes una vez con todos los buckets, podemos listar los archivos contenidos dentro de uno muy particular.
+Despúes, una vez con todos los buckets, podemos listar los archivos contenidos dentro de bucket muy particular.
 
 ```groovy
 String bucletName = "makingdevs-bucket"
@@ -46,7 +46,7 @@ bucket = myBuckets.find { it.name==bucketName }
 s3Objects = s3Service.listObjects(bucket)
 ```
 
-Finalmente, podemos subir un archivo en particular hacia el bucket que deseamos.
+Finalmente, podemos subir un archivo específico hacia el bucket que deseamos.
 
 ```groovy
 
@@ -54,12 +54,12 @@ file = new File("/some/file/in/your/filesystem.ext")
 
 S3Object s3Object = new S3Object()
 s3Object.with {
-  acl AccessControlList.REST_CANNED_PUBLIC_READ
-  contentLength file.length()
-  contentType file.toURL().openConnection().contentType
-  dataInputFile file
-  key file.name
-  bucketName bucket.getName() // we use our previous bucket
+  setAcl AccessControlList.REST_CANNED_PUBLIC_READ
+  setContentLength file.length()
+  setContentType file.toURL().openConnection().contentType
+  setDataInputFile file
+  setKey file.name
+  setBucketName bucket.getName() // we use our previous bucket
 }
 
 s3Service.putObject bucket, s3Object
