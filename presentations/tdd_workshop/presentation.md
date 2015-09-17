@@ -1,5 +1,5 @@
 # TDD Workshop for great beginners
-<!-- .slide: data-background="images/bg2.jpg" -->
+<!-- .slide: data-background="images/rubik.jpg" -->
 
 
 
