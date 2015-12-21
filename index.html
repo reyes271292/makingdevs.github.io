@@ -9,7 +9,7 @@
   <meta name="author" content="MakingDevs">
 
   
-  <meta name="description" content="Las pruebas funcionales se utilizan para verificar que los flujos de una aplicación que se definen en los casos de uso o historias de usuario &hellip;">
+  <meta name="description" content="Una de las Herramientas que nos prove el framework Grails es el uso de su consola, una extension de la consola de groovy regular, esta consola nos &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -72,7 +72,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/2015/08/23/pruebas-funcionales-con-geb-y-spock/">Pruebas Funcionales Con Geb Y Spock</a></h1>
+      <h1 class="entry-title"><a href="/2015/12/21/manejo-de-transacciones-en-grails-3-dot-0/">Manejo De Transacciones en Grails 3.0</a></h1>
     
     
       <p class="meta">
@@ -81,26 +81,47 @@
 
 
 
-<time class='entry-date' datetime='2015-08-23T23:47:26-05:00'><span class='date'><span class='date-month'>Aug</span> <span class='date-day'>23</span><span class='date-suffix'>rd</span>, <span class='date-year'>2015</span></span> <span class='time'>11:47 pm</span></time>
+<time class='entry-date' datetime='2015-12-21T17:07:51-06:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>21</span><span class='date-suffix'>st</span>, <span class='date-year'>2015</span></span> <span class='time'>5:07 pm</span></time>
         
-           | <a href="/2015/08/23/pruebas-funcionales-con-geb-y-spock/#disqus_thread"
-             data-disqus-identifier="http://blog.makingdevs.com/2015/08/23/pruebas-funcionales-con-geb-y-spock/">Comments</a>
+           | <a href="/2015/12/21/manejo-de-transacciones-en-grails-3-dot-0/#disqus_thread"
+             data-disqus-identifier="http://blog.makingdevs.com/2015/12/21/manejo-de-transacciones-en-grails-3-dot-0/">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p>Las pruebas funcionales se utilizan para verificar que los flujos de una aplicación que se definen en los casos de uso o historias de usuario funcionen correctamente; son pruebas difíciles de implementar ya que deben realizarse desde la perspectiva del usuario y muchas veces las interfaces de usuario cambian constantemente.</p>
+  <div class="entry-content"><p>Una de las Herramientas que nos prove el framework Grails es el uso de su consola, una extension de la consola de groovy regular, esta consola nos permite ejecutar fragmentos de codigo, en el uso particular de la consola de grails, podemos acceder a todos los elementos de las Clases de Dominio del proyecto que se han creado, Para ejecutar la consola solo se debe de escribir el comando.</p>
 
-<p>Geb es una herramienta para escribir pruebas funcionales con Groovy que hace uso del <a href="http://www.seleniumhq.org/projects/webdriver/"><em>WebDriver de Selenium</em></a> para la automatizacion del navegador y toma varias ideas de la biblioteca jQuery para la interacción con los elementos. Utiliza el patrón de diseño <a href="http://martinfowler.com/bliki/PageObject.html"><em>Page Object</em></a> para mapear los elementos de las páginas en clases que representan cada una de las vistas.</p>
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>grails console</span></code></pre></td></tr></table></div></figure>
 
+
+<p>El uso de esta console en las nuevas versiones de grails(3.0 >),ha cambiado, ya que ahora debemos de usar la sentencia</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">withTransaction</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>de esta forma podremos acceder a todo el gorm de la aplicación:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="kn">import</span> <span class="nn">com.mx.Company</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">Company</span><span class="o">.</span><span class="na">withTransaction</span> <span class="o">{</span> <span class="n">status</span> <span class="o">-&gt;</span>
+</span><span class='line'>    <span class="n">Company</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="mi">1</span><span class="o">)</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>`</p>
 </div>
   
-  
-    <footer>
-      <a rel="full-article" href="/2015/08/23/pruebas-funcionales-con-geb-y-spock/">Read on &rarr;</a>
-    </footer>
   
 
 
@@ -277,7 +298,7 @@
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/2015/08/23/pruebas-funcionales-con-geb-y-spock/">Pruebas Funcionales Con Geb Y Spock</a>
+        <a href="/2015/12/21/manejo-de-transacciones-en-grails-3-dot-0/">Manejo De Transacciones en Grails 3.0</a>
       </li>
     
       <li class="post">

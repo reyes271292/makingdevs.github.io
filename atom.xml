@@ -4,7 +4,7 @@
   <title><![CDATA[Blog de MakingDevs]]></title>
   <link href="http://blog.makingdevs.com/atom.xml" rel="self"/>
   <link href="http://blog.makingdevs.com/"/>
-  <updated>2015-09-15T09:53:48-05:00</updated>
+  <updated>2015-12-21T17:17:28-06:00</updated>
   <id>http://blog.makingdevs.com/</id>
   <author>
     <name><![CDATA[MakingDevs]]></name>
@@ -14,387 +14,39 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Pruebas Funcionales Con Geb Y Spock]]></title>
-    <link href="http://blog.makingdevs.com/2015/08/23/pruebas-funcionales-con-geb-y-spock/"/>
-    <updated>2015-08-23T23:47:26-05:00</updated>
-    <id>http://blog.makingdevs.com/2015/08/23/pruebas-funcionales-con-geb-y-spock</id>
-    <content type="html"><![CDATA[<p>Las pruebas funcionales se utilizan para verificar que los flujos de una aplicación que se definen en los casos de uso o historias de usuario funcionen correctamente; son pruebas difíciles de implementar ya que deben realizarse desde la perspectiva del usuario y muchas veces las interfaces de usuario cambian constantemente.</p>
+    <title type="html"><![CDATA[Manejo De Transacciones en Grails 3.0]]></title>
+    <link href="http://blog.makingdevs.com/2015/12/21/manejo-de-transacciones-en-grails-3-dot-0/"/>
+    <updated>2015-12-21T17:07:51-06:00</updated>
+    <id>http://blog.makingdevs.com/2015/12/21/manejo-de-transacciones-en-grails-3-dot-0</id>
+    <content type="html"><![CDATA[<p>Una de las Herramientas que nos prove el framework Grails es el uso de su consola, una extension de la consola de groovy regular, esta consola nos permite ejecutar fragmentos de codigo, en el uso particular de la consola de grails, podemos acceder a todos los elementos de las Clases de Dominio del proyecto que se han creado, Para ejecutar la consola solo se debe de escribir el comando.</p>
 
-<p>Geb es una herramienta para escribir pruebas funcionales con Groovy que hace uso del <a href="http://www.seleniumhq.org/projects/webdriver/"><em>WebDriver de Selenium</em></a> para la automatizacion del navegador y toma varias ideas de la biblioteca jQuery para la interacción con los elementos. Utiliza el patrón de diseño <a href="http://martinfowler.com/bliki/PageObject.html"><em>Page Object</em></a> para mapear los elementos de las páginas en clases que representan cada una de las vistas.</p>
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>grails console</span></code></pre></td></tr></table></div></figure>
 
-<!-- more -->
 
+<p>El uso de esta console en las nuevas versiones de grails(3.0 >),ha cambiado, ya que ahora debemos de usar la sentencia</p>
 
-<h2>CONFIGURACIÓN DE GRADLE</h2>
-
-<p>A continuación se muestra la implementación de una prueba funcional integrando Geb con el framework de pruebas Spock.</p>
-
-<p>El primer paso es obtener las dependencias de Geb,Spock y el Selenium Driver para los diferentes navegadores. Para este ejemplo voy a utilizar Gradle para la ejecución de las pruebas y la administración de las dependencias.</p>
-
-<figure class='code'><figcaption><span>build.gradle</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">apply</span> <span class="nl">plugin:</span><span class="s2">&quot;groovy&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">repositories</span><span class="o">{</span>
-</span><span class='line'>  <span class="n">jcenter</span><span class="o">()</span>
-</span><span class='line'><span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">ext</span><span class="o">{</span>
-</span><span class='line'>  <span class="n">drivers</span> <span class="o">=</span> <span class="o">[</span><span class="s2">&quot;firefox&quot;</span><span class="o">,</span><span class="s2">&quot;chrome&quot;</span><span class="o">]</span>
-</span><span class='line'>  <span class="n">groovyVersion</span> <span class="o">=</span> <span class="s2">&quot;2.4.4&quot;</span>
-</span><span class='line'>  <span class="n">spockGroovyVersion</span> <span class="o">=</span> <span class="s2">&quot;2.4&quot;</span>
-</span><span class='line'>  <span class="n">gebVersion</span> <span class="o">=</span> <span class="s2">&quot;0.12.1&quot;</span>
-</span><span class='line'>  <span class="n">seleniumVersion</span> <span class="o">=</span> <span class="s2">&quot;2.44.0&quot;</span>
-</span><span class='line'><span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">dependencies</span><span class="o">{</span>
-</span><span class='line'>  <span class="n">testCompile</span> <span class="s2">&quot;org.codehaus.groovy:groovy-all:${groovyVersion}&quot;</span>
-</span><span class='line'>  <span class="n">testCompile</span> <span class="s2">&quot;org.gebish:geb-spock:${gebVersion}</span>
-</span><span class='line'><span class="s2">  testCompile &quot;</span><span class="n">org</span><span class="o">.</span><span class="na">spockframework</span><span class="o">:</span><span class="n">spock</span><span class="o">-</span><span class="nl">core:</span><span class="mf">1.0</span><span class="o">-</span><span class="n">groovy</span><span class="o">-</span><span class="n">$</span><span class="o">{</span><span class="n">spockGroovyVersion</span><span class="o">}</span><span class="s2">&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">  drivers.each{ driver -&gt;</span>
-</span><span class='line'><span class="s2">    testCompile &quot;</span><span class="n">org</span><span class="o">.</span><span class="na">seleniumhq</span><span class="o">.</span><span class="na">selenium</span><span class="o">:</span><span class="n">selenium</span><span class="o">-</span><span class="n">$</span><span class="o">{</span><span class="n">driver</span><span class="o">}-</span><span class="nl">driver:</span><span class="n">$</span><span class="o">{</span><span class="n">seleniumVersion</span><span class="o">}</span><span class="err">&quot;</span>
-</span><span class='line'>  <span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">withTransaction</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>Una vez que se definen las dependencias necesarias se crean las tareas para la ejecución de las pruebas en cada navegador que compone la lista.
-Geb permite realizar capturas de pantalla en cualquier punto del flujo de la aplicación que se está probando; para especificar el directorio donde se encontrarán estas imagenes se agrega la propiedad &ldquo;geb.build.reportsDir&rdquo; a las propiedades del sistema.</p>
+<p>de esta forma podremos acceder a todo el gorm de la aplicación:</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
 <span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">drivers</span><span class="o">.</span><span class="na">each</span><span class="o">{</span> <span class="n">driver</span> <span class="o">-&gt;</span>
-</span><span class='line'>  <span class="n">task</span> <span class="s2">&quot;${driver}Test&quot;</span><span class="o">(</span><span class="nl">type:</span><span class="n">Test</span><span class="o">){</span>
-</span><span class='line'>    <span class="n">reports</span><span class="o">{</span>
-</span><span class='line'>      <span class="n">html</span><span class="o">.</span><span class="na">destination</span> <span class="o">=</span> <span class="n">reporting</span><span class="o">.</span><span class="na">file</span><span class="o">(</span><span class="s2">&quot;$name/tests&quot;</span><span class="o">)</span>
-</span><span class='line'>    <span class="o">}</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="kn">import</span> <span class="nn">com.mx.Company</span>
 </span><span class='line'>
-</span><span class='line'>    <span class="n">outputs</span><span class="o">.</span><span class="na">upToDateWhen</span><span class="o">{</span> <span class="kc">false</span> <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">systemProperty</span> <span class="s2">&quot;geb.build.reportsDir&quot;</span><span class="o">,</span><span class="n">reporting</span><span class="o">.</span><span class="na">file</span><span class="o">(</span><span class="s2">&quot;$name/geb&quot;</span><span class="o">)</span>
-</span><span class='line'>    <span class="n">systemProperty</span> <span class="s2">&quot;geb.env&quot;</span><span class="o">,</span> <span class="n">driver</span>
-</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="n">Company</span><span class="o">.</span><span class="na">withTransaction</span> <span class="o">{</span> <span class="n">status</span> <span class="o">-&gt;</span>
+</span><span class='line'>    <span class="n">Company</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="mi">1</span><span class="o">)</span>
 </span><span class='line'><span class="o">}</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>Para que la automatización del navegador sea posible con Chrome es necesario descargar la versión más reciente del <a href="https://sites.google.com/a/chromium.org/chromedriver/downloads"><em>WebDriver para Chrome</em></a> y definir en la propiedad del sistema el valor del directorio donde se encuentra.
-Finalmente se sobreescribe la tarea de test para que dependa de las creadas anteriormente y todas las pruebas se ejecuten al ejecutar el comando <code>gradle test</code>.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">chromeTest</span><span class="o">{</span>
-</span><span class='line'>  <span class="n">systemProperty</span> <span class="s2">&quot;webdriver.chrome.driver&quot;</span><span class="o">,</span><span class="s2">&quot;${System.properties[&quot;</span><span class="n">user</span><span class="o">.</span><span class="na">home</span><span class="s2">&quot;]}/.grails/chromedriver&quot;</span>
-</span><span class='line'><span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">test</span><span class="o">{</span>
-</span><span class='line'>  <span class="n">dependsOn</span> <span class="n">drivers</span><span class="o">.</span><span class="na">collect</span><span class="o">{</span> <span class="n">driver</span> <span class="o">-&gt;</span> <span class="n">tasks</span><span class="o">[</span><span class="s2">&quot;${driver}Test&quot;</span><span class="o">]</span> <span class="o">}</span>
-</span><span class='line'>  <span class="n">enabled</span> <span class="o">=</span> <span class="kc">false</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>CONFIGURACIÓN DE GEB</h2>
-
-<p>Antes de comenzar a escribir las pruebas es necesario crear el archivo de configuración de Geb.
-Aquí se crean las instancias del driver para Chrome y Firefox.</p>
-
-<p>El método <strong>waiting</strong> es útil en aplicaciones que utilizan AJAX ya que espera por un elemento el tiempo definido en la configuración, en este caso el tiempo será de 2 segundos.</p>
-
-<p>La propiedad <strong>baseUrl</strong> indíca la dirección de la aplicación que será probada, para este ejemplo se probará un flujo del sitio de MakingDevs.</p>
-
-<figure class='code'><figcaption><span>GebConfig.groovy</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="kn">import</span> <span class="nn">org.openqa.selenium.chrome.ChromeDriver</span>
-</span><span class='line'><span class="kn">import</span> <span class="nn">org.openqa.selenium.firefox.FirefoxDriver</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">waiting</span><span class="o">{</span>
-</span><span class='line'>  <span class="n">timeout</span> <span class="o">=</span> <span class="mi">2</span>
-</span><span class='line'><span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">environments</span><span class="o">{</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="n">chrome</span><span class="o">{</span>
-</span><span class='line'>    <span class="n">driver</span> <span class="o">=</span> <span class="o">{</span>
-</span><span class='line'>      <span class="kt">def</span> <span class="n">driverInstance</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ChromeDriver</span><span class="o">()</span>
-</span><span class='line'>      <span class="n">driverInstance</span><span class="o">.</span><span class="na">manage</span><span class="o">().</span><span class="na">window</span><span class="o">().</span><span class="na">maximize</span><span class="o">()</span>
-</span><span class='line'>      <span class="n">driverInstance</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'>  <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="n">firefox</span><span class="o">{</span>
-</span><span class='line'>    <span class="n">driver</span> <span class="o">=</span> <span class="o">{</span>
-</span><span class='line'>      <span class="kt">def</span> <span class="n">driverInstance</span> <span class="o">=</span> <span class="k">new</span> <span class="n">FirefoxDriver</span><span class="o">()</span>
-</span><span class='line'>      <span class="n">driverInstance</span><span class="o">.</span><span class="na">manage</span><span class="o">().</span><span class="na">window</span><span class="o">().</span><span class="na">maximize</span><span class="o">()</span>
-</span><span class='line'>      <span class="n">driverInstance</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'>  <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">baseUrl</span> <span class="o">=</span> <span class="s2">&quot;http://makingdevs.com&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>PAGE OBJECTS</h2>
-
-<p>Como se mencionó anteriormente, para la interacción con los elementos del sitio se deben crear clases que representen cada página de la aplicación. Estas clases se deben extender de la clase <strong>Page</strong> y en ellas deben mapearse los componentes con los que se va a interactuar dentro del closure estático <strong>content</strong>; los componentes pueden ser referenciados haciendo uso de los selectores que proporciona Geb y que son muy parecidos a los de la biblioteca jQuery.</p>
-
-<p>Dentro de cada clase Page puede declararse la propiedad estática <strong>url</strong> para que el navegador apunte a esa página cuando el método <strong>to()</strong> sea utilizado.</p>
-
-<p>El closure estático <strong>at</strong> ayuda a determinar si el navegador se encuentra actualmente en esa página al comprobar que un elemento de la página cumpla con una condición.</p>
-
-<p>Vamos a probar un flujo sencillo, en el cual el usuario consulta la información de un curso, para ello se necesitarán tres clases, MakingDevsHomePage, MakingDevsCoursesPage y MakingDevsCourseInfoPage:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">makingdevs</span>
-</span><span class='line'>
-</span><span class='line'><span class="kn">import</span> <span class="nn">geb.*</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">class</span> <span class="nc">MakingDevsHomePage</span> <span class="kd">extends</span> <span class="n">Page</span><span class="o">{</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kd">static</span> <span class="n">at</span> <span class="o">=</span> <span class="o">{</span> <span class="n">title</span> <span class="o">==</span> <span class="s2">&quot;. : MakingDevs - Welcome : .&quot;</span> <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kd">static</span> <span class="n">content</span> <span class="o">=</span> <span class="o">{</span>
-</span><span class='line'>    <span class="n">coursesButton</span><span class="o">(</span><span class="nl">to:</span> <span class="n">MakingDevsCoursesPage</span><span class="o">){</span> <span class="n">$</span><span class="o">(</span><span class="s2">&quot;ul.nav a&quot;</span><span class="o">,</span><span class="mi">1</span><span class="o">)</span> <span class="o">}</span>
-</span><span class='line'>  <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">makingdevs</span>
-</span><span class='line'>
-</span><span class='line'><span class="kn">import</span> <span class="nn">geb.*</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">class</span> <span class="nc">MakingDevsCoursesPage</span> <span class="kd">extends</span> <span class="n">Page</span><span class="o">{</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kd">static</span> <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;/training&quot;</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kd">static</span> <span class="n">at</span> <span class="o">=</span> <span class="o">{</span>
-</span><span class='line'>    <span class="n">waitFor</span><span class="o">{</span> <span class="n">$</span><span class="o">(</span><span class="s2">&quot;.section-main-header&quot;</span><span class="o">)</span> <span class="o">}</span>
-</span><span class='line'>    <span class="n">$</span><span class="o">(</span><span class="s2">&quot;.section-main-header&quot;</span><span class="o">).</span><span class="na">text</span><span class="o">()</span> <span class="o">==</span> <span class="s2">&quot;Nuestro entrenamiento&quot;</span>
-</span><span class='line'>  <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kd">static</span> <span class="n">content</span> <span class="o">=</span> <span class="o">{</span>
-</span><span class='line'>    <span class="n">groovyCoursesDiv</span><span class="o">{</span> <span class="n">$</span><span class="o">(</span><span class="s2">&quot;.span7&quot;</span><span class="o">,</span><span class="mi">2</span><span class="o">).</span><span class="na">children</span><span class="o">(</span><span class="s2">&quot;ul&quot;</span><span class="o">)</span> <span class="o">}</span>
-</span><span class='line'>  <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">makingdevs</span><span class="o">.</span><span class="na">pages</span>
-</span><span class='line'>
-</span><span class='line'><span class="kn">import</span> <span class="nn">geb.*</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">class</span> <span class="nc">CourseInfoPage</span> <span class="kd">extends</span> <span class="n">Page</span><span class="o">{</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kd">static</span> <span class="n">at</span> <span class="o">=</span> <span class="o">{</span> <span class="n">waitFor</span><span class="o">{</span> <span class="n">$</span><span class="o">(</span><span class="s2">&quot;i.icon-terminal&quot;</span><span class="o">)</span> <span class="o">}</span> <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kd">static</span> <span class="n">content</span> <span class="o">=</span> <span class="o">{</span>
-</span><span class='line'>    <span class="n">postTitle</span><span class="o">{</span> <span class="n">$</span><span class="o">(</span><span class="s2">&quot;.post-title&quot;</span><span class="o">)</span> <span class="o">}</span>
-</span><span class='line'>  <span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>INTEGRACIÓN CON SPOCK</h2>
-
-<p><a href="https://spockframework.github.io/spock/docs/1.0/introduction.html"><em>Spock</em></a> es un framework de pruebas y especificación que se caracteriza por su formato <em>Given-When-Then</em> que hace las pruebas más descriptivas.</p>
-
-<p>Al integrar Geb con Spock es posible definir que acciones que deben ocurrir al ejecutar la prueba funcional. Por ejemplo, en la primera prueba escrita en la siguiente clase se utiliza el método <strong>to</strong> dentro del bloque <em>when</em> para que el navegador se dirija a la página principal del sitio, una vez ahí se da click a un vínculo y finalmente se verifica que ese vínculo lleve a la página que muestra los cursos.</p>
-
-<p>La segunda prueba muestra algo más interesante, ya que implementa un <strong>Data Table</strong> de Spock para agrupar un conjunto de valores de entrada y salida separados por el símbolo <strong>|</strong>; la prueba verifica que al ir a la url declarada en MakingDevsCoursesPage se busque con el método <em>find</em> dentro de una sección referenciada por el selector groovyCoursesDiv el vínculo con un atributo href que comience con el valor declarado en la columna <em>_selectorUrl</em> de la tabla para después hacer click en el elemento y finalmente comparar el texto del componente asociado al selector de postTitle con el del valor en la columna <em>_postTitle</em>.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">makingdevs</span>
-</span><span class='line'>
-</span><span class='line'><span class="kn">import</span> <span class="nn">geb.spock.GebReportingSpec</span>
-</span><span class='line'><span class="kn">import</span> <span class="nn">java.lang.Void</span> <span class="k">as</span> <span class="n">Should</span>
-</span><span class='line'><span class="kn">import</span> <span class="nn">com.makingdevs.pages.*</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">class</span> <span class="nc">MakingDevsSiteFunctionalSpec</span> <span class="kd">extends</span> <span class="n">GebReportingSpec</span><span class="o">{</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="n">Should</span> <span class="s2">&quot;show the available courses&quot;</span><span class="o">(){</span>
-</span><span class='line'>    <span class="nl">when:</span>
-</span><span class='line'>      <span class="n">to</span> <span class="n">MakingDevsHomePage</span>
-</span><span class='line'>    <span class="nl">and:</span>
-</span><span class='line'>      <span class="n">coursesButton</span><span class="o">.</span><span class="na">click</span><span class="o">()</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="nl">then:</span>
-</span><span class='line'>      <span class="n">at</span> <span class="n">MakingDevsCoursesPage</span>
-</span><span class='line'>  <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="n">Should</span> <span class="s2">&quot;show the course information&quot;</span><span class="o">(){</span>
-</span><span class='line'>    <span class="nl">when:</span>
-</span><span class='line'>      <span class="n">to</span> <span class="n">MakingDevsCoursesPage</span>
-</span><span class='line'>    <span class="nl">and:</span>
-</span><span class='line'>      <span class="n">groovyCoursesDiv</span><span class="o">.</span><span class="na">find</span><span class="o">(</span><span class="s2">&quot;a[href^=&#39;${_selectorUrl}&quot;</span><span class="o">).</span><span class="na">click</span><span class="o">()</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="nl">then:</span>
-</span><span class='line'>      <span class="n">at</span> <span class="n">CourseInfoPage</span>
-</span><span class='line'>      <span class="n">postTitle</span><span class="o">.</span><span class="na">text</span><span class="o">()</span> <span class="o">==</span> <span class="n">_postTitle</span>
-</span><span class='line'>    <span class="nl">where:</span>
-</span><span class='line'>    <span class="n">_selectorUrl</span>                    <span class="o">|</span> <span class="n">_postTitle</span>
-</span><span class='line'>    <span class="s2">&quot;/training/groovy-testing&quot;</span>      <span class="o">|</span> <span class="s2">&quot;Pruebas en la JVM con Groovy&quot;</span>
-</span><span class='line'>    <span class="s2">&quot;/training/groovy-essentials&quot;</span>   <span class="o">|</span> <span class="s2">&quot;El lenguaje dinámico Groovy&quot;</span>
-</span><span class='line'>    <span class="s2">&quot;/training/grails-intermediate&quot;</span> <span class="o">|</span> <span class="s2">&quot;Productividad con Grails&quot;</span>
-</span><span class='line'>    <span class="s2">&quot;/training/groovy-intermediate&quot;</span> <span class="o">|</span> <span class="s2">&quot;Productividad con Groovy&quot;</span>
-</span><span class='line'>  <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Finalmente para correr las pruebas ejecutamos el comando <code>./gradlew firefoxTest</code> para Firefox o <code>./gradlew chromeTest</code> para chrome; la tarea <code>./gradlew test</code> corre las pruebas en ambos navegadores.</p>
-
-<p>Pueden encontrar el código completo <a href="https://github.com/egjimenezg/FunctionalTesting"><em>aquí</em></a>.</p>
+<p>`</p>
 ]]></content>
   </entry>
   
