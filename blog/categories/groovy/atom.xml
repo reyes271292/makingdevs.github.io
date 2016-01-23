@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Groovy | Blog de MakingDevs]]></title>
   <link href="http://blog.makingdevs.com/blog/categories/groovy/atom.xml" rel="self"/>
   <link href="http://blog.makingdevs.com/"/>
-  <updated>2015-12-21T17:23:05-06:00</updated>
+  <updated>2016-01-22T18:41:08-06:00</updated>
   <id>http://blog.makingdevs.com/</id>
   <author>
     <name><![CDATA[MakingDevs]]></name>
@@ -12,6 +12,42 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Bitacorado De Pruebas en Gradle]]></title>
+    <link href="http://blog.makingdevs.com/2016/01/22/bitacorado-de-pruebas-en-gradle/"/>
+    <updated>2016-01-22T18:14:37-06:00</updated>
+    <id>http://blog.makingdevs.com/2016/01/22/bitacorado-de-pruebas-en-gradle</id>
+    <content type="html"><![CDATA[<p>Hace tiempo al correr unas pruebas con un proyecto de gradle tuve la necesidad de saber el orden y la forma en que se estaban corriendo ciertas pruebas, gradle arroja este resultado al final de la ejecución, sin embargo yo quería un bitacorado al momento de la ejecución, para lo cual buscando en la documentación me encontre con el <a href="https://docs.gradle.org/current/dsl/org.gradle.api.tasks.testing.logging.TestLoggingContainer.html">TestLoggingContainer</a>, del cual pude obtener este fragmento:</p>
+
+<pre><code class="java">apply plugin: 'java'
+
+test {
+  testLogging {
+    // set options for log level LIFECYCLE
+    events "failed"
+      exceptionFormat "short"
+
+      // set options for log level DEBUG
+      debug {
+        events "started", "skipped", "failed"
+          exceptionFormat "full"
+      }
+
+    // remove standard output/error logging from --info builds
+    // by assigning only 'failed' and 'skipped' events
+    info.events = ["failed", "skipped"]
+  }
+}
+</code></pre>
+
+<p>En donde pongo todo los tipos de eventos del proyecto que son <code>events "started", "passed", "skipped", "failed"</code> y con ello obtengo una salida como la siguiente:</p>
+
+<p><img src="/images/test_logging.png" alt="Screenshot 1" /></p>
+
+<p>Muy útil cuando no queremos hacer bitácora manual de que pruebas se están corriendo, Gradle ya cuenta con ella.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Amazon S3 Y Groovy]]></title>
