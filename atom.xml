@@ -1,0 +1,1705 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Blog de MakingDevs]]></title>
+  <link href="http://blog.makingdevs.com/atom.xml" rel="self"/>
+  <link href="http://blog.makingdevs.com/"/>
+  <updated>2015-12-21T17:23:05-06:00</updated>
+  <id>http://blog.makingdevs.com/</id>
+  <author>
+    <name><![CDATA[MakingDevs]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Manejo De Transacciones en Grails 3.0]]></title>
+    <link href="http://blog.makingdevs.com/2015/12/21/manejo-de-transacciones-en-grails-3-dot-0/"/>
+    <updated>2015-12-21T17:07:51-06:00</updated>
+    <id>http://blog.makingdevs.com/2015/12/21/manejo-de-transacciones-en-grails-3-dot-0</id>
+    <content type="html"><![CDATA[<p>Una de las Herramientas que nos prove el framework Grails es el uso de su consola, una extension de la consola de groovy regular, esta consola nos permite ejecutar fragmentos de codigo, en el uso particular de la consola de grails, podemos acceder a todos los elementos de las Clases de Dominio del proyecto que se han creado, Para ejecutar la consola solo se debe de escribir el comando.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>grails console</span></code></pre></td></tr></table></div></figure>
+
+
+<p>El uso de esta console en las nuevas versiones de grails(3.0 >),ha cambiado, ya que ahora debemos de usar la sentencia</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">withTransaction</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>de esta forma podremos acceder a todo el gorm de la aplicación:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="kn">import</span> <span class="nn">com.mx.Company</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">Company</span><span class="o">.</span><span class="na">withTransaction</span> <span class="o">{</span> <span class="n">status</span> <span class="o">-&gt;</span>
+</span><span class='line'>    <span class="n">Company</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="mi">1</span><span class="o">)</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>`</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Amazon S3 Y Groovy]]></title>
+    <link href="http://blog.makingdevs.com/2015/08/13/amazon-s3-y-groovy/"/>
+    <updated>2015-08-13T22:47:08-05:00</updated>
+    <id>http://blog.makingdevs.com/2015/08/13/amazon-s3-y-groovy</id>
+    <content type="html"><![CDATA[<p>En una de las tareas que realice recientemente, tuve la necesidad de transferir un par de archivos que obtuve de un endpoint(de la cual hablaré en otro post) hacia un Bucket de Amazon S3.</p>
+
+<p>La solución inmediata fue usar una biblioteca que encontré para Java de nombre <a href="http://www.jets3t.org/">jets3t</a>, la cual, provee de un conjunto de herramientas muy simple para operar con Amazon S3, Cloud Front y Google Storage.</p>
+
+<p>El caso muy puntual que tuve que resolver fue subir un archivo y despúes borrarlo de un bucket muy particular. En este ejemplo muestro primero como listar todos los buckets disponibles en una cuenta de S3.</p>
+
+<!-- more -->
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="nd">@Grapes</span><span class="o">(</span>
+</span><span class='line'>    <span class="nd">@Grab</span><span class="o">(</span><span class="n">group</span><span class="o">=</span><span class="s1">&#39;net.java.dev.jets3t&#39;</span><span class="o">,</span> <span class="n">module</span><span class="o">=</span><span class="s1">&#39;jets3t&#39;</span><span class="o">,</span> <span class="n">version</span><span class="o">=</span><span class="s1">&#39;0.9.3&#39;</span><span class="o">)</span>
+</span><span class='line'><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.jets3t.service.security.*</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.jets3t.service.*</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.jets3t.service.impl.rest.httpclient.*</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.jets3t.service.model.*</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.jets3t.service.acl.*</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">String</span> <span class="n">awsAccessKey</span> <span class="o">=</span> <span class="s2">&quot;YOURAWSACCESSKEY&quot;</span>
+</span><span class='line'><span class="n">String</span> <span class="n">awsSecretKey</span> <span class="o">=</span> <span class="s2">&quot;YOURAWSSECRETKEY&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">AWSCredentials</span> <span class="n">awsCredentials</span> <span class="o">=</span> <span class="k">new</span> <span class="n">AWSCredentials</span><span class="o">(</span><span class="n">awsAccessKey</span><span class="o">,</span> <span class="n">awsSecretKey</span><span class="o">)</span>
+</span><span class='line'><span class="n">S3Service</span> <span class="n">s3Service</span> <span class="o">=</span> <span class="k">new</span> <span class="n">RestS3Service</span><span class="o">(</span><span class="n">awsCredentials</span><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">S3Bucket</span><span class="o">[]</span> <span class="n">myBuckets</span> <span class="o">=</span> <span class="n">s3Service</span><span class="o">.</span><span class="na">listAllBuckets</span><span class="o">()</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Despúes, una vez con todos los buckets, podemos listar los archivos contenidos dentro de bucket muy particular.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">String</span> <span class="n">bucletName</span> <span class="o">=</span> <span class="s2">&quot;makingdevs-bucket&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">bucket</span> <span class="o">=</span> <span class="n">myBuckets</span><span class="o">.</span><span class="na">find</span> <span class="o">{</span> <span class="n">it</span><span class="o">.</span><span class="na">name</span><span class="o">==</span><span class="n">bucketName</span> <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">s3Objects</span> <span class="o">=</span> <span class="n">s3Service</span><span class="o">.</span><span class="na">listObjects</span><span class="o">(</span><span class="n">bucket</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Finalmente, podemos subir un archivo específico hacia el bucket que deseamos.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">file</span> <span class="o">=</span> <span class="k">new</span> <span class="n">File</span><span class="o">(</span><span class="s2">&quot;/some/file/in/your/filesystem.ext&quot;</span><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">S3Object</span> <span class="n">s3Object</span> <span class="o">=</span> <span class="k">new</span> <span class="n">S3Object</span><span class="o">()</span>
+</span><span class='line'><span class="n">s3Object</span><span class="o">.</span><span class="na">with</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">setAcl</span> <span class="n">AccessControlList</span><span class="o">.</span><span class="na">REST_CANNED_PUBLIC_READ</span>
+</span><span class='line'>  <span class="n">setContentLength</span> <span class="n">file</span><span class="o">.</span><span class="na">length</span><span class="o">()</span>
+</span><span class='line'>  <span class="n">setContentType</span> <span class="n">file</span><span class="o">.</span><span class="na">toURL</span><span class="o">().</span><span class="na">openConnection</span><span class="o">().</span><span class="na">contentType</span>
+</span><span class='line'>  <span class="n">setDataInputFile</span> <span class="n">file</span>
+</span><span class='line'>  <span class="n">setKey</span> <span class="n">file</span><span class="o">.</span><span class="na">name</span>
+</span><span class='line'>  <span class="n">setBucketName</span> <span class="n">bucket</span><span class="o">.</span><span class="na">getName</span><span class="o">()</span> <span class="c1">// we use our previous bucket</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">s3Service</span><span class="o">.</span><span class="na">putObject</span> <span class="n">bucket</span><span class="o">,</span> <span class="n">s3Object</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Una vez que llamamos al servicio <code>s3Service</code> el archivo queda colocado en el bucket. Y finalmente si deseamos borrarlo podemos usar <code>s3Service.deleteObject s3Bucket, s3Object.key</code>, en donde sólo mandamos el objeto del bucket y el <em>key</em> del objeto que deseamos borrar.</p>
+
+<p>Finalmente, me gustaría detallar dos líneas que en mi opinión son relevantes:</p>
+
+<ul>
+<li>La parte de <code>acl AccessControlList.REST_CANNED_PUBLIC_READ</code>, la cual indica que el archivo que se sube es de acceso público para quién quiera que tenga la URL y sólo el propietario puede modificar, existen otras constantes que dan combinaciones de permisos distintos en <a href="http://www.jets3t.org/api/org/jets3t/service/acl/AccessControlList.html">la documentación de JetS3t</a>.</li>
+<li>La línea con <code>contentType file.toURL().openConnection().contentType</code> que es una forma de obtener el <em>content type</em> sin la necesidad de una biblioteca adicional, sólo con el uso convencional de las clases Java con las que ya contamos. Les recomiendo tomar cualquier archivo y probar sólo esa línea.</li>
+</ul>
+
+
+<p>Si bien hay más cosas que se pueden hacer, les sugiero se den una vuelta por la documentación de esta biblioteca.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Revisión Del Libro - the Software Craftsman: Professionalism]]></title>
+    <link href="http://blog.makingdevs.com/2015/08/02/revision-del-libro-the-software-craftsman-professionalism/"/>
+    <updated>2015-08-02T18:44:42-05:00</updated>
+    <id>http://blog.makingdevs.com/2015/08/02/revision-del-libro-the-software-craftsman-professionalism</id>
+    <content type="html"><![CDATA[<p>Libro que al igual que <a href="https://pragprog.com/the-pragmatic-programmer" title="the-pragmatic-programmer"><em>The Pragmatic Programmer: From Journeyman to Master</em></a> se ganó estar en mis libros de cabecera, y se ha ganado un lugar muy especial en mi librero.</p>
+
+<p>El escritor, y desarrollador de toda la vida <a href="https://twitter.com/sandromancuso" title="sandromancuso"><em>Sandro Mancuso</em></a>, plasma muy bien la idea que el tiene acerca de lo que todo desarrollador de software, y en mi opinión personal lo que debería buscar todo desarrollador, para cambiar su entorno de trabajo y ayudarnos a todos (porque estamos en el mismo barco) a cambiar la mentalidad de los clientes, de que no somos la clase de <em>persona/profesional</em> que la mayor parte del mundo cree que somos:</p>
+
+<!-- more -->
+
+
+<ol>
+<li>Unos micos tirando lineas de código a diestra y siniestra, y haciendo el código lo más ilegible posible para que nada ni nadie pueda entenderlo</li>
+<li>Unos personajes que se sientan en el cuarto más oscuro del sótano de la empresa y que nadie conoce (usualmente cuentan leyendas de que terror de ellos)</li>
+<li>Los padrinos mágicos de los clientes que hacen que se cumplan sus deseos y que en un parpadear de ojos ya lo tiene funcionando en producción y libre de defectos</li>
+<li>Las personas que arreglan los defectos del sistema con su teclado mágico</li>
+<li>Personas o cosas que transforman café, cerveza o en su defecto bebidas energéticas en líneas de código que pasan por una caja mágica que lo transforma en un sistema para su empresa</li>
+</ol>
+
+
+<p>Mientras más leía este libro más me iba dando cuenta de que muchas de las cosas que el plasmó las había pasado en algún momento, que otras pocas las estaba pasando y que muchas otras parecían estar a la vuelta de la esquina, como si de un libro de adivinación se tratase.</p>
+
+<p>Me ayudó a entender la idea de lo que no es un artesano del software y de que para ser uno debes ser más que un desarrollador, que va más allá de incluso herramientas, métodos y metodologías (<em>Agile, Kanban, Lean, XP, TDD,</em> entre otras) inclusive va mucho más allá de un lenguaje de programación, de un IDE, de un editor de textos o un manipulador de textos.</p>
+
+<p>Un artesano va más allá de todo esto pero el que vaya más allá no quiere decir que no incluya todo lo anterior, lo más importante para un artesano de software es ser un profesional del software, para ello se basan en muchos principios que van desde ayudar a los desarrolladores a ser mejores en su día a día con técnicas de desarollo tales como TDD, XP, entre otras, pasando por enseñar a como decir que &ldquo;NO&rdquo; a los clientes, como levantar la mano para que nuestra voz sea escuchada, como lidiar con personas que solo ven el desarrollo de software como &ldquo;un trabajo más&rdquo;, que &ldquo;El <em>cómo está hecho</em> es tan importante como <em>el está hecho</em>&rdquo; (<em>&ldquo;How it is done is as important as getting it done&rdquo; - Sandro Mancuso, The Software Craftsman: Professionalism, Pragmatism</em>) que la artesanía del software es un largo camino hacia la maestría, que esto es una mentalidad del desarrollador donde ellos eligen ser responsables de su carrera, constantemente aprendiendo nuevas herramientas, técnicas y constantemente mejorándose.</p>
+
+<p>Me ayudó a comprender que hace unos años la &ldquo;antigüedad&rdquo; (seniority) se medía en base a cuan ilegible era su código (algo así al a cantidad de WTF por revisión de código), y cuan mal estábamos en hacer eso. Esos tiempos han cambiado y ahora es a la inversa mientras menos WTF por revisión de código existan mejor el código es.</p>
+
+<p>Entendí también que el código legado a veces no es tan malo como suena, que también ahí existen áreas de oportunidad y que se pueden hacer cosas para ir mejorando poco a poco para que este no sea tan doloroso como todos creemos que es.</p>
+
+<p>Otra cosa que me ayudó este libro a ver es que un desarrollador en la búsqueda de su maestría es alguien que debe evaluar sus trabajos y empresas en base a sus objetivos y principios, y que cualquier empresa que no esté alineada a sus principios y objetivos debería ser descartada en las fases de las entrevistas. Ya que en las entrevistas no solo el candidato a ser empleado es evaluado, también como buen profesional debemos evaluar a la empresa que nos está entrevistando y cuestionar las cosas que vemos (no ser altaneros o unos patanes, tener el suficiente tacto para hacer las preguntas), desde si quien está entrevistando es RH, hasta si el que está entrevistando es el desarrollador y desde esos inicios se puede ver que tan arraigadas tienen esas jerarquías.</p>
+
+<p>Y aunque la búsqueda de un nuevo trabajo y/o la permenencia en ese trabajo prácticamente depende de 3 cosas (al menos para el autor): Autonomía, Maestría, Propósito. Y es aquí donde está lo interesante de esta parte ya que deja fuera la parte del <em>Dinero</em> ya que el conocimiento es más valioso, y no es porque el dinero no lo sea pero el perseguir solamente el dinero te puede desviar de tus objetivos iniciales.</p>
+
+<p>Y de lo que me di cuenta es que en México estamos del nabo, ya que mientras en muchas empresas alrededor del mundo ya están viendo a los desarrolladores como una parte fundamental de su estructura interna, y que no son los elementos fácilmente reemplazables, aquí siguen viéndonos como los meros micos sentados en una silla frente a una computadora escribiendo código, y mientras esto siga así las empresas mexicanas irán cada día más en picada porque casi ningún buen desarrollador va a querer estar trabajando con ellos. Sin embargo esta mentalidad no es solo culpa de las empresas es también culpa de nosotros como desarrolladores, porque como profesionales debemos decirles lo que está pasando ser honestos y hablar con franquesa ante ellos, como si de su contador se tratara o su abogado o su doctor, nadie confiaría en ellos si les dice que si a todo.</p>
+
+<p>&ldquo;Locura es hacer lo mismo una vez tras otra y esperar resultados diferentes&rdquo; el cambio comienza en nosotros los desarrolladores levantando nuestras manos y cuestionando las decisiones de las personas que se encuentran arriba (hablando de empresas que cuentan con una estructura jerárquica), porque esto no es solo culpa de las empresas también es culpa de nosotros por solo acatar las decisiones de ellos sin decir nada, eso no es ni siquiera es ser profesional, eso es apatía y no es algo que debamos hacer, debemos aprender a decir que &ldquo;NO&rdquo; pero con bases, aportando opciones y si en ese momento no se cuenta con alguna opción decir que en ese momento están escasos de ideas pero que se pensará en algo para traerlo a la mesa y tomar en base a ello las decisiones.</p>
+
+<p>Por último todo aspirante a ser un Artesano del Software debería tener seguir esto, <a href="http://manifesto.softwarecraftsmanship.org/" title="softwarecraftsmanship">link original</a>:</p>
+
+<p>  Como aspirantes a Artesanos del Software estamos elevando el listón de desarrollo de software profesional practicando y ayudando a otros a aprender el oficio. A través de este trabajo hemos llegado a valorar:</p>
+
+<ul>
+<li>No sólo software que funciona, <strong>sino también software bien diseñado</strong></li>
+<li>No sólo responder al cambio, <strong>sino también agregar valor constantemente</strong></li>
+<li>No sólo individuos e interacciones, <strong>sino también una comunidad de profesionales</strong></li>
+<li>No sólo colaboración de clientes, <strong>sino también asociaciones productivas</strong></li>
+</ul>
+
+
+<p>  Es decir, en la búsqueda de los elementos de la izquierda, hemos encontrado indispensables los elementos de la derecha.</p>
+
+<p>Y lo que más me agradó de este libro fue que en realidad pone sobre la mesa lo que un desarrollador debería ser (al menos en el concepto del autor), y contesta la pregunta que estoy seguro a muchos de nosotros como desarrolladores nos han hecho <em>¿Piensas ser un desarollador toda tu vida?</em> o alguna de sus variantes, y aunque para mí la respuesta es un claro y conciso &ldquo;SI&rdquo; para muchos la respuesta todavía está en el aire.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Hot Deployment en Gradle]]></title>
+    <link href="http://blog.makingdevs.com/2015/07/26/hot-deployment-en-gradle/"/>
+    <updated>2015-07-26T23:19:13-05:00</updated>
+    <id>http://blog.makingdevs.com/2015/07/26/hot-deployment-en-gradle</id>
+    <content type="html"><![CDATA[<p>Durante un tiempo estuve buscando de la forma de tener una aplicación web con Gradle y tener características como el hot deploy, Grails lo tiene y viendólo de forma interna usa un elemento de nombre <a href="https://github.com/spring-projects/spring-loaded" title="springloaded">SpringLoaded</a>.</p>
+
+<p>Después me di cuenta que frameworks como <a href="https://github.com/spring-projects/spring-loaded" title="dropwizard">Dropwizard</a> lo usan, y que incluso SpringBoot a través del uso del CLI también, investigando un poco más al respecto y por la necesidad de tenerlo listo para algunos proyectos encontré <a href="http://www.cholick.com/entry/show/280" title="tomcat">un artículo</a> en donde explica como ponerlo en acción usando propiamente <a href="https://github.com/spring-projects/spring-loaded" title="dropwizard">Dropwizard</a>. Fue un buen acercamiento, el problema es el siguiente bloque de código en configuración de gradle:</p>
+
+<!-- more -->
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">run</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">args</span> <span class="o">=</span> <span class="o">[</span><span class="s1">&#39;server&#39;</span><span class="o">,</span> <span class="s1">&#39;app.yaml&#39;</span><span class="o">]</span>
+</span><span class='line'>  <span class="n">jvmArgs</span> <span class="o">=</span> <span class="o">[</span><span class="s2">&quot;-javaagent:${new File(&quot;</span><span class="n">$buildDir</span><span class="s">/agent/</span><span class="n">springloaded</span><span class="o">-</span><span class="n">$</span><span class="o">{</span><span class="n">springloadedVersion</span><span class="o">}.</span><span class="na">jar</span><span class="s2">&quot;).absolutePath}&quot;</span><span class="o">,</span> <span class="s1">&#39;-noverify&#39;</span><span class="o">]</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>En donde, el atributo <code>jvmArgs</code> es sólo aplicable a tareas del tipo <code>JavaExec</code>, más específico, que implementan <code>JavaExecSpec</code> o <code>JavaForkOptions</code>. Es aquí en donde <a href="https://github.com/bmuschko/gradle-tomcat-plugin" title="tomcat">el plugin de tomcat</a> que se puede encontrar para Gradle tiene el problema, pues su tarea no lo hace.</p>
+
+<p>La combinación se haría en conjunto con un plugin de gradle, <a href="https://github.com/bluepapa32/gradle-watch-plugin" title="gradle watch">el watch</a>, el actúa con cada cambio en la aplicación realizando las tareas que se le digan. Sin embargo, lo que encontré funcionaba para la cmbinación de SpringBooy e IntelliJ Idea, lo cual no veía mal, pero no era mi caso. De cualquier forma pongo disponible la configuración que independiente me sirvió para hacer un hot deploy usando ambos elementos:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">apply</span> <span class="nl">plugin:</span> <span class="s1">&#39;groovy&#39;</span>
+</span><span class='line'><span class="n">apply</span> <span class="nl">plugin:</span> <span class="s1">&#39;spring-boot&#39;</span>
+</span><span class='line'><span class="n">apply</span> <span class="nl">plugin:</span> <span class="s1">&#39;com.bluepapa32.watch&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">sourceCompatibility</span> <span class="o">=</span> <span class="mf">1.8</span>
+</span><span class='line'><span class="n">targetCompatibility</span> <span class="o">=</span> <span class="mf">1.8</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">ext</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">springLoadedVersion</span> <span class="o">=</span> <span class="s1">&#39;1.2.1.RELEASE&#39;</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">mainClassName</span><span class="o">=</span><span class="s1">&#39;com.makingdevs.Application&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">repositories</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">mavenCentral</span><span class="o">()</span>
+</span><span class='line'>  <span class="n">maven</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">url</span> <span class="s2">&quot;https://code.lds.org/nexus/content/groups/main-repo&quot;</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">dependencies</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">compile</span><span class="o">(</span><span class="s2">&quot;org.springframework.boot:spring-boot-starter-web&quot;</span><span class="o">)</span>
+</span><span class='line'>  <span class="n">compile</span> <span class="s1">&#39;org.codehaus.groovy:groovy-all:2.4.3&#39;</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">buildscript</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">repositories</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">mavenCentral</span><span class="o">()</span>
+</span><span class='line'>    <span class="n">jcenter</span><span class="o">()</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>  <span class="n">dependencies</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">classpath</span> <span class="s2">&quot;org.springframework.boot:spring-boot-gradle-plugin:1.2.4.RELEASE&quot;</span>
+</span><span class='line'>    <span class="n">classpath</span> <span class="s1">&#39;org.springframework:springloaded:1.2.0.RELEASE&#39;</span>
+</span><span class='line'>    <span class="n">classpath</span> <span class="s1">&#39;com.bluepapa32:gradle-watch-plugin:0.1.5&#39;</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">jar</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">baseName</span> <span class="o">=</span> <span class="s1">&#39;meerkat-mymapmanager&#39;</span>
+</span><span class='line'>  <span class="n">version</span> <span class="o">=</span>  <span class="s1">&#39;0.1.0&#39;</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">compileGroovy</span> <span class="o">{</span>
+</span><span class='line'>  <span class="c1">//enable compilation in a separate daemon process</span>
+</span><span class='line'>  <span class="n">options</span><span class="o">.</span><span class="na">fork</span> <span class="o">=</span> <span class="kc">true</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">watch</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">groovy</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">files</span> <span class="nf">files</span><span class="o">(</span><span class="s1">&#39;src/main/groovy&#39;</span><span class="o">)</span>
+</span><span class='line'>    <span class="n">tasks</span> <span class="s1">&#39;compileGroovy&#39;</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Al final del día, lo que encontre fue <a href="http://akhikhl.github.io/gretty-doc/index.html" title="gretty">el plugin de Gretty</a>, con el que fácilmente podemos usar un contenedor de Tomcat o Jetty y tener disponible el Hot deploy, creo que tiene algunos detalles de rendimiento pero es útil. Finalmente la configuración se reduce mucho y hay varias tareas disponibles, entre ellas <code>appRun</code>, que es la que levanta el elemento configuraco y lo dijo listo para los cambios:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="c1">// Using the new mechanism to include plugins</span>
+</span><span class='line'><span class="n">plugins</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">id</span> <span class="s1">&#39;groovy&#39;</span>
+</span><span class='line'>  <span class="n">id</span> <span class="s1">&#39;war&#39;</span>
+</span><span class='line'>  <span class="n">id</span> <span class="s2">&quot;org.akhikhl.gretty&quot;</span> <span class="n">version</span> <span class="s2">&quot;1.2.4&quot;</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">repositories</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">mavenCentral</span><span class="o">()</span>
+</span><span class='line'>  <span class="n">jcenter</span><span class="o">()</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">dependencies</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">compile</span> <span class="s1">&#39;org.codehaus.groovy:groovy-all:2.3.4&#39;</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">gretty</span> <span class="o">{</span>
+</span><span class='line'>  <span class="c1">// &#39;jetty7&#39;, &#39;jetty8&#39;, &#39;jetty9&#39;, &#39;tomcat7&#39;, &#39;tomcat8&#39;</span>
+</span><span class='line'>  <span class="n">servletContainer</span> <span class="o">=</span> <span class="s1">&#39;tomcat7&#39;</span>
+</span><span class='line'>  <span class="n">httpPort</span> <span class="o">=</span> <span class="mi">9091</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Creo que nos servirá bien un rato para las cosas que tenemos que hcaer, por que incluso soporta SpringBoot.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Borrado Batch en Grails]]></title>
+    <link href="http://blog.makingdevs.com/2015/05/01/borrado-batch-en-grails/"/>
+    <updated>2015-05-01T20:58:30-05:00</updated>
+    <id>http://blog.makingdevs.com/2015/05/01/borrado-batch-en-grails</id>
+    <content type="html"><![CDATA[<p>En esta ocasión les quiero compartir la solución a un problema que tuve al borrar una colección de objetos en grails y con el GORM, si bien podría hacerlo con HQL o con SQL usando las bondades de Hibernate me gusto más el acercamiento que les quiero presentar.</p>
+
+<!-- more -->
+
+
+<p>La necesidad era borrar un grupo de objetos en donde el contenido de su relación estuviera vacío, ejemplifico con la estructura de unas clases:</p>
+
+<div><script src='https://gist.github.com/54953d90cc778b71548a.js?file=domains.groovy'></script>
+<noscript><pre><code>class Group {
+  String name
+  
+  static hasMany = [members : Member]
+}
+
+class Member {
+  String name
+}</code></pre></noscript></div>
+
+
+<p>El primer acercamiento que tuve fue obtener la lista de elementos y hacer una condicional buscando los elementos vacíos, después borrar&hellip;</p>
+
+<div><script src='https://gist.github.com/54953d90cc778b71548a.js?file=delete1.groovy'></script>
+<noscript><pre><code>groupsToDelete = [] 
+Group.list().each { group -&gt; 
+  if(group.members.isEmpty()) 
+    groupsToDelete &lt;&lt; link
+} 
+groupsToDelete*.delete() </code></pre></noscript></div>
+
+
+<p>Una vez hecho, mejoramos intentamos mejorar el código con una búsqueda mucho más refinada y ejecutando el borrado, para ello nos apoyamos de los <strong>where queries</strong>:</p>
+
+<div><script src='https://gist.github.com/54953d90cc778b71548a.js?file=delete2.groovy'></script>
+<noscript><pre><code>Group.where { 
+  members.size() == 0 
+}.deleteAll()</code></pre></noscript></div>
+
+
+<p>Basado en la documentación de Grails:</p>
+
+<blockquote><p>Since each where method call returns a DetachedCriteria instance, you can use where queries to execute batch operations such as batch updates and deletes.</p></blockquote>
+
+<p>Sin embargo, este acercamiento tiene un problema, manda un error cuando se busca por las relaciones del objeto y no permite el borrado. El error: <code>org.springframework.dao.InvalidDataAccessResourceUsageException: Queries of type SizeEquals are not supported by this implementation</code></p>
+
+<h3>La solución que me gustó</h3>
+
+<p>Usamos <strong>Detached Criteria</strong> para resolver este problema, por que:</p>
+
+<ul>
+<li>No están asociados con una sesión o conexión, lo cual permite formularlos y reusarlos.</li>
+<li>También cuenta con métodos batch: <code>deleteAll</code>, <code>updateAll</code></li>
+<li>Permiten proyecciones y subqueries, que es lo que estamos buscando para resolver nuestro problema</li>
+</ul>
+
+
+<p>Finalmente nuestra solución es:</p>
+
+<div><script src='https://gist.github.com/54953d90cc778b71548a.js?file=delete3.groovy'></script>
+<noscript><pre><code>import grails.gorm.*
+
+def criteria = new DetachedCriteria(Group).build { 
+  isEmpty &#39;members&#39;
+}
+criteria.deleteAll()
+// criteria.count()</code></pre></noscript></div>
+
+
+<p>Con esto, tenemos una búsqueda refinada y el borrado de los elementos directo, inclusive el método <code>deleteAll</code> regresa un entero con la cantidad de registros afectados.</p>
+
+<p>Esto me fue de mucha utilidad y ojalá también lo sea para ustedes en algún momento.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Clusterizacion Con Camel]]></title>
+    <link href="http://blog.makingdevs.com/2015/04/07/clusterizacion-con-camel/"/>
+    <updated>2015-04-07T19:56:54-05:00</updated>
+    <id>http://blog.makingdevs.com/2015/04/07/clusterizacion-con-camel</id>
+    <content type="html"><![CDATA[<p>Camel ofrece distintas soluciones para ser escalado o para distribuir la carga en diferentes instancias, la soluciones que ofrece dependerá de como se encuentra nuestra infraestructura ( y configuración).</p>
+
+<ul>
+<li>Misma JVM y CamelContext</li>
+<li>Misma JVM pero diferente CamelContext</li>
+<li>Diferente JVM y CamelContext</li>
+</ul>
+
+
+<!-- more -->
+
+
+<p>El problema que me vi envuelto fue de estas tres, la ultima, el clusterizar camel que se encontraban en diferentes JVM y CamelContext. Y en particular tuve un problema de mensajes duplicados. Para esto camel ofrece ciertas soluciones, un componente llamado <strong>Idempotent Consumer</strong>. El Idempotent Consumer pertenece a los patrones de EIP se usa para filtrar los mensajes duplicados. Este modelo se implementa utilizando la clase IdempotentConsumer. Este utiliza una expresión para calcular una cadena de mensaje ID único para un intercambio de mensajes, este ID puede ser consultado en la IdempotentRepository para ver si se ha visto antes, si se tiene no es tomado para ser procesado, en cambio si no se tiene, entonces el mensaje se procesa y la ID se añade al repositorio.</p>
+
+<p>Hay varios tipos de IdempotentRepository:</p>
+
+<ul>
+<li>MemoryIdempotentRepository</li>
+<li>FileIdempotentRepository</li>
+<li>HazelcastIdempotentRepository (Available as of Camel 2.8)</li>
+<li>JdbcMessageIdRepository (Available as of Camel 2.7)</li>
+<li>JpaMessageIdRepository</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="nd">@Grab</span><span class="o">(</span><span class="n">group</span><span class="o">=</span><span class="s1">&#39;org.slf4j&#39;</span><span class="o">,</span> <span class="n">module</span><span class="o">=</span><span class="s1">&#39;slf4j-api&#39;</span><span class="o">,</span> <span class="n">version</span><span class="o">=</span><span class="s1">&#39;1.7.10&#39;</span><span class="o">)</span>
+</span><span class='line'><span class="nd">@Grab</span><span class="o">(</span><span class="n">group</span><span class="o">=</span><span class="s1">&#39;org.apache.camel&#39;</span><span class="o">,</span> <span class="n">module</span><span class="o">=</span><span class="s1">&#39;camel-core&#39;</span><span class="o">,</span> <span class="n">version</span><span class="o">=</span><span class="s1">&#39;2.12.0&#39;</span><span class="o">)</span>
+</span><span class='line'><span class="nd">@Grab</span><span class="o">(</span><span class="n">group</span><span class="o">=</span><span class="s1">&#39;org.apache.camel&#39;</span><span class="o">,</span> <span class="n">module</span><span class="o">=</span><span class="s1">&#39;camel-mail&#39;</span><span class="o">,</span> <span class="n">version</span><span class="o">=</span><span class="s1">&#39;2.12.0&#39;</span><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.apache.camel.impl.DefaultCamelContext</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.apache.camel.builder.RouteBuilder</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.apache.camel.processor.idempotent.FileIdempotentRepository</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">def</span> <span class="n">camelContext</span> <span class="o">=</span> <span class="k">new</span> <span class="n">DefaultCamelContext</span><span class="o">()</span>
+</span><span class='line'><span class="n">camelContext</span><span class="o">.</span><span class="na">addRoutes</span><span class="o">(</span><span class="k">new</span> <span class="n">RouteBuilder</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>  <span class="kt">def</span> <span class="kt">void</span> <span class="nf">configure</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">from</span><span class="o">(</span><span class="s2">&quot;imaps://imap.gmail.com?username=jorge@makingdevs.com&quot;</span>
+</span><span class='line'>      <span class="o">+</span> <span class="s2">&quot;&amp;password=m4k1ngd3vs&quot;</span>
+</span><span class='line'>      <span class="o">+</span> <span class="s2">&quot;&amp;consumer.delay=6000&quot;</span><span class="o">)</span>
+</span><span class='line'>    <span class="o">.</span><span class="na">idempotentConsumer</span><span class="o">(</span> <span class="n">header</span><span class="o">(</span><span class="s2">&quot;Message-ID&quot;</span><span class="o">),</span>
+</span><span class='line'>      <span class="n">FileIdempotentRepository</span><span class="o">.</span><span class="na">fileIdempotentRepository</span><span class="o">(</span>
+</span><span class='line'>        <span class="k">new</span> <span class="nf">File</span><span class="o">(</span><span class="s2">&quot;idempotentRepository.txt&quot;</span><span class="o">)))</span>
+</span><span class='line'>    <span class="o">.</span><span class="na">to</span><span class="o">(</span><span class="s2">&quot;log:groovymail?showAll=true&amp;multiline=true&quot;</span><span class="o">)</span> <span class="o">}</span> <span class="o">})</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">camelContext</span><span class="o">.</span><span class="na">start</span><span class="o">()</span>
+</span><span class='line'><span class="n">addShutdownHook</span><span class="o">{</span> <span class="n">camelContext</span><span class="o">.</span><span class="na">stop</span><span class="o">()</span> <span class="o">}</span>
+</span><span class='line'><span class="kd">synchronized</span><span class="o">(</span><span class="k">this</span><span class="o">){</span> <span class="k">this</span><span class="o">.</span><span class="na">wait</span><span class="o">()</span> <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Este es un script ejemplo el cual utiliza <code>FileIdempotentRepository</code> utilizando un archivo ejemplo para llevar el control, si exploramos el archivo ahí se encuentra los id de los mensajes procesados.</p>
+
+<p><img src="http://blog.makingdevs.com/images/camel_output.png" alt="Camel output" /></p>
+
+<p>Asi si hay un mensaje el cual ya se encuentra dentro de este archivo se ignora y no es procesado. En mi caso utilize JpaMessageIdRepository dentro de grails y fue muy simple utilizar este componente solo agregue la dependencia de camel sql en el buildConfig.groovy</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">runtime</span> <span class="err">&#39;</span><span class="n">org</span><span class="o">.</span><span class="na">apache</span><span class="o">.</span><span class="na">camel</span><span class="o">:</span><span class="n">camel</span><span class="o">-</span><span class="nl">sql:</span><span class="mf">2.13</span><span class="o">.</span><span class="mi">0</span><span class="err">’</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>y agregue el bean en resources.groovy</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="kn">import</span> <span class="nn">org.apache.camel.processor.idempotent.jdbc.JdbcMessageIdRepository</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">beans</span> <span class="o">=</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">messageIdRepository</span><span class="o">(</span><span class="n">JdbcMessageIdRepository</span><span class="o">,</span><span class="n">ref</span><span class="o">(</span><span class="s1">&#39;dataSource&#39;</span><span class="o">),</span><span class="s1">&#39;jdbcProcessorName&#39;</span><span class="o">)</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>y por ultimo agregue el <em>idempotentComponent</em>.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Personalizar Notificaciones De Correo en Jenkins]]></title>
+    <link href="http://blog.makingdevs.com/2014/11/06/personalizar-notificaciones-de-correo-en-jenkins/"/>
+    <updated>2014-11-06T18:08:56-06:00</updated>
+    <id>http://blog.makingdevs.com/2014/11/06/personalizar-notificaciones-de-correo-en-jenkins</id>
+    <content type="html"><![CDATA[<p>Las <strong>notificaciones</strong> son básicas para la correcta comunicación de los involucrados de nuestros proyectos como: <em>Stakeholders/ Key Users / Developers / Clientes / Testers</em>.</p>
+
+<p>Por esta razón te recomiendo personalizar las notificaciones por defecto de <strong>Jenkins</strong>.</p>
+
+<p>Objetivo: Informar los despliegues desde Jenkins por correo, usando el <a href="https://wiki.jenkins-ci.org/display/JENKINS/Email-ext+plugin">plugin: Email-ext</a></p>
+
+<!-- more -->
+
+
+<p>Procedimiento:</p>
+
+<ol>
+<li><p>Instalar el plugin desde la consola de administración de Jenkins. <img src="http://blog.makingdevs.com/images/IC-Jenkins-PlugIn-Email-Ext_01.jpg" alt="Screenshot 1" /></p></li>
+<li><p>Configurar la cuenta de correo saliente SMTP, te recomiendo que uses el autenticado.<img src="http://blog.makingdevs.com/images/IC-Jenkins-PlugIn-Email-Ext_02.jpg" alt="Screenshot 2" /></p></li>
+<li><p>Configurar el plugin: Email-ext con información base de los usuarios a notificar ( <em>Stake Holders/ Key Users / Developers / Clientes / Testers</em> ) en las listas por DEFAULT de la configuración general a nivel. Esto te permitirá contar con la misma configuración para tus N tareas de despliegue. <img src="http://blog.makingdevs.com/images/IC-Jenkins-PlugIn-Email-Ext_03.jpg" alt="Screenshot 3" /></p></li>
+<li><p>Para personalizar el correo que se enviará, copiaremos un<strong>Template</strong> dentro del Home de Jenkins, <em>static-analysis.jelly</em> y asignando nombre relacionado al proyecto. Si requieres más información, consulta la <a href="https://github.com/jenkinsci/email-ext-plugin/tree/master/src/main/resources/hudson/plugins/emailext/templates">documentación del plugin en GitHub</a>. Este template es un <strong>HTML el cual puedes editar su contenido</strong>, incluyendo titulo del proyecto, una imagen, etc. <img src="http://blog.makingdevs.com/images/IC-Jenkins-PlugIn-Email-Ext_04.jpg" alt="Screenshot 4" /></p></li>
+<li><p>Añade en una tarea de Jenkins, un paso al finalizar, usando Email notification. <img src="http://blog.makingdevs.com/images/IC-Jenkins-PlugIn-Email-Ext_05.jpg" alt="Screenshot 5" /></p></li>
+<li><p>Ejecuta tu tarea y verifica el correo recibido. <img src="http://blog.makingdevs.com/images/IC-Jenkins-PlugIn-Email-Ext_06.jpg" alt="Screenshot 6" /></p></li>
+</ol>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Inyección De Métodos Por Categorías Y TimeCategory]]></title>
+    <link href="http://blog.makingdevs.com/2014/09/16/inyeccion-de-metodos-por-categorias-y-timecategory/"/>
+    <updated>2014-09-16T18:55:30-05:00</updated>
+    <id>http://blog.makingdevs.com/2014/09/16/inyeccion-de-metodos-por-categorias-y-timecategory</id>
+    <content type="html"><![CDATA[<h2>Acerca de las categorías</h2>
+
+<p>En Groovy se pueden inyectar métodos de algunas formas, uno de ellos es a través del uso de categorías, la cual nos da inyección temporal y controlada de dichos elementos. Para hacerlo las clases que son categorías deben de cumplir con cierta estructura:</p>
+
+<ul>
+<li>Los métodos de la clase deben ser definidos como estáticos</li>
+<li>El primer argumento de dicho método define el tipo sobre el cual se inyectarían los nuevos métodos</li>
+<li>Deben de ser usados dentro del alcance de un closure con ayuda de la palabra reservada <code>use</code></li>
+</ul>
+
+
+<!-- more -->
+
+
+<p>Un ejemplo podría ser el siguiente:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="kd">class</span> <span class="nc">NameUtil</span><span class="o">{</span>
+</span><span class='line'>    <span class="kd">static</span> <span class="nf">prettify</span><span class="o">(</span><span class="n">String</span> <span class="n">name</span><span class="o">){</span>
+</span><span class='line'>        <span class="n">name</span><span class="o">.</span><span class="na">trim</span><span class="o">().</span><span class="na">split</span><span class="o">(</span><span class="s1">&#39; &#39;</span><span class="o">).</span><span class="na">grep</span> <span class="o">{</span> <span class="n">it</span><span class="o">.</span><span class="na">size</span><span class="o">()</span> <span class="o">}*.</span><span class="na">capitalize</span><span class="o">().</span><span class="na">join</span><span class="o">(</span><span class="s1">&#39; &#39;</span><span class="o">)</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">use</span> <span class="n">NameUtil</span><span class="o">,</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">println</span> <span class="s2">&quot;  josé   juan    reyes    zuñiga   &quot;</span><span class="o">.</span><span class="na">prettify</span><span class="o">()</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Adicionalmente, podemos crear dicha inyección de métodos con ayuda de la anotación <code>@Category</code>, que prácticamente nos facilita a que cualquier clase pueda ser usada como categoría, pues no necesariamente los métodos tiene que ser estáticos y el contexto del argumento para la inyección es el objeto <code>this</code> en donde se esté intentando usar.</p>
+
+<h2>Uso de GroovyTime</h2>
+
+<p>La clase <code>TimeCategory</code> es una clase que tiene una serie de métodos de conveniencia para el manejo del tiempo, formando así un DSL, con el que podemos operar. Y con ayuda de la clase <code>Duration</code> complementamos algunas operaciones que se pueden realizar en el contexto de los objetos que estemos usando.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="kn">import</span> <span class="nn">groovy.time.TimeCategory</span>
+</span><span class='line'>
+</span><span class='line'><span class="nf">use</span> <span class="o">(</span> <span class="n">TimeCategory</span> <span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">println</span> <span class="mi">2</span><span class="o">.</span><span class="na">hours</span><span class="o">.</span><span class="na">ago</span>
+</span><span class='line'>    <span class="n">println</span> <span class="mi">30</span><span class="o">.</span><span class="na">minutes</span><span class="o">.</span><span class="na">from</span> <span class="c1">// TimeDuration</span>
+</span><span class='line'>    <span class="n">println</span> <span class="mi">30</span><span class="o">.</span><span class="na">minutes</span><span class="o">.</span><span class="na">from</span><span class="o">.</span><span class="na">now</span>
+</span><span class='line'>    <span class="n">println</span> <span class="mi">40</span><span class="o">.</span><span class="na">minutes</span> <span class="o">+</span> <span class="mi">30</span><span class="o">.</span><span class="na">minutes</span><span class="o">.</span><span class="na">from</span><span class="o">.</span><span class="na">now</span>
+</span><span class='line'>    <span class="n">println</span> <span class="mi">30</span><span class="o">.</span><span class="na">minutes</span><span class="o">.</span><span class="na">ago</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kt">def</span> <span class="n">today</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Date</span><span class="o">()</span>
+</span><span class='line'>    <span class="n">println</span> <span class="n">today</span> <span class="o">-</span> <span class="mi">3</span><span class="o">.</span><span class="na">years</span>
+</span><span class='line'>    <span class="n">println</span> <span class="n">today</span> <span class="o">+</span> <span class="mi">4</span><span class="o">.</span><span class="na">weeks</span>
+</span><span class='line'>    <span class="n">println</span> <span class="n">today</span> <span class="o">+</span> <span class="mi">90</span><span class="o">.</span><span class="na">minutes</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Para que consideres el conjunto de operaciones que tienes disponibles te recomendamos visitar la documentación de <a href="http://groovy.codehaus.org/api/groovy/time/TimeCategory.html">TimeCategory</a> y <a href="http://groovy.codehaus.org/api/groovy/time/Duration.html">Duration</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Lectura De Correo Con Apache Camel + Groovy]]></title>
+    <link href="http://blog.makingdevs.com/2014/08/26/lectura-de-correo-con-apache-camel-plus-groovy/"/>
+    <updated>2014-08-26T18:29:26-05:00</updated>
+    <id>http://blog.makingdevs.com/2014/08/26/lectura-de-correo-con-apache-camel-plus-groovy</id>
+    <content type="html"><![CDATA[<p>Hola a todos es un gusto contribuir al blog de makingdevs.com y mostrarles un poco de lo que es Apache Camel, para ellos hablaremos primero de su definición.</p>
+
+<p><a href="http://camel.apache.org/">Apache Camel</a> es un framework de integración de código abierto, basado en <a href="http://www.enterpriseintegrationpatterns.com/toc.html">Enterprise Integration Patterns (Patrones de Integración Empresarial)</a>. Camel nos permite definir las reglas de enrutamiento o mediación con ayuda de un lenguaje especifico (DSL), incluyendo un API basada en Java o mediante una configuración XML. El uso de un lenguaje específico del dominio significa que Apache Camel es capaz de soportar un comportamiento automático de las reglas de ruteo en un entorno de desarrollo integrado usando código Java sin gran cantidad de archivos de configuración XML.</p>
+
+<!-- more -->
+
+
+<p>Con ayuda de camel y Mail Component (componente de e-mail de Camel) realize un script para la lectura de un correo Gmail, filtrando el procesamiento de los mismo por su subject y escupiendo el contenido a un endPoint de log.</p>
+
+<p>Pero si son curiosos ustedes se preguntaran <strong>¿Que es un endPoint?</strong>. Un endpoint es la interface a través de la cual los sistemas externos pueden enviar y recibir mensajes, permitiendo así la integración de sistemas en Camel. La función de un endpoint es crear productores y consumidores, lo que nos permite usar este endpoint como to y from dentro de una ruta Camel. Asi se denota un endpoint URIs siguiendo el siguiente formato: <strong>[componente]:[contexto]?[opciones]</strong>.</p>
+
+<h3>Producers y Consumers</h3>
+
+<p>Un productor es el encargado de proveer los mensajes, siendo el puente de comunicación con el sistema externo, no procesa la información solo provee el mensaje, en este ejemplo el correo es el productor. Un consumidor es el encargado de recibir el mensaje que el productor obtiene y así procesar el mensaje o inclusive partir dicho mensaje para que sea procesado por otro consumidor. Bueno después de una pequeña introducción a Camel les muestro mi script en la cual hago lectura del correo filtro los mensajes por su subject y los arrojo a un log y no solo puede ser un log gracias a camel este puede ser un bean, FTP, intancia de amazon, un archivo, <a href="http://camel.apache.org/components.html">casi cualquier cosa</a>. Nota necesitamos las dependencias de camel core y camel mail para el siguiente ejemplo:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="nd">@Grab</span><span class="o">(</span><span class="n">group</span><span class="o">=</span><span class="s1">&#39;org.apache.camel&#39;</span><span class="o">,</span> <span class="n">module</span><span class="o">=</span><span class="s1">&#39;camel-core&#39;</span><span class="o">,</span> <span class="n">version</span><span class="o">=</span><span class="s1">&#39;1.6.0&#39;</span><span class="o">)</span>
+</span><span class='line'><span class="nd">@Grab</span><span class="o">(</span><span class="n">group</span><span class="o">=</span><span class="s1">&#39;org.apache.camel&#39;</span><span class="o">,</span> <span class="n">module</span><span class="o">=</span><span class="s1">&#39;camel-mail&#39;</span><span class="o">,</span> <span class="n">version</span><span class="o">=</span><span class="s1">&#39;1.6.0&#39;</span><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.apache.camel.impl.DefaultCamelContext</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.apache.camel.builder.RouteBuilder</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">def</span> <span class="n">camelContext</span> <span class="o">=</span> <span class="k">new</span> <span class="n">DefaultCamelContext</span><span class="o">()</span>
+</span><span class='line'><span class="n">camelContext</span><span class="o">.</span><span class="na">addRoutes</span><span class="o">(</span><span class="k">new</span> <span class="n">RouteBuilder</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>  <span class="kt">def</span> <span class="kt">void</span> <span class="nf">configure</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">from</span><span class="o">(</span><span class="s2">&quot;imaps://imap.gmail.com?username=user&quot;</span>
+</span><span class='line'>    <span class="o">+</span> <span class="s2">&quot;&amp;password=password&quot;</span>
+</span><span class='line'>    <span class="o">+</span> <span class="s2">&quot;&amp;deleteProcessedMessages=false&quot;</span>
+</span><span class='line'>    <span class="o">+</span> <span class="s2">&quot;&amp;processOnlyUnseenMessages=true&quot;</span>
+</span><span class='line'>    <span class="o">+</span> <span class="s2">&quot;&amp;consumer.delay=6000&quot;</span><span class="o">)</span>
+</span><span class='line'>    <span class="o">.</span><span class="na">filter</span> <span class="o">{</span><span class="n">it</span><span class="o">.</span><span class="na">in</span><span class="o">.</span><span class="na">headers</span><span class="o">.</span><span class="na">subject</span><span class="o">.</span><span class="na">contains</span><span class="o">(</span><span class="s1">&#39;camel&#39;</span><span class="o">)}</span>
+</span><span class='line'>    <span class="o">.</span><span class="na">to</span><span class="o">(</span><span class="s2">&quot;log:groovymail?showAll=true&amp;multiline=true&quot;</span><span class="o">)</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">})</span>
+</span><span class='line'><span class="n">camelContext</span><span class="o">.</span><span class="na">start</span><span class="o">()</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">addShutdownHook</span><span class="o">{</span> <span class="n">camelContext</span><span class="o">.</span><span class="na">stop</span><span class="o">()</span> <span class="o">}</span>
+</span><span class='line'><span class="kd">synchronized</span><span class="o">(</span><span class="k">this</span><span class="o">){</span> <span class="k">this</span><span class="o">.</span><span class="na">wait</span><span class="o">()</span> <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Notaran que al final del script hay una declaración <code>camelContext.start()</code>. El <em>CamelContext</em> representa una sola base de reglas de enrutamiento Camel. Se utiliza el CamelContext de una manera similar al ApplicationContext. Y asi tenemos un pequeño ejemplo de lectura de correo con ayuda de Camel.</p>
+
+<p>Como vemos Camel nos permite integrar sistemas muy facilmente. Espero les agradece este pequeño articulo y les sea de gran ayuda, dudas y comentarios son bienvenidas. Salu2</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Introduccion a Ratpack]]></title>
+    <link href="http://blog.makingdevs.com/2014/08/19/introduccion-a-ratpack/"/>
+    <updated>2014-08-19T00:34:28-05:00</updated>
+    <id>http://blog.makingdevs.com/2014/08/19/introduccion-a-ratpack</id>
+    <content type="html"><![CDATA[<p>Es bueno estar de vuelta escribiendo, ya ha pasado bastante tiempo desde que hice un post así que vamos a ver algo que me ayudó en un curso. El día de hoy hablaremos de Ratpack y para ello primero vamos a dar una pequeña introducción de lo que es. Ratpack, como su página lo dice, es un conjunto de librerías de JAVA que facilita la rapidez, eficiencia, evolución y pruebas de aplicaciones HTTP, está construida sobre Netty y por ello posee muchos de los beneficios del motor del mismo. Ratpack se enfoca en permitir applicaciones HTTP para ser eficientes, modulares y adaptativas a los nuevos requerimientos, tecnologías y buenas pruebas sobre el tiempo. Bueno vamos a dejar de momento las definiciones y vamos a lo bonito, el código.</p>
+
+<!-- more -->
+
+
+<p>Para este post vamos a hacer uso de gvm y de lazybones, para ello procederemos a instalar <a href="http://gvmtool.net/" title="gvm">gvm</a> Una vez listo procedemos a ejecutar el siguiente comando :</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>gvm install lazybones
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Y con ello tendremos lazybones instalado en nuestra máquina&hellip; bueno y ¿para que necesitamos lazybones si es un post sobre Ratpack? Lazybones es una herramienta de línea de comandos que nos permite generar una estructura de un proyecto para cualquier framework basado en plantillas predefinidas. Y Ratpack tiene varias plantillas para lazybones que pueden ser encontradas en</p>
+
+<p><a href="https://bintray.com/">Bintray</a> en el apartado de <a href="https://bintray.com/ratpack/lazybones">ratpack/lazybones repository</a>. Si desean saber un poco más de Lazybones pueden encontrarlo en la <a href="https://github.com/pledbrook/lazybones#running-it">documentación</a> Para crear la estructura del proyecto ejecutaremos la siguiente sentencia :</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>lazybones create ratpack contact-book
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Al ejecutar la instrucción nos aparecerá en pantalla una serie de instrucciones y también lo que ganamos al ejecutarla. A parte nos da la estructura de directorios que se genera y nos dice como levantar nuestra aplicación.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>  &lt;proj&gt;
+</span><span class='line'>    <span class="p">|</span>
+</span><span class='line'>    +- src
+</span><span class='line'>        <span class="p">|</span>
+</span><span class='line'>        +- ratpack
+</span><span class='line'>        <span class="p">|</span>     <span class="p">|</span>
+</span><span class='line'>        <span class="p">|</span>     +- ratpack.groovy
+</span><span class='line'>        <span class="p">|</span>     +- ratpack.properties
+</span><span class='line'>        <span class="p">|</span>     +- public          // Static assets in here
+</span><span class='line'>        <span class="p">|</span>          <span class="p">|</span>
+</span><span class='line'>        <span class="p">|</span>          +- images
+</span><span class='line'>        <span class="p">|</span>          +- lib
+</span><span class='line'>        <span class="p">|</span>          +- scripts
+</span><span class='line'>        <span class="p">|</span>          +- styles
+</span><span class='line'>        <span class="p">|</span>
+</span><span class='line'>        +- main
+</span><span class='line'>        <span class="p">|</span>   <span class="p">|</span>
+</span><span class='line'>        <span class="p">|</span>   +- groovy
+</span><span class='line'>                 <span class="p">|</span>
+</span><span class='line'>                 +- // App classes in here!
+</span><span class='line'>        <span class="p">|</span>
+</span><span class='line'>        +- <span class="nb">test</span>
+</span><span class='line'>            <span class="p">|</span>
+</span><span class='line'>            +- groovy
+</span><span class='line'>                 <span class="p">|</span>
+</span><span class='line'>                 +- // Spock tests in here!
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Para levantar el ejemplo nos movemos a la carpeta con cd, ejecutamos lo siguiente y nos preparamos un café porque va a descargar dependencias XD:
+<code>./gradlew run</code></p>
+
+<p>Una vez que terminó de ejecutarse podemos ver lo que se creó en la url <a href="http://localhost:5050">http://localhost:5050</a> como podrán observar la página que se creó no es gran cosa pero ya tenemos lo necesario para trabajar en una aplicación un poco más compleja como iremos viendo a lo largo de este post. Como podremos ver en el <strong>README.md</strong> existen prácticamente tres archivos principales:</p>
+
+<ul>
+<li><strong>build.gradle</strong></li>
+<li><strong>Ratpack.groovy</strong></li>
+<li><strong>index.html</strong></li>
+</ul>
+
+
+<p>El primero es un archivo de gradle (para los que no lo han manejado o conocen de él pueden revisar el siguiente <a href="http://www.gradle.org/documentation">link</a> pero a grandes rasgos gradle vendría siendo lo mismo que Maven pero con drogas XD. El segundo archivo es donde usualmente sucede la magia ya que es donde se resuelven las urls y se hace todo el show necesario. Y el tercer archivo no es más que una plantilla html que se visualiza a través del segundo archivo. Con los arvhivos que vamos a estar trabajando de momento son <strong>index.html</strong> y <strong>Ratpack.groovy</strong>. En el tag body del html dejamos lo siguiente:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;body&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;section&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;h1&gt;</span>${model.title}<span class="nt">&lt;/h1&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;p&gt;</span>This is the main page of your contacts<span class="nt">&lt;/p&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/section&gt;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nt">&lt;footer</span> <span class="na">class=</span><span class="s">&quot;site-footer&quot;</span><span class="nt">&gt;&lt;/footer&gt;</span>
+</span><span class='line'><span class="nt">&lt;/body&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Y en el <strong>Ratpack.groovy</strong> dejamos lo siguiente:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="kn">import</span> <span class="nn">static</span> <span class="n">ratpack</span><span class="o">.</span><span class="na">groovy</span><span class="o">.</span><span class="na">Groovy</span><span class="o">.</span><span class="na">groovyTemplate</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">static</span> <span class="n">ratpack</span><span class="o">.</span><span class="na">groovy</span><span class="o">.</span><span class="na">Groovy</span><span class="o">.</span><span class="na">ratpack</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">ratpack</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">handlers</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">get</span> <span class="o">{</span>
+</span><span class='line'>      <span class="n">render</span> <span class="nf">groovyTemplate</span><span class="o">(</span><span class="s2">&quot;index.html&quot;</span><span class="o">,</span> <span class="nl">title:</span> <span class="s2">&quot;Contact book&quot;</span><span class="o">)</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">assets</span> <span class="s2">&quot;public&quot;</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Recargamos la página y vemos el cambio. Ahora vamos a añadir un form para poder agregar a un elemento a la lista de contactos. Para ello agregamos un link a nuestro <em>index.html</em></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'>  <span class="nt">&lt;body&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;section&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;h1&gt;</span>${model.title}<span class="nt">&lt;/h1&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;p&gt;</span>This is the main page of your contacts<span class="nt">&lt;/p&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/section&gt;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;create&quot;</span><span class="nt">&gt;</span>Create contact<span class="nt">&lt;/a&gt;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nt">&lt;footer</span> <span class="na">class=</span><span class="s">&quot;site-footer&quot;</span><span class="nt">&gt;&lt;/footer&gt;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c">&lt;!-- build:js scripts/jquery.js --&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;lib/jquery/jquery.min.js&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+</span><span class='line'>    <span class="c">&lt;!-- endbuild --&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/body&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Ahora para visualizar la nueva página le agregamos al archivo <strong>Ratpack.groovy</strong> lo siguiente :</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">get</span><span class="o">(</span><span class="s1">&#39;contacts/new&#39;</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">render</span> <span class="nf">groovyTemplate</span><span class="o">(</span><span class="s2">&quot;contacts/new.html&quot;</span><span class="o">,</span> <span class="nl">title:</span> <span class="s2">&quot;New contact&quot;</span><span class="o">)</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Y dentro de la carpeta de templates creamos una carpeta llamada contacts y dentro de ella agregamos un archivo llamado <strong>new.html</strong></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="cp">&lt;!doctype html&gt;</span>
+</span><span class='line'>  <span class="c">&lt;!--[if lt IE 7]&gt;      &lt;html class=&quot;no-js lt-ie9 lt-ie8 lt-ie7&quot;&gt; &lt;![endif]--&gt;</span>
+</span><span class='line'>  <span class="c">&lt;!--[if IE 7]&gt;         &lt;html class=&quot;no-js lt-ie9 lt-ie8&quot;&gt; &lt;![endif]--&gt;</span>
+</span><span class='line'>  <span class="c">&lt;!--[if IE 8]&gt;         &lt;html class=&quot;no-js lt-ie9&quot;&gt; &lt;![endif]--&gt;</span>
+</span><span class='line'>  <span class="c">&lt;!--[if gt IE 8]&gt;&lt;!--&gt;</span> <span class="nt">&lt;html</span> <span class="na">class=</span><span class="s">&quot;no-js&quot;</span><span class="nt">&gt;</span> <span class="c">&lt;!--&lt;![endif]--&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;head&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;meta</span> <span class="na">charset=</span><span class="s">&quot;utf-8&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;meta</span> <span class="na">http-equiv=</span><span class="s">&quot;X-UA-Compatible&quot;</span> <span class="na">content=</span><span class="s">&quot;IE=edge,chrome=1&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;title&gt;</span>Ratpack: ${model.title}<span class="nt">&lt;/title&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;meta</span> <span class="na">name=</span><span class="s">&quot;description&quot;</span> <span class="na">content=</span><span class="s">&quot;&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;meta</span> <span class="na">name=</span><span class="s">&quot;viewport&quot;</span> <span class="na">content=</span><span class="s">&quot;width=device-width&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/head&gt;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nt">&lt;body&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;section&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;h1&gt;</span>${model.title}<span class="nt">&lt;/h1&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/section&gt;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;/&quot;</span><span class="nt">&gt;</span>Home<span class="nt">&lt;/a&gt;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nt">&lt;footer</span> <span class="na">class=</span><span class="s">&quot;site-footer&quot;</span><span class="nt">&gt;&lt;/footer&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/body&gt;</span>
+</span><span class='line'><span class="nt">&lt;/html&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Así para cuando regresemos a la página y la recarguemos podemos ver el link y hasta el momento navegar la página sin problemas. Ahora vamos a agregar un pequeño formulario para poder capturar los datos del contacto, como son:</p>
+
+<ul>
+<li><strong>Nombre</strong></li>
+<li><strong>Apellidos</strong></li>
+<li><strong>Correo</strong></li>
+<li><strong>Alias</strong></li>
+<li><strong>Teléfono</strong></li>
+</ul>
+
+
+<p>Para ello vamos a hacer un formulario común y silvestre en el html:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'>  <span class="nt">&lt;body&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;section&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;h1&gt;</span>${model.title}<span class="nt">&lt;/h1&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/section&gt;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nt">&lt;form</span> <span class="na">action=</span><span class="s">&quot;/contacts&quot;</span> <span class="na">method=</span><span class="s">&quot;post&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;div&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;label</span> <span class="na">for=</span><span class="s">&quot;name&quot;</span><span class="nt">/&gt;</span>Name<span class="nt">&lt;/label&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">&quot;text&quot;</span> <span class="na">name=</span><span class="s">&quot;name&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="nt">&lt;div&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;label</span> <span class="na">for=</span><span class="s">&quot;lastName&quot;</span><span class="nt">/&gt;</span>Last name<span class="nt">&lt;/label&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">&quot;text&quot;</span> <span class="na">name=</span><span class="s">&quot;lastName&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="nt">&lt;div&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;label</span> <span class="na">for=</span><span class="s">&quot;email&quot;</span><span class="nt">/&gt;</span>Email<span class="nt">&lt;/label&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">&quot;text&quot;</span> <span class="na">name=</span><span class="s">&quot;email&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="nt">&lt;div&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;label</span> <span class="na">for=</span><span class="s">&quot;nickname&quot;</span><span class="nt">/&gt;</span>Nickname<span class="nt">&lt;/label&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">&quot;text&quot;</span> <span class="na">name=</span><span class="s">&quot;nickname&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="nt">&lt;div&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;label</span> <span class="na">for=</span><span class="s">&quot;phone&quot;</span><span class="nt">/&gt;</span>Phone<span class="nt">&lt;/label&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">&quot;text&quot;</span> <span class="na">name=</span><span class="s">&quot;phone&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="nt">&lt;button</span> <span class="na">type=</span><span class="s">&quot;submit&quot;</span><span class="nt">&gt;</span> Create <span class="nt">&lt;/button&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/form&gt;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;/&quot;</span><span class="nt">&gt;</span>Home<span class="nt">&lt;/a&gt;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nt">&lt;footer</span> <span class="na">class=</span><span class="s">&quot;site-footer&quot;</span><span class="nt">&gt;&lt;/footer&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/body&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Una vez que tenemos eso lo demás es cuestión de recibirlo y procesarlo para ello hacemos uso del handler post con el path al que va a responder y vamos a agregarlo a una variable global (esto es para efectos de ejemplo no intenten esto en casa o sus trabajos XD)</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">ratpack</span> <span class="o">{</span>
+</span><span class='line'>  <span class="kt">def</span> <span class="n">contacts</span> <span class="o">=</span> <span class="o">[]</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">handlers</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">get</span> <span class="o">{</span>
+</span><span class='line'>      <span class="n">render</span> <span class="nf">groovyTemplate</span><span class="o">(</span><span class="s2">&quot;index.html&quot;</span><span class="o">,</span> <span class="nl">title:</span> <span class="s2">&quot;Contact book&quot;</span><span class="o">)</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">post</span><span class="o">(</span><span class="s1">&#39;contacts&#39;</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="n">Form</span> <span class="n">form</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="na">parse</span><span class="o">(</span><span class="n">Form</span><span class="o">)</span>
+</span><span class='line'>      <span class="kt">def</span> <span class="n">contact</span> <span class="o">=</span> <span class="o">[:]</span>
+</span><span class='line'>      <span class="n">contact</span><span class="o">.</span><span class="na">id</span> <span class="o">=</span> <span class="n">contacts</span> <span class="o">?</span> <span class="n">contacts</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">max</span><span class="o">()</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">:</span> <span class="mi">1</span>
+</span><span class='line'>      <span class="n">contact</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="na">name</span>
+</span><span class='line'>      <span class="n">contact</span><span class="o">.</span><span class="na">lastName</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="na">lastName</span>
+</span><span class='line'>      <span class="n">contact</span><span class="o">.</span><span class="na">email</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="na">email</span>
+</span><span class='line'>      <span class="n">contact</span><span class="o">.</span><span class="na">nickname</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="na">nickname</span>
+</span><span class='line'>      <span class="n">contact</span><span class="o">.</span><span class="na">phone</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="na">phone</span>
+</span><span class='line'>      <span class="n">contacts</span> <span class="o">&lt;&lt;</span> <span class="n">contact</span>
+</span><span class='line'>      <span class="n">redirect</span> <span class="s2">&quot;/contacts/${contact.id}&quot;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">get</span><span class="o">(</span><span class="s1">&#39;contacts/new&#39;</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="n">render</span> <span class="nf">groovyTemplate</span><span class="o">(</span><span class="s2">&quot;contacts/new.html&quot;</span><span class="o">,</span> <span class="nl">title:</span> <span class="s2">&quot;New contact&quot;</span><span class="o">)</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">assets</span> <span class="s2">&quot;public&quot;</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Como podrán observar mediante el <code>context.parse(Form)</code> obtenemos los datos enviados en la petición y de esa manera podemos acceder a los datos enviados como si fuera un mapa de groovy. Al final de la petición hacemos un redirect para ver los datos que se han creado con esa petición, pero de momento esto no funciona así que vamos a agregar un nuevo handler con algo que se le llama <em>pathTokens</em> y para ello agregamos lo siguiente:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'>  <span class="n">get</span><span class="o">(</span><span class="s1">&#39;contacts/:id&#39;</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kt">def</span> <span class="n">id</span> <span class="o">=</span> <span class="n">pathTokens</span><span class="o">.</span><span class="na">asLong</span><span class="o">(</span><span class="s1">&#39;id&#39;</span><span class="o">)</span>
+</span><span class='line'>    <span class="kt">def</span> <span class="n">contact</span> <span class="o">=</span> <span class="n">contacts</span><span class="o">.</span><span class="na">find</span> <span class="o">{</span>
+</span><span class='line'>      <span class="n">it</span><span class="o">.</span><span class="na">id</span> <span class="o">==</span> <span class="n">id</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="n">render</span> <span class="nf">groovyTemplate</span><span class="o">(</span><span class="s2">&quot;contacts/show.html&quot;</span><span class="o">,</span> <span class="nl">contact:</span><span class="n">contact</span><span class="o">)</span>
+</span><span class='line'>  <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Así mismo agregamos la página que va a visualizar los datos del contacto dentro de la carpeta <em>contacts</em>:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;html&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;head&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;title&gt;</span>Ratpack: Show contact<span class="nt">&lt;/title&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/head&gt;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nt">&lt;body&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;section&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;h1&gt;</span>Show contact<span class="nt">&lt;/h1&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/section&gt;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nt">&lt;div&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;div&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;label</span> <span class="na">for=</span><span class="s">&quot;name&quot;</span><span class="nt">/&gt;</span>Name : <span class="nt">&lt;/label&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;span&gt;&lt;strong&gt;</span> ${model.contact.name} <span class="nt">&lt;/strong&gt;&lt;/span&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="nt">&lt;div&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;label</span> <span class="na">for=</span><span class="s">&quot;lastName&quot;</span><span class="nt">/&gt;</span>Last name : <span class="nt">&lt;/label&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;span&gt;&lt;strong&gt;</span> ${model.contact.lastName} <span class="nt">&lt;/strong&gt;&lt;/span&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="nt">&lt;div&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;label</span> <span class="na">for=</span><span class="s">&quot;email&quot;</span><span class="nt">/&gt;</span>Email : <span class="nt">&lt;/label&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;span&gt;&lt;strong&gt;</span> ${model.contact.email} <span class="nt">&lt;/strong&gt;&lt;/span&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="nt">&lt;div&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;label</span> <span class="na">for=</span><span class="s">&quot;nickname&quot;</span><span class="nt">/&gt;</span>Nickname : <span class="nt">&lt;/label&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;span&gt;&lt;strong&gt;</span> ${model.contact.nickname} <span class="nt">&lt;/strong&gt;&lt;/span&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="nt">&lt;div&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;label</span> <span class="na">for=</span><span class="s">&quot;phone&quot;</span><span class="nt">/&gt;</span>Phone : <span class="nt">&lt;/label&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;span&gt;&lt;strong&gt;</span> ${model.contact.phone} <span class="nt">&lt;/strong&gt;&lt;/span&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nt">&lt;ul&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;li&gt;</span> <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;/&quot;</span><span class="nt">&gt;</span>Home<span class="nt">&lt;/a&gt;</span> <span class="nt">&lt;/li&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;li&gt;</span> <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;contacts/new&quot;</span><span class="nt">&gt;</span>New contact<span class="nt">&lt;/a&gt;</span> <span class="nt">&lt;/li&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/ul&gt;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nt">&lt;/body&gt;</span>
+</span><span class='line'><span class="nt">&lt;/html&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Ahora vamos a visualizar nuestra lista de contactos y para ello agregaremos un nuevo <em>handler</em> y un nuevo elemento llamado <em>byMethod</em>:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'>  <span class="n">handler</span><span class="o">(</span><span class="s2">&quot;contacts&quot;</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">byMethod</span> <span class="o">{</span>
+</span><span class='line'>      <span class="n">get</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">render</span> <span class="nf">groovyTemplate</span><span class="o">(</span><span class="s2">&quot;contacts/list.html&quot;</span><span class="o">,</span> <span class="nl">contacts:</span> <span class="n">contacts</span><span class="o">)</span>
+</span><span class='line'>      <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="n">post</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">Form</span> <span class="n">form</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="na">parse</span><span class="o">(</span><span class="n">Form</span><span class="o">)</span>
+</span><span class='line'>        <span class="kt">def</span> <span class="n">contact</span> <span class="o">=</span> <span class="o">[:]</span>
+</span><span class='line'>        <span class="n">contact</span><span class="o">.</span><span class="na">id</span> <span class="o">=</span> <span class="n">contacts</span> <span class="o">?</span> <span class="n">contacts</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">max</span><span class="o">()</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">:</span> <span class="mi">1</span>
+</span><span class='line'>        <span class="n">contact</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="na">name</span>
+</span><span class='line'>        <span class="n">contact</span><span class="o">.</span><span class="na">lastName</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="na">lastName</span>
+</span><span class='line'>        <span class="n">contact</span><span class="o">.</span><span class="na">email</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="na">email</span>
+</span><span class='line'>        <span class="n">contact</span><span class="o">.</span><span class="na">nickname</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="na">nickname</span>
+</span><span class='line'>        <span class="n">contact</span><span class="o">.</span><span class="na">phone</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="na">phone</span>
+</span><span class='line'>        <span class="n">contacts</span> <span class="o">&lt;&lt;</span> <span class="n">contact</span>
+</span><span class='line'>        <span class="n">redirect</span> <span class="s2">&quot;/contacts/${contact.id}&quot;</span>
+</span><span class='line'>      <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>  <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Lo que hará el <em>handler</em> es manejar la url &ldquo;contacts&rdquo; y delegarla por al método por el cual se haya realizado la petición en el caso de GET visualizará la lista de contactos pero si es por POST agregará los datos del contacto y después de agregarse se visualizará la información de dicho contacto. También agregaremos un link a la lista de contactos para poder visualizar cada uno de los datos de manera individual esto es por si se tiene información extra que no se muestre en el detalle general de la lista de contactos.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;html&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;head&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;title&gt;</span>Ratpack: Contact list<span class="nt">&lt;/title&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/head&gt;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nt">&lt;body&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;section&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;h1&gt;</span>Contact list<span class="nt">&lt;/h1&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/section&gt;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nt">&lt;div&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;table</span> <span class="na">border=</span><span class="s">&quot;1&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;thead&gt;</span>
+</span><span class='line'>          <span class="nt">&lt;tr&gt;</span>
+</span><span class='line'>            <span class="nt">&lt;th&gt;</span>Name<span class="nt">&lt;/th&gt;</span>
+</span><span class='line'>            <span class="nt">&lt;th&gt;</span>Last name<span class="nt">&lt;/th&gt;</span>
+</span><span class='line'>            <span class="nt">&lt;th&gt;</span>Phone<span class="nt">&lt;/th&gt;</span>
+</span><span class='line'>            <span class="nt">&lt;th&gt;</span>Email<span class="nt">&lt;/th&gt;</span>
+</span><span class='line'>            <span class="nt">&lt;th&gt;</span>Nickname<span class="nt">&lt;/th&gt;</span>
+</span><span class='line'>            <span class="nt">&lt;th&gt;</span>Show<span class="nt">&lt;/th&gt;</span>
+</span><span class='line'>          <span class="nt">&lt;/tr&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;/thead&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;tbody&gt;</span>
+</span><span class='line'>          <span class="err">&lt;</span>% model.contacts.each { %&gt;
+</span><span class='line'>            <span class="nt">&lt;tr&gt;</span>
+</span><span class='line'>              <span class="nt">&lt;td&gt;</span>${it.name}<span class="nt">&lt;/td&gt;</span>
+</span><span class='line'>              <span class="nt">&lt;td&gt;</span>${it.lastName}<span class="nt">&lt;/td&gt;</span>
+</span><span class='line'>              <span class="nt">&lt;td&gt;</span>${it.phone}<span class="nt">&lt;/td&gt;</span>
+</span><span class='line'>              <span class="nt">&lt;td&gt;</span>${it.email}<span class="nt">&lt;/td&gt;</span>
+</span><span class='line'>              <span class="nt">&lt;td&gt;</span>${it.nickname}<span class="nt">&lt;/td&gt;</span>
+</span><span class='line'>              <span class="nt">&lt;td&gt;</span> <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;/contacts/${it.id}&quot;</span><span class="nt">&gt;</span>Show<span class="nt">&lt;/a&gt;</span> <span class="nt">&lt;/td&gt;</span>
+</span><span class='line'>            <span class="nt">&lt;/tr&gt;</span>
+</span><span class='line'>          <span class="err">&lt;</span>% } %&gt;
+</span><span class='line'>        <span class="nt">&lt;/tbody&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;/table&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nt">&lt;ul&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;li&gt;</span> <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;/&quot;</span><span class="nt">&gt;</span>Home<span class="nt">&lt;/a&gt;</span> <span class="nt">&lt;/li&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;li&gt;</span> <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;contacts/new&quot;</span><span class="nt">&gt;</span>New contact<span class="nt">&lt;/a&gt;</span> <span class="nt">&lt;/li&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/ul&gt;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nt">&lt;/body&gt;</span>
+</span><span class='line'><span class="nt">&lt;/html&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Ya nos falta poco para poder tener un <em>CRUD</em> completo, solo nos falta eliminar y actualizar (casi nada XD). Así que para ello vamos a agregar un <em>handler</em> más y anidar un <em>byMethod</em> como lo hicimos con el POST de <em>contacts</em>. Para ello hacemos lo siguiente:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'>  <span class="n">handler</span><span class="o">(</span><span class="s2">&quot;contacts/:id&quot;</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">byMethod</span> <span class="o">{</span>
+</span><span class='line'>      <span class="n">get</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kt">def</span> <span class="n">id</span> <span class="o">=</span> <span class="n">pathTokens</span><span class="o">.</span><span class="na">asLong</span><span class="o">(</span><span class="s1">&#39;id&#39;</span><span class="o">)</span>
+</span><span class='line'>        <span class="kt">def</span> <span class="n">contact</span> <span class="o">=</span> <span class="n">contacts</span><span class="o">.</span><span class="na">find</span> <span class="o">{</span>
+</span><span class='line'>          <span class="n">it</span><span class="o">.</span><span class="na">id</span> <span class="o">==</span> <span class="n">id</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="n">render</span> <span class="nf">groovyTemplate</span><span class="o">(</span><span class="s2">&quot;contacts/show.html&quot;</span><span class="o">,</span> <span class="nl">contact:</span><span class="n">contact</span><span class="o">)</span>
+</span><span class='line'>      <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">delete</span> <span class="o">{</span>
+</span><span class='line'>          <span class="kt">def</span> <span class="n">id</span> <span class="o">=</span> <span class="n">pathTokens</span><span class="o">.</span><span class="na">asLong</span><span class="o">(</span><span class="s1">&#39;id&#39;</span><span class="o">)</span>
+</span><span class='line'>          <span class="n">contacts</span> <span class="o">=</span> <span class="n">contacts</span><span class="o">.</span><span class="na">findAll</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">it</span><span class="o">.</span><span class="na">id</span> <span class="o">!=</span> <span class="n">id</span>
+</span><span class='line'>          <span class="o">}</span>
+</span><span class='line'>          <span class="n">render</span> <span class="s2">&quot;ok&quot;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>  <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Ahora una pregunta, ¿Cómo hacemos para llamar a ese método desde la página? bueno para hacer eso vamos a requerir a jQuery y para ello ocuparemos <a href="http://bower.io/]">Bower</a> y para instalar jquery usamos el siguiente comando: <code>bower install jquery</code>.</p>
+
+<p>Esto nos creará una carpeta llamada <em>bower_components</em> que de momento moveremos a la carpeta de <strong>src/ratpack/public/lib</strong> para tenerla disponible en la aplicación:  <code>mv bower_components src/ratpack/public/lib/</code>.</p>
+
+<p>Una vez hecho procedemos a incluir el script en la app en la lista de contactos y agregamos un archivo más que es el que se encargará de eliminar el elemento.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'>  <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;lib/bower_components/jquery/dist/jquery.js&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;scripts/delete.js&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>El código de eliminar es relativamente sencillo ya que lo que vamos a hacer es que cada elemento con la clase delete vamos a añadir el evento click y vamos a realizar la llamada al server con los datos del href.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'>  <span class="nx">$</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">$</span><span class="p">(</span><span class="s2">&quot;.delete&quot;</span><span class="p">).</span><span class="nx">click</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">event</span><span class="p">.</span><span class="nx">preventDefault</span><span class="p">();</span>
+</span><span class='line'>      <span class="kd">var</span> <span class="nx">url</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">target</span><span class="p">).</span><span class="nx">attr</span><span class="p">(</span><span class="s1">&#39;href&#39;</span><span class="p">);</span>
+</span><span class='line'>      <span class="nx">$</span><span class="p">.</span><span class="nx">ajax</span><span class="p">({</span>
+</span><span class='line'>        <span class="nx">type</span><span class="o">:</span> <span class="s2">&quot;DELETE&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="nx">url</span><span class="o">:</span> <span class="nx">url</span><span class="p">,</span>
+</span><span class='line'>      <span class="p">}).</span><span class="nx">success</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">location</span><span class="p">.</span><span class="nx">reload</span><span class="p">();</span>
+</span><span class='line'>      <span class="p">});</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>  <span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Una vez realizado esto podremos ver como nuestros datos cambian al eliminar un elemento de la lista de contactos. Veamos ahora como editar un elemento. Para la edición vamos a hacerlo de la manera más fácil que podamos esto es agregaremos en el <em>byMethod</em> anterior el método POST, agregamos otro GET más para visualizar la pantalla de edición y actualizaremos los datos de ese elemento, para ello requerimos crear una pantalla nueva y agregarla a la navegación:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'>  <span class="n">get</span><span class="o">(</span><span class="s2">&quot;contacts/:id/edit&quot;</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kt">def</span> <span class="n">id</span> <span class="o">=</span> <span class="n">pathTokens</span><span class="o">.</span><span class="na">asLong</span><span class="o">(</span><span class="s1">&#39;id&#39;</span><span class="o">)</span>
+</span><span class='line'>    <span class="kt">def</span> <span class="n">contact</span> <span class="o">=</span> <span class="n">contacts</span><span class="o">.</span><span class="na">find</span> <span class="o">{</span>
+</span><span class='line'>      <span class="n">it</span><span class="o">.</span><span class="na">id</span> <span class="o">==</span> <span class="n">id</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="n">render</span> <span class="nf">groovyTemplate</span><span class="o">(</span><span class="s2">&quot;contacts/edit.html&quot;</span><span class="o">,</span> <span class="nl">title:</span><span class="s2">&quot;Editing contact&quot;</span><span class="o">,</span> <span class="nl">contact:</span><span class="n">contact</span><span class="o">)</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">handler</span><span class="o">(</span><span class="s2">&quot;contacts/:id&quot;</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">byMethod</span> <span class="o">{</span>
+</span><span class='line'>      <span class="n">post</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kt">def</span> <span class="n">id</span> <span class="o">=</span> <span class="n">pathTokens</span><span class="o">.</span><span class="na">asLong</span><span class="o">(</span><span class="s1">&#39;id&#39;</span><span class="o">)</span>
+</span><span class='line'>        <span class="kt">def</span> <span class="n">contact</span> <span class="o">=</span> <span class="n">contacts</span><span class="o">.</span><span class="na">find</span> <span class="o">{</span>
+</span><span class='line'>          <span class="n">it</span><span class="o">.</span><span class="na">id</span> <span class="o">==</span> <span class="n">id</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">Form</span> <span class="n">form</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="na">parse</span><span class="o">(</span><span class="n">Form</span><span class="o">)</span>
+</span><span class='line'>        <span class="n">contact</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="na">name</span>
+</span><span class='line'>        <span class="n">contact</span><span class="o">.</span><span class="na">lastName</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="na">lastName</span>
+</span><span class='line'>        <span class="n">contact</span><span class="o">.</span><span class="na">email</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="na">email</span>
+</span><span class='line'>        <span class="n">contact</span><span class="o">.</span><span class="na">nickname</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="na">nickname</span>
+</span><span class='line'>        <span class="n">contact</span><span class="o">.</span><span class="na">phone</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="na">phone</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">render</span> <span class="nf">groovyTemplate</span><span class="o">(</span><span class="s2">&quot;contacts/show.html&quot;</span><span class="o">,</span> <span class="nl">contact:</span><span class="n">contact</span><span class="o">)</span>
+</span><span class='line'>      <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>  <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'>  <span class="cp">&lt;!doctype html&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;html&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;head&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;meta</span> <span class="na">charset=</span><span class="s">&quot;utf-8&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;meta</span> <span class="na">http-equiv=</span><span class="s">&quot;X-UA-Compatible&quot;</span> <span class="na">content=</span><span class="s">&quot;IE=edge,chrome=1&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/head&gt;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nt">&lt;body&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;section&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;h1&gt;</span>${model.title}<span class="nt">&lt;/h1&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;/section&gt;</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="nt">&lt;form</span> <span class="na">action=</span><span class="s">&quot;/contacts/${model.contact.id}&quot;</span> <span class="na">method=</span><span class="s">&quot;post&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;div&gt;</span>
+</span><span class='line'>          <span class="nt">&lt;label</span> <span class="na">for=</span><span class="s">&quot;name&quot;</span><span class="nt">/&gt;</span>Name<span class="nt">&lt;/label&gt;</span>
+</span><span class='line'>          <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">&quot;text&quot;</span> <span class="na">name=</span><span class="s">&quot;name&quot;</span> <span class="na">value=</span><span class="s">&quot;${model.contact.name}&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nt">&lt;div&gt;</span>
+</span><span class='line'>          <span class="nt">&lt;label</span> <span class="na">for=</span><span class="s">&quot;lastName&quot;</span><span class="nt">/&gt;</span>Last name<span class="nt">&lt;/label&gt;</span>
+</span><span class='line'>          <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">&quot;text&quot;</span> <span class="na">name=</span><span class="s">&quot;lastName&quot;</span> <span class="na">value=</span><span class="s">&quot;${model.contact.lastName}&quot;</span><span class="nt">/&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nt">&lt;div&gt;</span>
+</span><span class='line'>          <span class="nt">&lt;label</span> <span class="na">for=</span><span class="s">&quot;email&quot;</span><span class="nt">/&gt;</span>Email<span class="nt">&lt;/label&gt;</span>
+</span><span class='line'>          <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">&quot;text&quot;</span> <span class="na">name=</span><span class="s">&quot;email&quot;</span> <span class="na">value=</span><span class="s">&quot;${model.contact.email}&quot;</span><span class="nt">/&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nt">&lt;div&gt;</span>
+</span><span class='line'>          <span class="nt">&lt;label</span> <span class="na">for=</span><span class="s">&quot;nickname&quot;</span><span class="nt">/&gt;</span>Nickname<span class="nt">&lt;/label&gt;</span>
+</span><span class='line'>          <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">&quot;text&quot;</span> <span class="na">name=</span><span class="s">&quot;nickname&quot;</span> <span class="na">value=</span><span class="s">&quot;${model.contact.nickname}&quot;</span><span class="nt">/&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nt">&lt;div&gt;</span>
+</span><span class='line'>          <span class="nt">&lt;label</span> <span class="na">for=</span><span class="s">&quot;phone&quot;</span><span class="nt">/&gt;</span>Phone<span class="nt">&lt;/label&gt;</span>
+</span><span class='line'>          <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">&quot;text&quot;</span> <span class="na">name=</span><span class="s">&quot;phone&quot;</span> <span class="na">value=</span><span class="s">&quot;${model.contact.phone}&quot;</span><span class="nt">/&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nt">&lt;button</span> <span class="na">type=</span><span class="s">&quot;submit&quot;</span><span class="nt">&gt;</span> Update <span class="nt">&lt;/button&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;/form&gt;</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="nt">&lt;ul&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;li&gt;</span> <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;/&quot;</span><span class="nt">&gt;</span>Home<span class="nt">&lt;/a&gt;</span> <span class="nt">&lt;/li&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;li&gt;</span> <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;/contacts&quot;</span><span class="nt">&gt;</span>Contact list<span class="nt">&lt;/a&gt;</span> <span class="nt">&lt;/li&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;li&gt;</span> <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;/contacts/new&quot;</span><span class="nt">&gt;</span>New contact<span class="nt">&lt;/a&gt;</span> <span class="nt">&lt;/li&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;/ul&gt;</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="nt">&lt;footer</span> <span class="na">class=</span><span class="s">&quot;site-footer&quot;</span><span class="nt">&gt;&lt;/footer&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/body&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/html&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Y de esta manera tenemos un pequeño CRUD con llamadas normales y un poco de jquery. En POST posteriores vamos a tomar este código y vamos a hacerle algunas mejoras. Para empezar haremos uso de los groovyTemplates como tal y ajustaremos esto a que se maneja más por REST. Espero les haya gustado y cualquier duda o comentario ya saben donde encontrarnos.</p>
+
+<p><strong>Saludos. GLHF.</strong></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Bienvenido a MakingDevs]]></title>
+    <link href="http://blog.makingdevs.com/2014/07/29/bienvenido-a-makingdevs/"/>
+    <updated>2014-07-29T00:21:37-05:00</updated>
+    <id>http://blog.makingdevs.com/2014/07/29/bienvenido-a-makingdevs</id>
+    <content type="html"><![CDATA[<p>Bienvenido seas a nuestro blog en MakingDevs!</p>
+
+<p>Ya hace más de un año que comenzamos con un gran reto: impulsar la carrera de los profesionales de software. ¿Para qué? Para crear grupos de desarrolladores que puedan generar productos de software de calidad, que permitan ofrecer las soluciones tecnológicas que necesitamos actualmente.</p>
+
+<!-- more -->
+
+
+<p>Creemos que la manera en que esto puede suceder es a través de las propias personas que están dentro de este gran ambiente, a través de su esfuerzo y dedicación al construir un software, y entrar en un ciclo de aprendizaje continuo que les permita crear cada vez mejores soluciones.</p>
+
+<p>La experiencia que adquieren les ayuda a afrontar cada vez retos mayores y trascender a través de código que escriben. Nuestra aportación, a través de este blog, será en la medida de lo posible compartir nuestras experiencias técnicas, metódicas y tecnológicas, que permitan a nuestros clientes y desarrolladores en general contar con un documento de referencia al que siempre podrán regresar para consultar. </p>
+
+<p>Nosotros hemos experimentado este tipo de actividad, en donde tenemos que documentar la experiencia adquirida o el aprendizaje obtenido, y regresar a tal artículo una y otra y otra vez, o bien, darlo como referencia a nuestros compañeros de trabajo, quiénes están pasando por la misma experiencia.</p>
+
+<p>El conocimiento es un activo que debe rondar continuamente en un equipo de trabajo que desarrolla software, y nosotros queremos extrapolar un poco de lo que ocurre todos los días en MakingDevs a través de este blog. Esperemos que encuentren útil nuestras experiencias, y poder contar con su participación al hacernos algún comentario o sugerencia.</p>
+
+<p>Estamos al servicio de los profesionales de software en todos los niveles, desde aspirantes hasta maestros y expertos.</p>
+
+<p><strong>ATENTAMENTE</strong></p>
+
+<p><em>Making Devs</em></p>
+]]></content>
+  </entry>
+  
+</feed>

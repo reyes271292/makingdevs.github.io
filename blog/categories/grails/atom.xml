@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Grails | Blog de MakingDevs]]></title>
+  <link href="http://blog.makingdevs.com/blog/categories/grails/atom.xml" rel="self"/>
+  <link href="http://blog.makingdevs.com/"/>
+  <updated>2015-12-21T17:23:05-06:00</updated>
+  <id>http://blog.makingdevs.com/</id>
+  <author>
+    <name><![CDATA[MakingDevs]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Borrado Batch en Grails]]></title>
+    <link href="http://blog.makingdevs.com/2015/05/01/borrado-batch-en-grails/"/>
+    <updated>2015-05-01T20:58:30-05:00</updated>
+    <id>http://blog.makingdevs.com/2015/05/01/borrado-batch-en-grails</id>
+    <content type="html"><![CDATA[<p>En esta ocasión les quiero compartir la solución a un problema que tuve al borrar una colección de objetos en grails y con el GORM, si bien podría hacerlo con HQL o con SQL usando las bondades de Hibernate me gusto más el acercamiento que les quiero presentar.</p>
+
+<!-- more -->
+
+
+<p>La necesidad era borrar un grupo de objetos en donde el contenido de su relación estuviera vacío, ejemplifico con la estructura de unas clases:</p>
+
+<p><div><script src='https://gist.github.com/54953d90cc778b71548a.js?file=domains.groovy'></script>
+<noscript><pre><code>class Group {
+  String name
+  
+  static hasMany = [members : Member]
+}
+
+class Member {
+  String name
+}</code></pre></noscript></div>
+</p>
+
+<p>El primer acercamiento que tuve fue obtener la lista de elementos y hacer una condicional buscando los elementos vacíos, después borrar&hellip;</p>
+
+<p><div><script src='https://gist.github.com/54953d90cc778b71548a.js?file=delete1.groovy'></script>
+<noscript><pre><code>groupsToDelete = [] 
+Group.list().each { group -&gt; 
+  if(group.members.isEmpty()) 
+    groupsToDelete &lt;&lt; link
+} 
+groupsToDelete*.delete() </code></pre></noscript></div>
+</p>
+
+<p>Una vez hecho, mejoramos intentamos mejorar el código con una búsqueda mucho más refinada y ejecutando el borrado, para ello nos apoyamos de los <strong>where queries</strong>:</p>
+
+<p><div><script src='https://gist.github.com/54953d90cc778b71548a.js?file=delete2.groovy'></script>
+<noscript><pre><code>Group.where { 
+  members.size() == 0 
+}.deleteAll()</code></pre></noscript></div>
+</p>
+
+<p>Basado en la documentación de Grails:</p>
+
+<blockquote><p>Since each where method call returns a DetachedCriteria instance, you can use where queries to execute batch operations such as batch updates and deletes.</p></blockquote>
+
+<p>Sin embargo, este acercamiento tiene un problema, manda un error cuando se busca por las relaciones del objeto y no permite el borrado. El error: <code>org.springframework.dao.InvalidDataAccessResourceUsageException: Queries of type SizeEquals are not supported by this implementation</code></p>
+
+<h3>La solución que me gustó</h3>
+
+<p>Usamos <strong>Detached Criteria</strong> para resolver este problema, por que:</p>
+
+<ul>
+<li>No están asociados con una sesión o conexión, lo cual permite formularlos y reusarlos.</li>
+<li>También cuenta con métodos batch: <code>deleteAll</code>, <code>updateAll</code></li>
+<li>Permiten proyecciones y subqueries, que es lo que estamos buscando para resolver nuestro problema</li>
+</ul>
+
+
+<p>Finalmente nuestra solución es:</p>
+
+<p><div><script src='https://gist.github.com/54953d90cc778b71548a.js?file=delete3.groovy'></script>
+<noscript><pre><code>import grails.gorm.*
+
+def criteria = new DetachedCriteria(Group).build { 
+  isEmpty &#39;members&#39;
+}
+criteria.deleteAll()
+// criteria.count()</code></pre></noscript></div>
+</p>
+
+<p>Con esto, tenemos una búsqueda refinada y el borrado de los elementos directo, inclusive el método <code>deleteAll</code> regresa un entero con la cantidad de registros afectados.</p>
+
+<p>Esto me fue de mucha utilidad y ojalá también lo sea para ustedes en algún momento.</p>
+]]></content>
+  </entry>
+  
+</feed>
