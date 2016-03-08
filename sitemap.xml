@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>http://blog.makingdevs.com/2016/03/08/microservicios-con-groovy/</loc>
+    <lastmod>2016-03-08T21:38:08-06:00</lastmod>
+  </url>
+  <url>
+    <loc>http://blog.makingdevs.com/2016/03/07/pruebas-funcionales-con-geb-y-spock/</loc>
+    <lastmod>2016-03-07T22:47:26-06:00</lastmod>
+  </url>
+  <url>
     <loc>http://blog.makingdevs.com/2016/01/22/bitacorado-de-pruebas-en-gradle/</loc>
     <lastmod>2016-01-22T18:14:37-06:00</lastmod>
   </url>
@@ -85,5 +93,8 @@
   </url>
   <url>
     <loc>http://blog.makingdevs.com/blog/categories/cloud/</loc>
+  </url>
+  <url>
+    <loc>http://blog.makingdevs.com/blog/categories/architecture/</loc>
   </url>
 </urlset>

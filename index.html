@@ -9,7 +9,7 @@
   <meta name="author" content="MakingDevs">
 
   
-  <meta name="description" content="Hace tiempo al correr unas pruebas con un proyecto de gradle tuve la necesidad de saber el orden y la forma en que se estaban corriendo ciertas &hellip;">
+  <meta name="description" content="Si bien, existen muchas tecnologías muy completas que permiten la creación de servicios robustos, a veces me he visto en la necesidad de hacer algo &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -66,6 +66,95 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/2016/03/08/microservicios-con-groovy/">MicroServicios Con Groovy</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2016-03-08T21:38:08-06:00'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>8</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>9:38 pm</span></time>
+        
+           | <a href="/2016/03/08/microservicios-con-groovy/#disqus_thread"
+             data-disqus-identifier="http://blog.makingdevs.com/2016/03/08/microservicios-con-groovy/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Si bien, existen muchas tecnologías muy completas que permiten la creación de servicios robustos, a veces me he visto en la necesidad de hacer algo pequeño. muy concreto pero mantenible, y que pueda soportar un volumen determinado. Es por esto que me he apoyado del poder que ofrece Groovy con ayuda de los <a href="http://docs.groovy-lang.org/latest/html/api/groovy/servlet/GroovyServlet.html">Groovlets</a>.</p>
+
+<p>La parte que me gusta de este acercamiento es que el poder del Scripting se pasa al navegador, o en este caso, a un cliente que consume algún servicio web. Cuando usamos <em>Groovlets</em> tenemos disponible lo sisguiente:</p>
+
+<ul>
+<li><em>request</em> - <code>HttpServletRequest</code></li>
+<li><em>response</em> - <code>HttpServletResponse</code></li>
+<li><em>application</em> - <code>ServletContext</code></li>
+<li><em>session</em> - <code>HttpSession</code></li>
+<li><em>out</em> - <code>PrintWriter</code></li>
+<li><em>headers</em> - <code>Header[]</code></li>
+<li><em>params</em> - Un objeto tipo <code>Map</code> que contiene los parámetros</li>
+</ul>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/2016/03/08/microservicios-con-groovy/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/2016/03/07/pruebas-funcionales-con-geb-y-spock/">Pruebas Funcionales Con Geb Y Spock</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2016-03-07T22:47:26-06:00'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>7</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>10:47 pm</span></time>
+        
+           | <a href="/2016/03/07/pruebas-funcionales-con-geb-y-spock/#disqus_thread"
+             data-disqus-identifier="http://blog.makingdevs.com/2016/03/07/pruebas-funcionales-con-geb-y-spock/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Las pruebas funcionales se utilizan para verificar que los flujos de una aplicación que se definen en los casos de uso o historias de usuario funcionen correctamente; son pruebas difíciles de implementar ya que deben realizarse desde la perspectiva del usuario y muchas veces las interfaces de usuario cambian constantemente.</p>
+
+<p>Geb es una herramienta para escribir pruebas funcionales con Groovy que hace uso del <a href="http://www.seleniumhq.org/projects/webdriver/"><em>WebDriver de Selenium</em></a> para la automatizacion del navegador y toma varias ideas de la biblioteca jQuery para la interacción con los elementos. Utiliza el patrón de diseño <a href="http://martinfowler.com/bliki/PageObject.html"><em>Page Object</em></a> para mapear los elementos de las páginas en clases que representan cada una de las vistas.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/2016/03/07/pruebas-funcionales-con-geb-y-spock/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -226,82 +315,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/2015/07/26/hot-deployment-en-gradle/">Hot Deployment en Gradle</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2015-07-26T23:19:13-05:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>26</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>11:19 pm</span></time>
-        
-           | <a href="/2015/07/26/hot-deployment-en-gradle/#disqus_thread"
-             data-disqus-identifier="http://blog.makingdevs.com/2015/07/26/hot-deployment-en-gradle/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Durante un tiempo estuve buscando de la forma de tener una aplicación web con Gradle y tener características como el hot deploy, Grails lo tiene y viendólo de forma interna usa un elemento de nombre <a href="https://github.com/spring-projects/spring-loaded" title="springloaded">SpringLoaded</a>.</p>
-
-<p>Después me di cuenta que frameworks como <a href="https://github.com/spring-projects/spring-loaded" title="dropwizard">Dropwizard</a> lo usan, y que incluso SpringBoot a través del uso del CLI también, investigando un poco más al respecto y por la necesidad de tenerlo listo para algunos proyectos encontré <a href="http://www.cholick.com/entry/show/280" title="tomcat">un artículo</a> en donde explica como ponerlo en acción usando propiamente <a href="https://github.com/spring-projects/spring-loaded" title="dropwizard">Dropwizard</a>. Fue un buen acercamiento, el problema es el siguiente bloque de código en configuración de gradle:</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/2015/07/26/hot-deployment-en-gradle/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/2015/05/01/borrado-batch-en-grails/">Borrado Batch en Grails</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2015-05-01T20:58:30-05:00'><span class='date'><span class='date-month'>May</span> <span class='date-day'>1</span><span class='date-suffix'>st</span>, <span class='date-year'>2015</span></span> <span class='time'>8:58 pm</span></time>
-        
-           | <a href="/2015/05/01/borrado-batch-en-grails/#disqus_thread"
-             data-disqus-identifier="http://blog.makingdevs.com/2015/05/01/borrado-batch-en-grails/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>En esta ocasión les quiero compartir la solución a un problema que tuve al borrar una colección de objetos en grails y con el GORM, si bien podría hacerlo con HQL o con SQL usando las bondades de Hibernate me gusto más el acercamiento que les quiero presentar.</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/2015/05/01/borrado-batch-en-grails/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/2">&larr; Older</a>
@@ -317,6 +330,14 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/2016/03/08/microservicios-con-groovy/">MicroServicios Con Groovy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2016/03/07/pruebas-funcionales-con-geb-y-spock/">Pruebas Funcionales Con Geb Y Spock</a>
+      </li>
+    
+      <li class="post">
         <a href="/2016/01/22/bitacorado-de-pruebas-en-gradle/">Bitacorado De Pruebas en Gradle</a>
       </li>
     
@@ -326,14 +347,6 @@
     
       <li class="post">
         <a href="/2015/08/02/revision-del-libro-the-software-craftsman-professionalism/">Revisión Del Libro - the Software Craftsman: Professionalism</a>
-      </li>
-    
-      <li class="post">
-        <a href="/2015/07/26/hot-deployment-en-gradle/">Hot Deployment en Gradle</a>
-      </li>
-    
-      <li class="post">
-        <a href="/2015/05/01/borrado-batch-en-grails/">Borrado Batch en Grails</a>
       </li>
     
   </ul>

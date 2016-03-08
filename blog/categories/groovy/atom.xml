@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Groovy | Blog de MakingDevs]]></title>
   <link href="http://blog.makingdevs.com/blog/categories/groovy/atom.xml" rel="self"/>
   <link href="http://blog.makingdevs.com/"/>
-  <updated>2016-01-22T18:41:08-06:00</updated>
+  <updated>2016-03-07T23:40:45-06:00</updated>
   <id>http://blog.makingdevs.com/</id>
   <author>
     <name><![CDATA[MakingDevs]]></name>
@@ -12,6 +12,102 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[MicroServicios Con Groovy]]></title>
+    <link href="http://blog.makingdevs.com/2016/03/08/microservicios-con-groovy/"/>
+    <updated>2016-03-08T21:38:08-06:00</updated>
+    <id>http://blog.makingdevs.com/2016/03/08/microservicios-con-groovy</id>
+    <content type="html"><![CDATA[<p>Si bien, existen muchas tecnologías muy completas que permiten la creación de servicios robustos, a veces me he visto en la necesidad de hacer algo pequeño. muy concreto pero mantenible, y que pueda soportar un volumen determinado. Es por esto que me he apoyado del poder que ofrece Groovy con ayuda de los <a href="http://docs.groovy-lang.org/latest/html/api/groovy/servlet/GroovyServlet.html">Groovlets</a>.</p>
+
+<p>La parte que me gusta de este acercamiento es que el poder del Scripting se pasa al navegador, o en este caso, a un cliente que consume algún servicio web. Cuando usamos <em>Groovlets</em> tenemos disponible lo sisguiente:</p>
+
+<ul>
+<li><em>request</em> - <code>HttpServletRequest</code></li>
+<li><em>response</em> - <code>HttpServletResponse</code></li>
+<li><em>application</em> - <code>ServletContext</code></li>
+<li><em>session</em> - <code>HttpSession</code></li>
+<li><em>out</em> - <code>PrintWriter</code></li>
+<li><em>headers</em> - <code>Header[]</code></li>
+<li><em>params</em> - Un objeto tipo <code>Map</code> que contiene los parámetros</li>
+</ul>
+
+
+<!-- more -->
+
+
+<p>Ahora bien, que la configuración XML si es el caso es muy sencilla y sólo tenemos que agregar el Servlet de Groovy y hacer el mapeo.</p>
+
+<pre><code class="xml">&lt;servlet&gt;
+  &lt;servlet-name&gt;Groovy&lt;/servlet-name&gt;
+  &lt;servlet-class&gt;groovy.servlet.GroovyServlet&lt;/servlet-class&gt;
+&lt;/servlet&gt;
+
+&lt;servlet-mapping&gt;
+  &lt;servlet-name&gt;Groovy&lt;/servlet-name&gt;
+  &lt;url-pattern&gt;*.groovy&lt;/url-pattern&gt;
+  &lt;url-pattern&gt;*.gdo&lt;/url-pattern&gt;
+&lt;/servlet-mapping&gt;
+</code></pre>
+
+<p><em>Nota: Que el mapeo no necesariamente es estricto con la extensión, podemos usar la que querramos.</em></p>
+
+<p>Y aunque la implementación que muestro no sería la más <em>adecuada</em>, sirve de ejemplo para mostrar en pocas líneas la mayoría de los elementos antes mencionado:</p>
+
+<p>Me apoyo de un par de clases que <em>modelan</em> un almacén de datos.</p>
+
+<pre><code class="groovy todos.groovy">class Todo {
+  String description
+}
+
+@Singleton // Only one instance
+class TodoManager {
+  List&lt;Todo&gt; todos = []
+}
+</code></pre>
+
+<p>Podemos jugar con el reponse directamente para decirle que cualquier respuesta sería JSON:</p>
+
+<pre><code class="groovy todos.groovy">response.contentType = 'application/json'
+</code></pre>
+
+<p>Buscar algún encabezado en particular para validar nuestra solicitud:</p>
+
+<pre><code class="groovy todos.groovy">def contentType = headers.find { k,v -&gt; k.toLowerCase() == 'content-type' }?.value
+
+if(contentType != "application/json"){
+  response.status = HttpServletResponse.SC_BAD_REQUEST // We return a status code 400
+  // Using the json method included
+  json(status:"Please use 'application/json' header, just received ${headers} instead")
+  return // And nothing more...
+}
+</code></pre>
+
+<p>A partir de aquí podemos jugar con el método de envío y hacer algunas acciones, aquí una muestra muy simple:</p>
+
+<pre><code class="groovy todos.groovy">switch(request.method.toLowerCase()){ // Validating the method
+  case 'get':
+    json(todos:TodoManager.instance.todos) // Using the instance
+  break
+  case 'post':
+    Todo todo = new Todo(description:params?.todo ?: "No description")
+    TodoManager.instance.todos &lt;&lt; todo
+    response.status = HttpServletResponse.SC_CREATED
+    json(todo:todo)
+  break
+  default:
+    response.status = HttpServletResponse.SC_BAD_REQUEST
+    json(status:"Method '${request.method.toLowerCase()}' not supported")
+}
+</code></pre>
+
+<p>Puedes incluir estos tres últimos fragmentos en un archivo y todo funcionará sin problemas. Aunque, nuevamente no es la forma más adecuada, muestra muy bien el potencial del simple uso del Groovlet.</p>
+
+<p>Al final podrías usar <code>@Grab</code> para obtener las dependencias de <em>Jetty</em> y levantar el contenedor en el mismo archivo.</p>
+
+<p><strong>Conclusión</strong>: En un par de líneas puedes conseguir un servicio pequeño, entendible y listo para pasarse a un proyecto de Gradle que permita estructurarlo mejor para irle creciendo.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Bitacorado De Pruebas en Gradle]]></title>
@@ -304,64 +400,6 @@ criteria.deleteAll()
 <p>Con esto, tenemos una búsqueda refinada y el borrado de los elementos directo, inclusive el método <code>deleteAll</code> regresa un entero con la cantidad de registros afectados.</p>
 
 <p>Esto me fue de mucha utilidad y ojalá también lo sea para ustedes en algún momento.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Inyección De Métodos Por Categorías Y TimeCategory]]></title>
-    <link href="http://blog.makingdevs.com/2014/09/16/inyeccion-de-metodos-por-categorias-y-timecategory/"/>
-    <updated>2014-09-16T18:55:30-05:00</updated>
-    <id>http://blog.makingdevs.com/2014/09/16/inyeccion-de-metodos-por-categorias-y-timecategory</id>
-    <content type="html"><![CDATA[<h2>Acerca de las categorías</h2>
-
-<p>En Groovy se pueden inyectar métodos de algunas formas, uno de ellos es a través del uso de categorías, la cual nos da inyección temporal y controlada de dichos elementos. Para hacerlo las clases que son categorías deben de cumplir con cierta estructura:</p>
-
-<ul>
-<li>Los métodos de la clase deben ser definidos como estáticos</li>
-<li>El primer argumento de dicho método define el tipo sobre el cual se inyectarían los nuevos métodos</li>
-<li>Deben de ser usados dentro del alcance de un closure con ayuda de la palabra reservada <code>use</code></li>
-</ul>
-
-
-<!-- more -->
-
-
-<p>Un ejemplo podría ser el siguiente:</p>
-
-<pre><code class="groovy">    class NameUtil{
-        static prettify(String name){
-            name.trim().split(' ').grep { it.size() }*.capitalize().join(' ')
-        }
-    }
-
-    use NameUtil, {
-        println "  josé   juan    reyes    zuñiga   ".prettify()
-    }
-</code></pre>
-
-<p>Adicionalmente, podemos crear dicha inyección de métodos con ayuda de la anotación <code>@Category</code>, que prácticamente nos facilita a que cualquier clase pueda ser usada como categoría, pues no necesariamente los métodos tiene que ser estáticos y el contexto del argumento para la inyección es el objeto <code>this</code> en donde se esté intentando usar.</p>
-
-<h2>Uso de GroovyTime</h2>
-
-<p>La clase <code>TimeCategory</code> es una clase que tiene una serie de métodos de conveniencia para el manejo del tiempo, formando así un DSL, con el que podemos operar. Y con ayuda de la clase <code>Duration</code> complementamos algunas operaciones que se pueden realizar en el contexto de los objetos que estemos usando.</p>
-
-<pre><code class="groovy">    import groovy.time.TimeCategory
-
-    use ( TimeCategory ) {
-        println 2.hours.ago
-        println 30.minutes.from // TimeDuration
-        println 30.minutes.from.now
-        println 40.minutes + 30.minutes.from.now
-        println 30.minutes.ago
-
-        def today = new Date()
-        println today - 3.years
-        println today + 4.weeks
-        println today + 90.minutes
-    }
-</code></pre>
-
-<p>Para que consideres el conjunto de operaciones que tienes disponibles te recomendamos visitar la documentación de <a href="http://groovy.codehaus.org/api/groovy/time/TimeCategory.html">TimeCategory</a> y <a href="http://groovy.codehaus.org/api/groovy/time/Duration.html">Duration</a></p>
 ]]></content>
   </entry>
   

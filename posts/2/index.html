@@ -9,7 +9,7 @@
   <meta name="author" content="MakingDevs">
 
   
-  <meta name="description" content="Camel ofrece distintas soluciones para ser escalado o para distribuir la carga en diferentes instancias, la soluciones que ofrece dependerá de como &hellip;">
+  <meta name="description" content="Durante un tiempo estuve buscando de la forma de tener una aplicación web con Gradle y tener características como el hot deploy, Grails lo tiene y &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -66,6 +66,82 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/2015/07/26/hot-deployment-en-gradle/">Hot Deployment en Gradle</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-07-26T23:19:13-05:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>26</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>11:19 pm</span></time>
+        
+           | <a href="/2015/07/26/hot-deployment-en-gradle/#disqus_thread"
+             data-disqus-identifier="http://blog.makingdevs.com/2015/07/26/hot-deployment-en-gradle/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Durante un tiempo estuve buscando de la forma de tener una aplicación web con Gradle y tener características como el hot deploy, Grails lo tiene y viendólo de forma interna usa un elemento de nombre <a href="https://github.com/spring-projects/spring-loaded" title="springloaded">SpringLoaded</a>.</p>
+
+<p>Después me di cuenta que frameworks como <a href="https://github.com/spring-projects/spring-loaded" title="dropwizard">Dropwizard</a> lo usan, y que incluso SpringBoot a través del uso del CLI también, investigando un poco más al respecto y por la necesidad de tenerlo listo para algunos proyectos encontré <a href="http://www.cholick.com/entry/show/280" title="tomcat">un artículo</a> en donde explica como ponerlo en acción usando propiamente <a href="https://github.com/spring-projects/spring-loaded" title="dropwizard">Dropwizard</a>. Fue un buen acercamiento, el problema es el siguiente bloque de código en configuración de gradle:</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/2015/07/26/hot-deployment-en-gradle/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/2015/05/01/borrado-batch-en-grails/">Borrado Batch en Grails</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-05-01T20:58:30-05:00'><span class='date'><span class='date-month'>May</span> <span class='date-day'>1</span><span class='date-suffix'>st</span>, <span class='date-year'>2015</span></span> <span class='time'>8:58 pm</span></time>
+        
+           | <a href="/2015/05/01/borrado-batch-en-grails/#disqus_thread"
+             data-disqus-identifier="http://blog.makingdevs.com/2015/05/01/borrado-batch-en-grails/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>En esta ocasión les quiero compartir la solución a un problema que tuve al borrar una colección de objetos en grails y con el GORM, si bien podría hacerlo con HQL o con SQL usando las bondades de Hibernate me gusto más el acercamiento que les quiero presentar.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/2015/05/01/borrado-batch-en-grails/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -198,82 +274,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/2014/08/26/lectura-de-correo-con-apache-camel-plus-groovy/">Lectura De Correo Con Apache Camel + Groovy</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2014-08-26T18:29:26-05:00'><span class='date'><span class='date-month'>Aug</span> <span class='date-day'>26</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>6:29 pm</span></time>
-        
-           | <a href="/2014/08/26/lectura-de-correo-con-apache-camel-plus-groovy/#disqus_thread"
-             data-disqus-identifier="http://blog.makingdevs.com/2014/08/26/lectura-de-correo-con-apache-camel-plus-groovy/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Hola a todos es un gusto contribuir al blog de makingdevs.com y mostrarles un poco de lo que es Apache Camel, para ellos hablaremos primero de su definición.</p>
-
-<p><a href="http://camel.apache.org/">Apache Camel</a> es un framework de integración de código abierto, basado en <a href="http://www.enterpriseintegrationpatterns.com/toc.html">Enterprise Integration Patterns (Patrones de Integración Empresarial)</a>. Camel nos permite definir las reglas de enrutamiento o mediación con ayuda de un lenguaje especifico (DSL), incluyendo un API basada en Java o mediante una configuración XML. El uso de un lenguaje específico del dominio significa que Apache Camel es capaz de soportar un comportamiento automático de las reglas de ruteo en un entorno de desarrollo integrado usando código Java sin gran cantidad de archivos de configuración XML.</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/2014/08/26/lectura-de-correo-con-apache-camel-plus-groovy/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/2014/08/19/introduccion-a-ratpack/">Introduccion a Ratpack</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2014-08-19T00:34:28-05:00'><span class='date'><span class='date-month'>Aug</span> <span class='date-day'>19</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>12:34 am</span></time>
-        
-           | <a href="/2014/08/19/introduccion-a-ratpack/#disqus_thread"
-             data-disqus-identifier="http://blog.makingdevs.com/2014/08/19/introduccion-a-ratpack/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Es bueno estar de vuelta escribiendo, ya ha pasado bastante tiempo desde que hice un post así que vamos a ver algo que me ayudó en un curso. El día de hoy hablaremos de Ratpack y para ello primero vamos a dar una pequeña introducción de lo que es. Ratpack, como su página lo dice, es un conjunto de librerías de JAVA que facilita la rapidez, eficiencia, evolución y pruebas de aplicaciones HTTP, está construida sobre Netty y por ello posee muchos de los beneficios del motor del mismo. Ratpack se enfoca en permitir applicaciones HTTP para ser eficientes, modulares y adaptativas a los nuevos requerimientos, tecnologías y buenas pruebas sobre el tiempo. Bueno vamos a dejar de momento las definiciones y vamos a lo bonito, el código.</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/2014/08/19/introduccion-a-ratpack/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/3">&larr; Older</a>
@@ -291,6 +291,14 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/2016/03/08/microservicios-con-groovy/">MicroServicios Con Groovy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2016/03/07/pruebas-funcionales-con-geb-y-spock/">Pruebas Funcionales Con Geb Y Spock</a>
+      </li>
+    
+      <li class="post">
         <a href="/2016/01/22/bitacorado-de-pruebas-en-gradle/">Bitacorado De Pruebas en Gradle</a>
       </li>
     
@@ -300,14 +308,6 @@
     
       <li class="post">
         <a href="/2015/08/02/revision-del-libro-the-software-craftsman-professionalism/">Revisión Del Libro - the Software Craftsman: Professionalism</a>
-      </li>
-    
-      <li class="post">
-        <a href="/2015/07/26/hot-deployment-en-gradle/">Hot Deployment en Gradle</a>
-      </li>
-    
-      <li class="post">
-        <a href="/2015/05/01/borrado-batch-en-grails/">Borrado Batch en Grails</a>
       </li>
     
   </ul>

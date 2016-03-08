@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Architecture | Blog de MakingDevs]]></title>
+  <link href="http://blog.makingdevs.com/blog/categories/architecture/atom.xml" rel="self"/>
+  <link href="http://blog.makingdevs.com/"/>
+  <updated>2016-03-07T23:40:45-06:00</updated>
+  <id>http://blog.makingdevs.com/</id>
+  <author>
+    <name><![CDATA[MakingDevs]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[MicroServicios Con Groovy]]></title>
+    <link href="http://blog.makingdevs.com/2016/03/08/microservicios-con-groovy/"/>
+    <updated>2016-03-08T21:38:08-06:00</updated>
+    <id>http://blog.makingdevs.com/2016/03/08/microservicios-con-groovy</id>
+    <content type="html"><![CDATA[<p>Si bien, existen muchas tecnologías muy completas que permiten la creación de servicios robustos, a veces me he visto en la necesidad de hacer algo pequeño. muy concreto pero mantenible, y que pueda soportar un volumen determinado. Es por esto que me he apoyado del poder que ofrece Groovy con ayuda de los <a href="http://docs.groovy-lang.org/latest/html/api/groovy/servlet/GroovyServlet.html">Groovlets</a>.</p>
+
+<p>La parte que me gusta de este acercamiento es que el poder del Scripting se pasa al navegador, o en este caso, a un cliente que consume algún servicio web. Cuando usamos <em>Groovlets</em> tenemos disponible lo sisguiente:</p>
+
+<ul>
+<li><em>request</em> - <code>HttpServletRequest</code></li>
+<li><em>response</em> - <code>HttpServletResponse</code></li>
+<li><em>application</em> - <code>ServletContext</code></li>
+<li><em>session</em> - <code>HttpSession</code></li>
+<li><em>out</em> - <code>PrintWriter</code></li>
+<li><em>headers</em> - <code>Header[]</code></li>
+<li><em>params</em> - Un objeto tipo <code>Map</code> que contiene los parámetros</li>
+</ul>
+
+
+<!-- more -->
+
+
+<p>Ahora bien, que la configuración XML si es el caso es muy sencilla y sólo tenemos que agregar el Servlet de Groovy y hacer el mapeo.</p>
+
+<pre><code class="xml">&lt;servlet&gt;
+  &lt;servlet-name&gt;Groovy&lt;/servlet-name&gt;
+  &lt;servlet-class&gt;groovy.servlet.GroovyServlet&lt;/servlet-class&gt;
+&lt;/servlet&gt;
+
+&lt;servlet-mapping&gt;
+  &lt;servlet-name&gt;Groovy&lt;/servlet-name&gt;
+  &lt;url-pattern&gt;*.groovy&lt;/url-pattern&gt;
+  &lt;url-pattern&gt;*.gdo&lt;/url-pattern&gt;
+&lt;/servlet-mapping&gt;
+</code></pre>
+
+<p><em>Nota: Que el mapeo no necesariamente es estricto con la extensión, podemos usar la que querramos.</em></p>
+
+<p>Y aunque la implementación que muestro no sería la más <em>adecuada</em>, sirve de ejemplo para mostrar en pocas líneas la mayoría de los elementos antes mencionado:</p>
+
+<p>Me apoyo de un par de clases que <em>modelan</em> un almacén de datos.</p>
+
+<pre><code class="groovy todos.groovy">class Todo {
+  String description
+}
+
+@Singleton // Only one instance
+class TodoManager {
+  List&lt;Todo&gt; todos = []
+}
+</code></pre>
+
+<p>Podemos jugar con el reponse directamente para decirle que cualquier respuesta sería JSON:</p>
+
+<pre><code class="groovy todos.groovy">response.contentType = 'application/json'
+</code></pre>
+
+<p>Buscar algún encabezado en particular para validar nuestra solicitud:</p>
+
+<pre><code class="groovy todos.groovy">def contentType = headers.find { k,v -&gt; k.toLowerCase() == 'content-type' }?.value
+
+if(contentType != "application/json"){
+  response.status = HttpServletResponse.SC_BAD_REQUEST // We return a status code 400
+  // Using the json method included
+  json(status:"Please use 'application/json' header, just received ${headers} instead")
+  return // And nothing more...
+}
+</code></pre>
+
+<p>A partir de aquí podemos jugar con el método de envío y hacer algunas acciones, aquí una muestra muy simple:</p>
+
+<pre><code class="groovy todos.groovy">switch(request.method.toLowerCase()){ // Validating the method
+  case 'get':
+    json(todos:TodoManager.instance.todos) // Using the instance
+  break
+  case 'post':
+    Todo todo = new Todo(description:params?.todo ?: "No description")
+    TodoManager.instance.todos &lt;&lt; todo
+    response.status = HttpServletResponse.SC_CREATED
+    json(todo:todo)
+  break
+  default:
+    response.status = HttpServletResponse.SC_BAD_REQUEST
+    json(status:"Method '${request.method.toLowerCase()}' not supported")
+}
+</code></pre>
+
+<p>Puedes incluir estos tres últimos fragmentos en un archivo y todo funcionará sin problemas. Aunque, nuevamente no es la forma más adecuada, muestra muy bien el potencial del simple uso del Groovlet.</p>
+
+<p>Al final podrías usar <code>@Grab</code> para obtener las dependencias de <em>Jetty</em> y levantar el contenedor en el mismo archivo.</p>
+
+<p><strong>Conclusión</strong>: En un par de líneas puedes conseguir un servicio pequeño, entendible y listo para pasarse a un proyecto de Gradle que permita estructurarlo mejor para irle creciendo.</p>
+]]></content>
+  </entry>
+  
+</feed>
