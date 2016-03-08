@@ -1,9 +1,9 @@
 ---
 layout: post
 title: "Pruebas funcionales con Geb y Spock"
-date: 2015-08-23 23:47:26 -0500
+date: 2016-03-07 23:47:26 -0500
 author: Gamaliel Jiménez García
-published: false
+published: true
 comments: true
 tags: groovy, testing, spock, geb
 categories:
