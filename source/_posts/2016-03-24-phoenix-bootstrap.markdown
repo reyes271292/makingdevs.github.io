@@ -47,6 +47,65 @@ Now that we have `bootstrap` if you check your `vendor` directory you will see t
 
 Well at this moment, if you run your `phoenix.server` you will find a couple of errors, so lets fix that:
 
-1. Let's remove all the `css` that `phoenix` ships with. For this open your `web/static/css/app.css` and remove the content of the file.
-1.
+1. Let's remove the `bootstrap css` that `phoenix` ships with. For this open your `web/static/css/app.css` and remove the first 6 lines of code of the file.
+1. Then open your `brunch-config.js` and in the `conventions` section add the following:
 
+   ```javascript
+   conventions: {
+     assets: /^(web\/static\/assets)/,
+     ignored: [
+       /^(web\/static\/vendor\/bootstrap\/)(?!.*min.(js|css)$)/,
+       /^(web\/static\/vendor\/jquery\/)(?!.*min.js)/
+     ]
+   }
+   ```
+1. After that you will need to load `jquery` and `bootstrap` in order, i.e. First `jquery` and then `bootstrap`. This is because `brunch` will merge all js in alphabetical order and we require that `jquery` loads first. For this we move to the `joinTo` in the `files` section and add the next lines:
+
+   ```javascript
+   files: {
+     javascripts: {
+       joinTo: "js/app.js",
+       order: {
+         before: [
+           "web/static/vendor/jquery/dist/jquery.min.js",
+           "web/static/vendor/bootstrap/dist/js/bootstrap.js"
+         ]
+       }
+     },
+   ... more code ...
+   ```
+
+After this you can open the main layout of your application and put the next code:
+
+```html
+<div class="dropdown">
+  <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+    Dropdown
+    <span class="caret"></span>
+  </button>
+  <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+    <li><a href="#">Action</a></li>
+    <li><a href="#">Another action</a></li>
+    <li><a href="#">Something else here</a></li>
+    <li role="separator" class="divider"></li>
+    <li><a href="#">Separated link</a></li>
+  </ul>
+</div>
+```
+
+And this is going to work as expected. Now you can make use of everything that `boostrap` have.
+
+Oh! I forgot for copying the fonts and icons that `bootstrap` have you need to use a tool called `assetsmanager-brunch` this is for manage assets that are not minify or uglify like images or fonts. For this we need to do:
+
+1. Install `assetsmanager-brunch` with `npm` help. Run the following `npm install --save assetsmanager-brunch`
+1. Then in the `plugins` section add the following code:
+
+   ```javascript
+   assetsmanager: {
+       copyTo: {
+         '/' : ['web/static/vendor/bootstrap/dist/fonts']
+       }
+   }
+   ```
+
+That's all folks! At least for this post I hope you enjoy and Good Luck, Have Fun!
