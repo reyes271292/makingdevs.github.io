@@ -3,7 +3,7 @@ layout: post
 title: "Add complete bootstrap to Phoenix"
 date: 2016-03-24 20:08:09 -0600
 comments: true
-published: false
+published: true
 author: Felipe Juárez Murillo
 tags: phoenix, elixir, bootstrap
 categories:
@@ -14,7 +14,7 @@ categories:
 
 It has been a while since I make a post and this is my first post in English so be gentle with me :P
 
-Since a couple of months I been working in a language called [elixir](http://elixir-lang.org/) and with his web framework [phoenix](http://www.phoenixframework.org/) and I have had a lot of fun with these elements. But sometimes I been struggling with configurations that should be easy maybe I don't read that carefully or maybe I'm a knucklehead, but whatever the reasone is, I hope this configuration works for you and give you a little help of how configure your Javascripts third parties for your Phoenix application.
+Since a couple of months I been working in a language called [elixir](http://elixir-lang.org/) and with his web framework [phoenix](http://www.phoenixframework.org/), I have had a lot of fun with these elements. But sometimes I been struggling with configurations that should be easy maybe I don't read that carefully or maybe I'm a knucklehead, but whatever the reasone is, I hope this configuration works for you and give you a little help of how configure your Javascripts third parties for your Phoenix application.
 
 <!-- more -->
 
@@ -44,12 +44,12 @@ Now is the time to install `bootstrap` and for that we need to run the following
 bower install -S bootstrap
 ```
 
-Now that we have `bootstrap` if you check your `vendor` directory you will see that there is not only `bootstrap` it is also `jquery` (because is a dependency for `bootstrap`) if have not heard of `bower` before I recommend you to look for other proyects it will save you a lot of time and space in your repository.
+Now that we have `bootstrap` if you check your `vendor` directory you will see that there is not only `bootstrap`, it is also `jquery` (because is a dependency for `bootstrap`), if have not heard of `bower` before I recommend you to look for other proyects it will save you a lot of time and space in your repository.
 
 Well at this moment, if you run your `phoenix.server` you will find a couple of errors, so lets fix that:
 
 1. Let's remove the `bootstrap css` that `phoenix` ships with. For this open your `web/static/css/app.css` and remove the first 6 lines of code of the file.
-1. Then open your `brunch-config.js` and in the `conventions` section add the following:
+2. Then open your `brunch-config.js` and in the `conventions` section add the following:
 
    ```javascript
    conventions: {
@@ -60,7 +60,7 @@ Well at this moment, if you run your `phoenix.server` you will find a couple of 
      ]
    }
    ```
-1. After that you will need to load `jquery` and `bootstrap` in order, i.e. First `jquery` and then `bootstrap`. This is because `brunch` will merge all js in alphabetical order and we require that `jquery` loads first. For this we move to the `joinTo` in the `files` section and add the next lines:
+3. After that you will need to load `jquery` and `bootstrap` in order, i.e. First `jquery` and then `bootstrap`. This is because `brunch` will merge all js in alphabetical order and we require that `jquery` loads first. For this we move to the `joinTo` in the `files` section and add the next lines:
 
    ```javascript
    files: {
@@ -98,8 +98,8 @@ And this is going to work as expected. Now you can make use of everything that `
 
 Oh! I forgot for copying the fonts and icons that `bootstrap` have you need to use a tool called `assetsmanager-brunch` this is for manage assets that are not minify or uglify like images or fonts. For this we need to do:
 
-1. Install `assetsmanager-brunch` with `npm` help. Run the following `npm install --save assetsmanager-brunch`
-1. Then in the `plugins` section add the following code:
+4. Install `assetsmanager-brunch` with `npm` help. Run the following `npm install --save assetsmanager-brunch`
+5. Then in the `plugins` section add the following code:
 
    ```javascript
    assetsmanager: {
