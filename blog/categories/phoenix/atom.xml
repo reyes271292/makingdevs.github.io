@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Phoenix | Blog de MakingDevs]]></title>
+  <link href="http://blog.makingdevs.com/blog/categories/phoenix/atom.xml" rel="self"/>
+  <link href="http://blog.makingdevs.com/"/>
+  <updated>2016-03-27T18:49:16-06:00</updated>
+  <id>http://blog.makingdevs.com/</id>
+  <author>
+    <name><![CDATA[MakingDevs]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Add Complete Bootstrap to Phoenix]]></title>
+    <link href="http://blog.makingdevs.com/2016/03/24/phoenix-bootstrap/"/>
+    <updated>2016-03-24T20:08:09-06:00</updated>
+    <id>http://blog.makingdevs.com/2016/03/24/phoenix-bootstrap</id>
+    <content type="html"><![CDATA[<p>It has been a while since I make a post and this is my first post in English so be gentle with me :P</p>
+
+<p>Since a couple of months I been working in a language called <a href="http://elixir-lang.org/">elixir</a> and with his web framework <a href="http://www.phoenixframework.org/">phoenix</a>, I have had a lot of fun with these elements. But sometimes I been struggling with configurations that should be easy maybe I don&rsquo;t read that carefully or maybe I&rsquo;m a knucklehead, but whatever the reasone is, I hope this configuration works for you and give you a little help of how configure your Javascripts third parties for your Phoenix application.</p>
+
+<!-- more -->
+
+
+<p>When you create a new application with phoenix you will notice (when you start the server) that actually <code>phoenix</code> have <a href="http://getbootstrap.com/">bootstrap</a> but that is not true at all, if you want to add a <code>dropdown</code> or something more sophisticated like a <code>dialog</code> or a <code>carousel</code> you will find that there is no <code>javascript</code> and the only thing that you have is the <code>stylesheet</code> so in order to add the complete <code>bootstrap</code> you need a couple steps before.</p>
+
+<p>Well let&rsquo;s get started with this thing:</p>
+
+<p>In order to manage all the libraries that you need to work with it is recommended to install <a href="http://bower.io/">bower</a>. Actually <code>phoenix</code> in his <a href="http://www.phoenixframework.org/docs/static-assets">Static Assets</a> page encourage you to do it.</p>
+
+<p>So we are going to follow this path and add bootstrap with <code>bower</code> but first we are going to create the <code>bower.json</code> file for storing our dependencies:</p>
+
+<pre><code class="sh">bower init
+</code></pre>
+
+<p>Then we are going to create a file named <code>.bowerrc</code> with this file we are going to tell to <code>bower</code> where are going to need to put all the <code>javascripts</code> that we need it from now on. In this file we are going to put the next instruction:</p>
+
+<pre><code class="js">{
+  "directory": "web/static/vendor"
+}
+</code></pre>
+
+<p>Now is the time to install <code>bootstrap</code> and for that we need to run the following instruction in your shell:</p>
+
+<pre><code class="sh">bower install -S bootstrap
+</code></pre>
+
+<p>Now that we have <code>bootstrap</code> if you check your <code>vendor</code> directory you will see that there is not only <code>bootstrap</code>, it is also <code>jquery</code> (because is a dependency for <code>bootstrap</code>), if have not heard of <code>bower</code> before I recommend you to look for other proyects it will save you a lot of time and space in your repository.</p>
+
+<p>Well at this moment, if you run your <code>phoenix.server</code> you will find a couple of errors, so lets fix that:</p>
+
+<ol>
+<li>Let&rsquo;s remove the <code>bootstrap css</code> that <code>phoenix</code> ships with. For this open your <code>web/static/css/app.css</code> and remove the first 6 lines of code of the file.</li>
+<li><p>Then open your <code>brunch-config.js</code> and in the <code>conventions</code> section add the following:</p>
+
+<pre><code class="javascript">conventions: {
+  assets: /^(web\/static\/assets)/,
+  ignored: [
+    /^(web\/static\/vendor\/bootstrap\/)(?!.*min.(js|css)$)/,
+    /^(web\/static\/vendor\/jquery\/)(?!.*min.js)/
+  ]
+}
+</code></pre></li>
+<li><p>After that you will need to load <code>jquery</code> and <code>bootstrap</code> in order, i.e. First <code>jquery</code> and then <code>bootstrap</code>. This is because <code>brunch</code> will merge all js in alphabetical order and we require that <code>jquery</code> loads first. For this we move to the <code>joinTo</code> in the <code>files</code> section and add the next lines:</p>
+
+<pre><code class="javascript">files: {
+  javascripts: {
+    joinTo: "js/app.js",
+    order: {
+      before: [
+        "web/static/vendor/jquery/dist/jquery.min.js",
+        "web/static/vendor/bootstrap/dist/js/bootstrap.js"
+      ]
+    }
+  },
+... more code ...
+</code></pre></li>
+</ol>
+
+
+<p>After this you can open the main layout of your application and put the next code:</p>
+
+<p>&#8220;`html</p>
+
+<div class="dropdown">
+  <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+    Dropdown
+    <span class="caret"></span>
+  </button>
+  <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+    <li><a href="#">Action</a></li>
+    <li><a href="#">Another action</a></li>
+    <li><a href="#">Something else here</a></li>
+    <li role="separator" class="divider"></li>
+    <li><a href="#">Separated link</a></li>
+  </ul>
+</div>
+
+
+<pre><code>
+And this is going to work as expected. Now you can make use of everything that `boostrap` have.
+
+Oh! I forgot for copying the fonts and icons that `bootstrap` have you need to use a tool called `assetsmanager-brunch` this is for manage assets that are not minify or uglify like images or fonts. For this we need to do:
+
+4. Install `assetsmanager-brunch` with `npm` help. Run the following `npm install --save assetsmanager-brunch`
+5. Then in the `plugins` section add the following code:
+</code></pre>
+
+<p>   assetsmanager: {
+       copyTo: {
+         &lsquo;/&rsquo; : [&lsquo;web/static/vendor/bootstrap/dist/fonts&rsquo;]
+       }
+   }
+   &#8220;`</p>
+
+<p>That&rsquo;s all folks! At least for this post I hope you enjoy and Good Luck, Have Fun!</p>
+]]></content>
+  </entry>
+  
+</feed>
