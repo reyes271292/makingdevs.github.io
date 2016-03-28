@@ -178,3 +178,9 @@ Ahora para verificar que realmente está en función el logger logback, se verif
 * %msg Muestra el msn que se manda acorde al nivel que se esta llamando
 * %n Indica el final de la línea 
 
+Pueden encontrar el código completo [*aquí*][2].
+
+[1]: http://logback.qos.ch/manual/introduction.html
+
+[2]: https://github.com/reyes271292/logger_logback
+
