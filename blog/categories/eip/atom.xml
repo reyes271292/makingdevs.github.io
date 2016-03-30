@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Eip | Blog de MakingDevs]]></title>
+  <link href="http://blog.makingdevs.com/blog/categories/eip/atom.xml" rel="self"/>
+  <link href="http://blog.makingdevs.com/"/>
+  <updated>2016-03-30T09:56:36-06:00</updated>
+  <id>http://blog.makingdevs.com/</id>
+  <author>
+    <name><![CDATA[MakingDevs]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Clusterizacion Con Camel]]></title>
+    <link href="http://blog.makingdevs.com/2015/04/07/clusterizacion-con-camel/"/>
+    <updated>2015-04-07T19:56:54-05:00</updated>
+    <id>http://blog.makingdevs.com/2015/04/07/clusterizacion-con-camel</id>
+    <content type="html"><![CDATA[<p>Camel ofrece distintas soluciones para ser escalado o para distribuir la carga en diferentes instancias, la soluciones que ofrece dependerá de como se encuentra nuestra infraestructura ( y configuración).</p>
+
+<ul>
+<li>Misma JVM y CamelContext</li>
+<li>Misma JVM pero diferente CamelContext</li>
+<li>Diferente JVM y CamelContext</li>
+</ul>
+
+
+<!-- more -->
+
+
+<p>El problema que me vi envuelto fue de estas tres, la ultima, el clusterizar camel que se encontraban en diferentes JVM y CamelContext. Y en particular tuve un problema de mensajes duplicados. Para esto camel ofrece ciertas soluciones, un componente llamado <strong>Idempotent Consumer</strong>. El Idempotent Consumer pertenece a los patrones de EIP se usa para filtrar los mensajes duplicados. Este modelo se implementa utilizando la clase IdempotentConsumer. Este utiliza una expresión para calcular una cadena de mensaje ID único para un intercambio de mensajes, este ID puede ser consultado en la IdempotentRepository para ver si se ha visto antes, si se tiene no es tomado para ser procesado, en cambio si no se tiene, entonces el mensaje se procesa y la ID se añade al repositorio.</p>
+
+<p>Hay varios tipos de IdempotentRepository:</p>
+
+<ul>
+<li>MemoryIdempotentRepository</li>
+<li>FileIdempotentRepository</li>
+<li>HazelcastIdempotentRepository (Available as of Camel 2.8)</li>
+<li>JdbcMessageIdRepository (Available as of Camel 2.7)</li>
+<li>JpaMessageIdRepository</li>
+</ul>
+
+
+<pre><code class="groovy">@Grab(group='org.slf4j', module='slf4j-api', version='1.7.10')
+@Grab(group='org.apache.camel', module='camel-core', version='2.12.0')
+@Grab(group='org.apache.camel', module='camel-mail', version='2.12.0')
+
+import org.apache.camel.impl.DefaultCamelContext
+import org.apache.camel.builder.RouteBuilder
+import org.apache.camel.processor.idempotent.FileIdempotentRepository
+
+def camelContext = new DefaultCamelContext()
+camelContext.addRoutes(new RouteBuilder() {
+  def void configure() {
+    from("imaps://imap.gmail.com?username=jorge@makingdevs.com"
+      + "&amp;password=m4k1ngd3vs"
+      + "&amp;consumer.delay=6000")
+    .idempotentConsumer( header("Message-ID"),
+      FileIdempotentRepository.fileIdempotentRepository(
+        new File("idempotentRepository.txt")))
+    .to("log:groovymail?showAll=true&amp;multiline=true") } })
+
+camelContext.start()
+addShutdownHook{ camelContext.stop() }
+synchronized(this){ this.wait() }
+</code></pre>
+
+<p>Este es un script ejemplo el cual utiliza <code>FileIdempotentRepository</code> utilizando un archivo ejemplo para llevar el control, si exploramos el archivo ahí se encuentra los id de los mensajes procesados.</p>
+
+<p><img src="/images/camel_output.png" alt="Camel output" /></p>
+
+<p>Asi si hay un mensaje el cual ya se encuentra dentro de este archivo se ignora y no es procesado. En mi caso utilize JpaMessageIdRepository dentro de grails y fue muy simple utilizar este componente solo agregue la dependencia de camel sql en el buildConfig.groovy</p>
+
+<pre><code class="groovy">runtime 'org.apache.camel:camel-sql:2.13.0’
+</code></pre>
+
+<p>y agregue el bean en resources.groovy</p>
+
+<pre><code class="groovy">import org.apache.camel.processor.idempotent.jdbc.JdbcMessageIdRepository
+
+beans = {
+  messageIdRepository(JdbcMessageIdRepository,ref('dataSource'),'jdbcProcessorName')
+}
+</code></pre>
+
+<p>y por ultimo agregue el <em>idempotentComponent</em>.</p>
+]]></content>
+  </entry>
+  
+</feed>

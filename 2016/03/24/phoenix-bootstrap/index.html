@@ -1,0 +1,399 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Add Complete Bootstrap to Phoenix - Blog de MakingDevs</title>
+  <meta name="author" content="MakingDevs">
+
+  
+  <meta name="description" content="It has been a while since I make a post and this is my first post in English so be gentle with me :P Since a couple of months I been working in a &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://blog.makingdevs.com/2016/03/24/phoenix-bootstrap/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Blog de MakingDevs" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Fjalla+One' rel='stylesheet' type='text/css'>
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Blog de MakingDevs</a></h1>
+  
+    <h2>El código que a veces olvidamos y no documentamos.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="blog.makingdevs.com">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Add Complete Bootstrap to Phoenix</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2016-03-24T20:08:09-06:00'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>24</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>8:08 pm</span></time>
+        
+           | <a href="#disqus_thread"
+             data-disqus-identifier="http://blog.makingdevs.com">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>It has been a while since I make a post and this is my first post in English so be gentle with me :P</p>
+
+<p>Since a couple of months I been working in a language called <a href="http://elixir-lang.org/">elixir</a> and with his web framework <a href="http://www.phoenixframework.org/">phoenix</a>, I have had a lot of fun with these elements. But sometimes I been struggling with configurations that should be easy maybe I don&rsquo;t read that carefully or maybe I&rsquo;m a knucklehead, but whatever the reasone is, I hope this configuration works for you and give you a little help of how configure your Javascripts third parties for your Phoenix application.</p>
+
+<!-- more -->
+
+
+<p>When you create a new application with phoenix you will notice (when you start the server) that actually <code>phoenix</code> have <a href="http://getbootstrap.com/">bootstrap</a> but that is not true at all, if you want to add a <code>dropdown</code> or something more sophisticated like a <code>dialog</code> or a <code>carousel</code> you will find that there is no <code>javascript</code> and the only thing that you have is the <code>stylesheet</code> so in order to add the complete <code>bootstrap</code> you need a couple steps before.</p>
+
+<p>Well let&rsquo;s get started with this thing:</p>
+
+<p>In order to manage all the libraries that you need to work with it is recommended to install <a href="http://bower.io/">bower</a>. Actually <code>phoenix</code> in his <a href="http://www.phoenixframework.org/docs/static-assets">Static Assets</a> page encourage you to do it.</p>
+
+<p>So we are going to follow this path and add bootstrap with <code>bower</code> but first we are going to create the <code>bower.json</code> file for storing our dependencies:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>bower init
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Then we are going to create a file named <code>.bowerrc</code> with this file we are going to tell to <code>bower</code> where are going to need to put all the <code>javascripts</code> that we need it from now on. In this file we are going to put the next instruction:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="s2">&quot;directory&quot;</span><span class="o">:</span> <span class="s2">&quot;web/static/vendor&quot;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now is the time to install <code>bootstrap</code> and for that we need to run the following instruction in your shell:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>bower install -S bootstrap
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now that we have <code>bootstrap</code> if you check your <code>vendor</code> directory you will see that there is not only <code>bootstrap</code>, it is also <code>jquery</code> (because is a dependency for <code>bootstrap</code>), if have not heard of <code>bower</code> before I recommend you to look for other proyects it will save you a lot of time and space in your repository.</p>
+
+<p>Well at this moment, if you run your <code>phoenix.server</code> you will find a couple of errors, so lets fix that:</p>
+
+<ol>
+<li>Let&rsquo;s remove the <code>bootstrap css</code> that <code>phoenix</code> ships with. For this open your <code>web/static/css/app.css</code> and remove the first 6 lines of code of the file.</li>
+<li><p>Then open your <code>brunch-config.js</code> and in the <code>conventions</code> section add the following:</p>
+
+<pre><code class="javascript">conventions: {
+  assets: /^(web\/static\/assets)/,
+  ignored: [
+    /^(web\/static\/vendor\/bootstrap\/)(?!.*min.(js|css)$)/,
+    /^(web\/static\/vendor\/jquery\/)(?!.*min.js)/
+  ]
+}
+</code></pre></li>
+<li><p>After that you will need to load <code>jquery</code> and <code>bootstrap</code> in order, i.e. First <code>jquery</code> and then <code>bootstrap</code>. This is because <code>brunch</code> will merge all js in alphabetical order and we require that <code>jquery</code> loads first. For this we move to the <code>joinTo</code> in the <code>files</code> section and add the next lines:</p>
+
+<pre><code class="javascript">files: {
+  javascripts: {
+    joinTo: "js/app.js",
+    order: {
+      before: [
+        "web/static/vendor/jquery/dist/jquery.min.js",
+        "web/static/vendor/bootstrap/dist/js/bootstrap.js"
+      ]
+    }
+  },
+... more code ...
+</code></pre></li>
+</ol>
+
+
+<p>After this you can open the main layout of your application and put the next code:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;dropdown&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;button</span> <span class="na">class=</span><span class="s">&quot;btn btn-default dropdown-toggle&quot;</span> <span class="na">type=</span><span class="s">&quot;button&quot;</span> <span class="na">id=</span><span class="s">&quot;dropdownMenu1&quot;</span> <span class="na">data-toggle=</span><span class="s">&quot;dropdown&quot;</span> <span class="na">aria-haspopup=</span><span class="s">&quot;true&quot;</span> <span class="na">aria-expanded=</span><span class="s">&quot;true&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>    Dropdown
+</span><span class='line'>    <span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">&quot;caret&quot;</span><span class="nt">&gt;&lt;/span&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/button&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;ul</span> <span class="na">class=</span><span class="s">&quot;dropdown-menu&quot;</span> <span class="na">aria-labelledby=</span><span class="s">&quot;dropdownMenu1&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;li&gt;&lt;a</span> <span class="na">href=</span><span class="s">&quot;#&quot;</span><span class="nt">&gt;</span>Action<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;li&gt;&lt;a</span> <span class="na">href=</span><span class="s">&quot;#&quot;</span><span class="nt">&gt;</span>Another action<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;li&gt;&lt;a</span> <span class="na">href=</span><span class="s">&quot;#&quot;</span><span class="nt">&gt;</span>Something else here<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;li</span> <span class="na">role=</span><span class="s">&quot;separator&quot;</span> <span class="na">class=</span><span class="s">&quot;divider&quot;</span><span class="nt">&gt;&lt;/li&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;li&gt;&lt;a</span> <span class="na">href=</span><span class="s">&quot;#&quot;</span><span class="nt">&gt;</span>Separated link<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/ul&gt;</span>
+</span><span class='line'><span class="nt">&lt;/div&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And this is going to work as expected. Now you can make use of everything that <code>boostrap</code> have.</p>
+
+<p>Oh! I forgot for copying the fonts and icons that <code>bootstrap</code> have you need to use a tool called <code>assetsmanager-brunch</code> this is for manage assets that are not minify or uglify like images or fonts. For this we need to do:</p>
+
+<ol>
+<li>Install <code>assetsmanager-brunch</code> with <code>npm</code> help. Run the following <code>npm install --save assetsmanager-brunch</code></li>
+<li><p>Then in the <code>plugins</code> section add the following code:</p>
+
+<pre><code class="javascript">assetsmanager: {
+    copyTo: {
+      '/' : ['web/static/vendor/bootstrap/dist/fonts']
+    }
+}
+</code></pre></li>
+</ol>
+
+
+<p>That&rsquo;s all folks! At least for this post I hope you enjoy and Good Luck, Have Fun!</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Felipe Juárez Murillo</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2016-03-24T20:08:09-06:00'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>24</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>8:08 pm</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/elixir/'>elixir</a>, <a class='category' href='/blog/categories/phoenix/'>phoenix</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://blog.makingdevs.com/2016/03/24/phoenix-bootstrap/" data-via="makingdevs" data-counturl="http://blog.makingdevs.com/2016/03/24/phoenix-bootstrap/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/2016/03/08/microservicios-con-groovy/" title="Previous Post: MicroServicios con Groovy">&laquo; MicroServicios con Groovy</a>
+      
+      
+        <a class="basic-alignment right" href="/2016/03/28/logger-logback/" title="Next Post: Uso de logback">Uso de logback &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2016/03/28/logger-logback/">Uso De Logback</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2016/03/24/phoenix-bootstrap/">Add Complete Bootstrap to Phoenix</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2016/03/08/microservicios-con-groovy/">MicroServicios Con Groovy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2016/03/07/pruebas-funcionales-con-geb-y-spock/">Pruebas Funcionales Con Geb Y Spock</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2016/01/22/bitacorado-de-pruebas-en-gradle/">Bitacorado De Pruebas en Gradle</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating&#8230;</li>
+  </ul>
+  
+  <a href="https://github.com/makingdevs">@makingdevs</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'makingdevs',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+<section class="googleplus">
+  <h1>
+    <a href="https://plus.google.com/makingdevs?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2016 - MakingDevs -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'makingdevs';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://blog.makingdevs.com/2016/03/24/phoenix-bootstrap/';
+        var disqus_url = 'http://blog.makingdevs.com/2016/03/24/phoenix-bootstrap/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
