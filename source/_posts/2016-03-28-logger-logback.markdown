@@ -99,12 +99,12 @@ Un ejemplo de como se vería:
 
 ## Acerca del patrón de salida
 
-* %d{HH:mm:ss.SSS} Es la hora que se realizo el proceso
-* [%thread] Indica el thread que inicio la tarea
-* %highlight(%-5level) Brinda el color acorde al nivel de logger que se esta usando
-* %cyan(%logger{15}) Muestra el nombre de la clase que esta tomando el logger, en color azul
-* %msg Muestra el msn que se manda acorde al nivel que se esta llamando
-* %n Indica el final de la línea
+* `%d{HH:mm:ss.SSS}` Es la hora que se realizo el proceso
+* `[%thread]` Indica el thread que inicio la tarea
+* `%highlight(%-5level)` Brinda el color acorde al nivel de logger que se esta usando
+* `%cyan(%logger{15})` Muestra el nombre de la clase que esta tomando el logger, en color azul
+* `%msg` Muestra el msn que se manda acorde al nivel que se esta llamando
+* `%n` Indica el final de la línea
 
 Pueden encontrar el código de ejemplo [*aquí*][2].
 
