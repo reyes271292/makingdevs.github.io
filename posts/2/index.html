@@ -9,7 +9,7 @@
   <meta name="author" content="MakingDevs">
 
   
-  <meta name="description" content="Hace tiempo al correr unas pruebas con un proyecto de gradle tuve la necesidad de saber el orden y la forma en que se estaban corriendo ciertas &hellip;">
+  <meta name="description" content="En una de las tareas que realice recientemente, tuve la necesidad de transferir un par de archivos que obtuve de un endpoint(de la cual hablaré en &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -66,85 +66,6 @@
     <div id="content">
       <div class="blog-index">
   
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/2016/01/22/bitacorado-de-pruebas-en-gradle/">Bitacorado De Pruebas en Gradle</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2016-01-22T18:14:37-06:00'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>22</span><span class='date-suffix'>nd</span>, <span class='date-year'>2016</span></span> <span class='time'>6:14 pm</span></time>
-        
-           | <a href="/2016/01/22/bitacorado-de-pruebas-en-gradle/#disqus_thread"
-             data-disqus-identifier="http://blog.makingdevs.com/2016/01/22/bitacorado-de-pruebas-en-gradle/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Hace tiempo al correr unas pruebas con un proyecto de gradle tuve la necesidad de saber el orden y la forma en que se estaban corriendo ciertas pruebas, gradle arroja este resultado al final de la ejecución, sin embargo yo quería un bitacorado al momento de la ejecución, para lo cual buscando en la documentación me encontre con el <a href="https://docs.gradle.org/current/dsl/org.gradle.api.tasks.testing.logging.TestLoggingContainer.html">TestLoggingContainer</a>, del cual pude obtener este fragmento:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">apply</span> <span class="nl">plugin:</span> <span class="err">&#39;</span><span class="n">java</span><span class="err">&#39;</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">test</span> <span class="o">{</span>
-</span><span class='line'>  <span class="n">testLogging</span> <span class="o">{</span>
-</span><span class='line'>    <span class="c1">// set options for log level LIFECYCLE</span>
-</span><span class='line'>    <span class="n">events</span> <span class="s">&quot;failed&quot;</span>
-</span><span class='line'>      <span class="n">exceptionFormat</span> <span class="s">&quot;short&quot;</span>
-</span><span class='line'>
-</span><span class='line'>      <span class="c1">// set options for log level DEBUG</span>
-</span><span class='line'>      <span class="n">debug</span> <span class="o">{</span>
-</span><span class='line'>        <span class="n">events</span> <span class="s">&quot;started&quot;</span><span class="o">,</span> <span class="s">&quot;skipped&quot;</span><span class="o">,</span> <span class="s">&quot;failed&quot;</span>
-</span><span class='line'>          <span class="n">exceptionFormat</span> <span class="s">&quot;full&quot;</span>
-</span><span class='line'>      <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1">// remove standard output/error logging from --info builds</span>
-</span><span class='line'>    <span class="c1">// by assigning only &#39;failed&#39; and &#39;skipped&#39; events</span>
-</span><span class='line'>    <span class="n">info</span><span class="o">.</span><span class="na">events</span> <span class="o">=</span> <span class="o">[</span><span class="s">&quot;failed&quot;</span><span class="o">,</span> <span class="s">&quot;skipped&quot;</span><span class="o">]</span>
-</span><span class='line'>  <span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>En donde pongo todo los tipos de eventos del proyecto que son <code>events "started", "passed", "skipped", "failed"</code> y con ello obtengo una salida como la siguiente:</p>
-
-<p><img src="http://blog.makingdevs.com/images/test_logging.png" alt="Screenshot 1" /></p>
-
-<p>Muy útil cuando no queremos hacer bitácora manual de que pruebas se están corriendo, Gradle ya cuenta con ella.</p>
-</div>
-  
-  
-
-
-    </article>
   
   
     <article>
@@ -302,6 +223,50 @@
 
     </article>
   
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/2015/04/07/clusterizacion-con-camel/">Clusterizacion Con Camel</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-04-07T19:56:54-05:00'><span class='date'><span class='date-month'>Apr</span> <span class='date-day'>7</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>7:56 pm</span></time>
+        
+           | <a href="/2015/04/07/clusterizacion-con-camel/#disqus_thread"
+             data-disqus-identifier="http://blog.makingdevs.com/2015/04/07/clusterizacion-con-camel/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Camel ofrece distintas soluciones para ser escalado o para distribuir la carga en diferentes instancias, la soluciones que ofrece dependerá de como se encuentra nuestra infraestructura ( y configuración).</p>
+
+<ul>
+<li>Misma JVM y CamelContext</li>
+<li>Misma JVM pero diferente CamelContext</li>
+<li>Diferente JVM y CamelContext</li>
+</ul>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/2015/04/07/clusterizacion-con-camel/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
   <div class="pagination">
     
       <a class="prev" href="/posts/3">&larr; Older</a>
@@ -319,10 +284,6 @@
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/2016/03/30/breve-uso-de-vert-dot-x/">Breve Uso De Vert.x</a>
-      </li>
-    
-      <li class="post">
         <a href="/2016/03/28/logger-logback/">Uso De Logback</a>
       </li>
     
@@ -336,6 +297,10 @@
     
       <li class="post">
         <a href="/2016/03/07/pruebas-funcionales-con-geb-y-spock/">Pruebas Funcionales Con Geb Y Spock</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2016/01/22/bitacorado-de-pruebas-en-gradle/">Bitacorado De Pruebas en Gradle</a>
       </li>
     
   </ul>
