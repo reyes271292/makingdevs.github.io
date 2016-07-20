@@ -1,0 +1,603 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Making Android Con Groovy(otra Vez) - Blog de MakingDevs</title>
+  <meta name="author" content="MakingDevs">
+
+  
+  <meta name="description" content="En las vísperas de la fecha en la que escribo este post, habíamos decidido entrar más de lleno con Android dentro del equipo de desarrollo, sin &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://blog.makingdevs.com/2016/07/19/making-android-con-groovy-otra-vez/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Blog de MakingDevs" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Fjalla+One' rel='stylesheet' type='text/css'>
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Blog de MakingDevs</a></h1>
+  
+    <h2>El código que a veces olvidamos y no documentamos.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="blog.makingdevs.com">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Making Android Con Groovy(otra Vez)</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2016-07-19T19:12:30-05:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>19</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>7:12 pm</span></time>
+        
+           | <a href="#disqus_thread"
+             data-disqus-identifier="http://blog.makingdevs.com">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>En las vísperas de la fecha en la que escribo este post, habíamos decidido entrar más de lleno con Android dentro del equipo de desarrollo, sin embargo, la convicción fue como siempre hacerlo de forma diferente, o por lo menos algo diferente con respecto a una industria que parecía siempre hacer lo mismo con lo mismo.</p>
+
+<p>Es por ello que me gustaría escribirles al respecto de la experiencia que tuvimos usando Groovy en un proyecto Android, sé de antemano que la atención y los reflectores se encuentran en otros lenguajes, sin embargo, a nosotros nos ayudo muchísimo la  la experiencia que teníamos con el lenguaje pero usándolo en otro contexto muy distinto, y aunque no escribiremos todo lo que hicimos en este post, si les comentaremos en algunos más que fue lo que hicimos y como nos beneficiamos.</p>
+
+<p>Explicarles como agregamos el plugin de Groovy dentro de un proyecto Android está de más, pueden consultarlo directamente en su <a href="https://github.com/groovy/groovy-android-gradle-plugin">repositorio de GitHub</a>. Lo que me gustaría mencionar es que ya está en una versión estable y confiable como para usarse.</p>
+
+<!-- more -->
+
+
+<h2>La estructura de un proyecto</h2>
+
+<p>Al igual que un proyecto Android(Java), hay mucha similaridad integrando Groovy:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>▾ app/
+</span><span class='line'>  ▾ src/
+</span><span class='line'>    ▾ main/
+</span><span class='line'>      ▾ groovy/com/makingdevs/mybarista/
+</span><span class='line'>        ▾ common/
+</span><span class='line'>            CamaraUtil.groovy
+</span><span class='line'>            ImageUtil.groovy
+</span><span class='line'>            LocationUtil.groovy
+</span><span class='line'>            SingleFragmentActivity.groovy
+</span><span class='line'>            WithFragment.groovy
+</span><span class='line'>        ▾ database/
+</span><span class='line'>        ▾ model/
+</span><span class='line'>          ▸ command/
+</span><span class='line'>          ▸ repository/
+</span><span class='line'>            Comment.groovy
+</span><span class='line'>            GPSLocation.groovy
+</span><span class='line'>            S3Asset.groovy
+</span><span class='line'>            User.groovy
+</span><span class='line'>        ▾ network/
+</span><span class='line'>          ▾ impl/
+</span><span class='line'>              RetrofitTemplate.groovy
+</span><span class='line'>            FoursquareRestOperations.groovy
+</span><span class='line'>            S3AssetRestOperations.groovy
+</span><span class='line'>            UserRestOperations.groovy
+</span><span class='line'>        ▾ service/
+</span><span class='line'>            CommentManager.groovy
+</span><span class='line'>            CommentManagerImpl.groovy
+</span><span class='line'>            FoursquareManager.groovy
+</span><span class='line'>            FoursquareManagerImpl.groovy
+</span><span class='line'>            S3assetManager.groovy
+</span><span class='line'>            S3assetManagerImpl.groovy
+</span><span class='line'>        ▾ ui/
+</span><span class='line'>          ▾ activity/
+</span><span class='line'>              PrincipalActivity.groovy
+</span><span class='line'>          ▾ adapter/
+</span><span class='line'>              CommentAdapter.groovy
+</span><span class='line'>              UserAdapter.groovy
+</span><span class='line'>          ▾ fragment/
+</span><span class='line'>              CameraFragment.groovy
+</span><span class='line'>              CommentsFragment.groovy
+</span><span class='line'>        ▾ view/
+</span><span class='line'>            CustomFontTextView.groovy
+</span><span class='line'>      ▸ res/
+</span><span class='line'>    app.iml
+</span><span class='line'>    proguard-rules.pro
+</span><span class='line'>▾ fastlane/
+</span><span class='line'>    Appfile
+</span><span class='line'>    Fastfile
+</span><span class='line'>  android_app.iml
+</span><span class='line'>  Gemfile
+</span><span class='line'>  Gemfile.lock
+</span><span class='line'>  gradle.properties
+</span><span class='line'>  gradlew*
+</span><span class='line'>  gradlew.bat
+</span><span class='line'>  local.properties
+</span><span class='line'>  README.md
+</span><span class='line'>  settings.gradle</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Los modelos</h2>
+
+<p>La ventaja de los POGOS de Groovy se siente al declarar o instanciar algún objeto de dominio:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="kn">import</span> <span class="nn">groovy.transform.CompileStatic</span>
+</span><span class='line'>
+</span><span class='line'><span class="nd">@CompileStatic</span>
+</span><span class='line'><span class="kd">class</span> <span class="nc">User</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">String</span> <span class="n">id</span>
+</span><span class='line'>    <span class="n">String</span> <span class="n">username</span>
+</span><span class='line'>    <span class="n">String</span> <span class="n">token</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Ahora instanciamos nuestra clase en cualquier parte:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">User</span> <span class="nf">getUserSession</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">SharedPreferences</span> <span class="n">session</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="na">getSharedPreferences</span><span class="o">(</span><span class="s2">&quot;UserSession&quot;</span><span class="o">,</span><span class="n">Context</span><span class="o">.</span><span class="na">MODE_PRIVATE</span><span class="o">)</span>
+</span><span class='line'>    <span class="n">String</span> <span class="n">username</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="na">getString</span><span class="o">(</span><span class="s2">&quot;username&quot;</span><span class="o">,</span><span class="kc">null</span><span class="o">);</span>
+</span><span class='line'>    <span class="n">String</span> <span class="n">token</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="na">getString</span><span class="o">(</span><span class="s2">&quot;token&quot;</span><span class="o">,</span><span class="kc">null</span><span class="o">)</span>
+</span><span class='line'>    <span class="n">String</span> <span class="n">id</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="na">getString</span><span class="o">(</span><span class="s2">&quot;id&quot;</span><span class="o">,</span><span class="kc">null</span><span class="o">)</span>
+</span><span class='line'>    <span class="k">new</span> <span class="nf">User</span><span class="o">(</span><span class="nl">username:</span><span class="n">username</span><span class="o">,</span><span class="nl">token:</span><span class="n">token</span><span class="o">,</span><span class="nl">id:</span><span class="n">id</span><span class="o">)</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>La nota <strong>importante</strong> aquí es la forma de la instanciación y que no hay palabra reservada <code>return</code>, al igual que la declaración del método como <code>public</code> no es necesaria. Además de que puedes llamar de forma abreviada a sus atributos.</p>
+
+<h2><code>@StaticCompile</code></h2>
+
+<p><strong>Groovy es un lenguaje de tipado dinámico opcional</strong>, lo cuál significa que podemos beneficiarnos de ciertos elementos del lenguaje y estar seguros de que compilará correctamente; esta anotación hace al compilador mas estricto, con la ventaja de optimizar el código de byte dando como resultado una mejor ejecución. Los desarrolladores recomiendan el uso intenso de esta anotación en todas las clases dentro del proyecto Android:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="kn">import</span> <span class="nn">android.content.Context</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">android.content.Intent</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">android.support.v4.app.Fragment</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">com.makingdevs.app.common.SingleFragmentActivity</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">com.makingdevs.app.ui.fragment.RegistrationFragment</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">groovy.transform.CompileStatic</span>
+</span><span class='line'>
+</span><span class='line'><span class="nd">@CompileStatic</span>
+</span><span class='line'><span class="kd">class</span> <span class="nc">RegistrationActivity</span> <span class="kd">extends</span> <span class="n">SingleFragmentActivity</span><span class="o">{</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">static</span> <span class="n">Intent</span> <span class="nf">newIntentWithContext</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">){</span>
+</span><span class='line'>        <span class="n">Intent</span> <span class="n">intent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="n">context</span><span class="o">,</span> <span class="n">RegistrationActivity</span><span class="o">)</span>
+</span><span class='line'>        <span class="n">intent</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="n">Fragment</span> <span class="nf">createFragment</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">new</span> <span class="nf">RegistrationFragment</span><span class="o">()</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Realmente este es un tema que se puede extender un poco más, pero iniciando con esto es suficiente.</p>
+
+<h2>Los closures</h2>
+
+<p>Para quién ya ha programado en Groovy conocerá que los closures son un elemento fundamental, para quiénes no, podrán compararlos con las lambdas de Java 8 o simplemente como lo que son: closures.</p>
+
+<p>La forma general del closure en Groovy es:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="o">{</span> <span class="n">p1</span><span class="o">,</span><span class="n">p2</span><span class="o">,</span><span class="n">p3</span><span class="o">...</span> <span class="o">-&gt;</span> <span class="n">body</span> <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Y creo que es de las partes de las que más podemos comentar, incluso creo que cada beneficio particular que nos da Groovy con los closures lo podremos comentar en un post por separado.</p>
+
+<h3>Implementando interfaces con Closures</h3>
+
+<p>El evento más solicitado dentro de una app Android es el <em>click</em> de un componente, con un closure podemos tratarlo:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="nd">@CompileStatic</span>
+</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">SomeFragment</span> <span class="kd">extends</span> <span class="n">Fragment</span> <span class="o">{</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">FloatingActionButton</span> <span class="n">mButtonGoChekin</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// ...more code...</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="n">View</span> <span class="nf">onCreateView</span><span class="o">(</span><span class="n">LayoutInflater</span> <span class="n">inflater</span><span class="o">,</span>
+</span><span class='line'>                      <span class="nd">@Nullable</span> <span class="n">ViewGroup</span> <span class="n">container</span><span class="o">,</span> <span class="nd">@Nullable</span> <span class="n">Bundle</span> <span class="n">savedInstanceState</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">mButtonGoChekin</span><span class="o">=</span> <span class="o">(</span><span class="n">FloatingActionButton</span><span class="o">)</span> <span class="n">root</span><span class="o">.</span><span class="na">findViewById</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">button_go_chekin</span><span class="o">)</span>
+</span><span class='line'>        <span class="n">mButtonGoChekin</span><span class="o">.</span><span class="na">onClickListener</span> <span class="o">=</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">Intent</span> <span class="n">intent</span> <span class="o">=</span> <span class="n">AnotherActivity</span><span class="o">.</span><span class="na">newIntentWithContext</span><span class="o">(</span><span class="n">getContext</span><span class="o">())</span>
+</span><span class='line'>            <span class="n">startActivity</span><span class="o">(</span><span class="n">intent</span><span class="o">)</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Ahora aquí una de las que más me gusta en conjunto con otra anotación de Groovy <code>@Singleton</code>, de la cual hablaremos en otro post.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='Groovy'><span class='line'><span class="nd">@Singleton</span>
+</span><span class='line'><span class="nd">@CompileStatic</span>
+</span><span class='line'><span class="kd">class</span> <span class="nc">RetrofitTemplate</span> <span class="o">{</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">Retrofit</span> <span class="n">retrofit</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Retrofit</span><span class="o">.</span><span class="na">Builder</span><span class="o">()</span>
+</span><span class='line'>            <span class="o">.</span><span class="na">addConverterFactory</span><span class="o">(</span><span class="n">GsonConverterFactory</span><span class="o">.</span><span class="na">create</span><span class="o">())</span>
+</span><span class='line'>            <span class="o">.</span><span class="na">baseUrl</span><span class="o">(</span><span class="n">BuildConfig</span><span class="o">.</span><span class="na">API_SERVER_URL</span><span class="o">)</span>
+</span><span class='line'>            <span class="o">.</span><span class="na">build</span><span class="o">()</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kt">def</span> <span class="nf">withRetrofit</span><span class="o">(</span><span class="n">Class</span> <span class="n">operations</span><span class="o">,</span> <span class="n">Closure</span> <span class="n">onSuccess</span><span class="o">,</span> <span class="n">Closure</span> <span class="n">onError</span><span class="o">,</span> <span class="n">Closure</span> <span class="n">action</span><span class="o">){</span>
+</span><span class='line'>        <span class="n">CustomRestOperations</span> <span class="n">restOperations</span> <span class="o">=</span> <span class="n">retrofit</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="n">operations</span><span class="o">)</span> <span class="k">as</span> <span class="n">CustomRestOperations</span>
+</span><span class='line'>        <span class="n">Call</span><span class="o">&lt;</span><span class="n">Checkin</span><span class="o">&gt;</span> <span class="n">model</span> <span class="o">=</span> <span class="n">action</span><span class="o">(</span><span class="n">restOperations</span><span class="o">)</span> <span class="k">as</span> <span class="n">Call</span><span class="o">&lt;</span><span class="n">Checkin</span><span class="o">&gt;</span>
+</span><span class='line'>        <span class="kt">def</span> <span class="n">callback</span> <span class="o">=</span> <span class="o">[</span>
+</span><span class='line'>                <span class="n">onResponse</span> <span class="o">:</span><span class="n">onSuccess</span><span class="o">,</span>
+</span><span class='line'>                <span class="n">onFailure</span> <span class="o">:</span> <span class="n">onError</span>
+</span><span class='line'>        <span class="o">]</span>
+</span><span class='line'>        <span class="n">model</span><span class="o">.</span><span class="na">enqueue</span><span class="o">(</span><span class="n">callback</span> <span class="k">as</span> <span class="n">Callback</span><span class="o">&lt;</span><span class="n">Checkin</span><span class="o">&gt;)</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>Podemos hacer que un mapa se comporte como la implementación de una interfaz</strong>, es sólo cuestión de usar los closures correctamente. Y también podemos ejecutar closures para mandarles parámetros listos para usarse en otros contextos.</p>
+
+<h2>Conclusión</h2>
+
+<p>Si bien, Groovy agrega peso a las aplicaciones Android, creo que cada byte y cada línea vale todo lo que no tuvimos que codificar, la fluidez en el teclado y la productividad ganada.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">José Juan Reyes Zuñiga</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2016-07-19T19:12:30-05:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>19</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>7:12 pm</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/groovy/'>groovy</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://blog.makingdevs.com/2016/07/19/making-android-con-groovy-otra-vez/" data-via="makingdevs" data-counturl="http://blog.makingdevs.com/2016/07/19/making-android-con-groovy-otra-vez/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/2016/03/28/logger-logback/" title="Previous Post: Uso de logback">&laquo; Uso de logback</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2016/07/19/making-android-con-groovy-otra-vez/">Making Android Con Groovy(otra Vez)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2016/03/28/logger-logback/">Uso De Logback</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2016/03/24/phoenix-bootstrap/">Add Complete Bootstrap to Phoenix</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2016/03/08/microservicios-con-groovy/">MicroServicios Con Groovy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2016/03/07/pruebas-funcionales-con-geb-y-spock/">Pruebas Funcionales Con Geb Y Spock</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating&#8230;</li>
+  </ul>
+  
+  <a href="https://github.com/makingdevs">@makingdevs</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'makingdevs',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+<section class="googleplus">
+  <h1>
+    <a href="https://plus.google.com/makingdevs?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2016 - MakingDevs -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'makingdevs';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://blog.makingdevs.com/2016/07/19/making-android-con-groovy-otra-vez/';
+        var disqus_url = 'http://blog.makingdevs.com/2016/07/19/making-android-con-groovy-otra-vez/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

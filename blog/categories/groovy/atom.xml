@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Groovy | Blog de MakingDevs]]></title>
   <link href="http://blog.makingdevs.com/blog/categories/groovy/atom.xml" rel="self"/>
   <link href="http://blog.makingdevs.com/"/>
-  <updated>2016-03-30T10:05:16-06:00</updated>
+  <updated>2016-07-19T20:59:32-05:00</updated>
   <id>http://blog.makingdevs.com/</id>
   <author>
     <name><![CDATA[MakingDevs]]></name>
@@ -12,6 +12,204 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Making Android Con Groovy(otra Vez)]]></title>
+    <link href="http://blog.makingdevs.com/2016/07/19/making-android-con-groovy-otra-vez/"/>
+    <updated>2016-07-19T19:12:30-05:00</updated>
+    <id>http://blog.makingdevs.com/2016/07/19/making-android-con-groovy-otra-vez</id>
+    <content type="html"><![CDATA[<p>En las vísperas de la fecha en la que escribo este post, habíamos decidido entrar más de lleno con Android dentro del equipo de desarrollo, sin embargo, la convicción fue como siempre hacerlo de forma diferente, o por lo menos algo diferente con respecto a una industria que parecía siempre hacer lo mismo con lo mismo.</p>
+
+<p>Es por ello que me gustaría escribirles al respecto de la experiencia que tuvimos usando Groovy en un proyecto Android, sé de antemano que la atención y los reflectores se encuentran en otros lenguajes, sin embargo, a nosotros nos ayudo muchísimo la  la experiencia que teníamos con el lenguaje pero usándolo en otro contexto muy distinto, y aunque no escribiremos todo lo que hicimos en este post, si les comentaremos en algunos más que fue lo que hicimos y como nos beneficiamos.</p>
+
+<p>Explicarles como agregamos el plugin de Groovy dentro de un proyecto Android está de más, pueden consultarlo directamente en su <a href="https://github.com/groovy/groovy-android-gradle-plugin">repositorio de GitHub</a>. Lo que me gustaría mencionar es que ya está en una versión estable y confiable como para usarse.</p>
+
+<!-- more -->
+
+
+<h2>La estructura de un proyecto</h2>
+
+<p>Al igual que un proyecto Android(Java), hay mucha similaridad integrando Groovy:</p>
+
+<pre><code class="plain">▾ app/
+  ▾ src/
+    ▾ main/
+      ▾ groovy/com/makingdevs/mybarista/
+        ▾ common/
+            CamaraUtil.groovy
+            ImageUtil.groovy
+            LocationUtil.groovy
+            SingleFragmentActivity.groovy
+            WithFragment.groovy
+        ▾ database/
+        ▾ model/
+          ▸ command/
+          ▸ repository/
+            Comment.groovy
+            GPSLocation.groovy
+            S3Asset.groovy
+            User.groovy
+        ▾ network/
+          ▾ impl/
+              RetrofitTemplate.groovy
+            FoursquareRestOperations.groovy
+            S3AssetRestOperations.groovy
+            UserRestOperations.groovy
+        ▾ service/
+            CommentManager.groovy
+            CommentManagerImpl.groovy
+            FoursquareManager.groovy
+            FoursquareManagerImpl.groovy
+            S3assetManager.groovy
+            S3assetManagerImpl.groovy
+        ▾ ui/
+          ▾ activity/
+              PrincipalActivity.groovy
+          ▾ adapter/
+              CommentAdapter.groovy
+              UserAdapter.groovy
+          ▾ fragment/
+              CameraFragment.groovy
+              CommentsFragment.groovy
+        ▾ view/
+            CustomFontTextView.groovy
+      ▸ res/
+    app.iml
+    proguard-rules.pro
+▾ fastlane/
+    Appfile
+    Fastfile
+  android_app.iml
+  Gemfile
+  Gemfile.lock
+  gradle.properties
+  gradlew*
+  gradlew.bat
+  local.properties
+  README.md
+  settings.gradle
+</code></pre>
+
+<h2>Los modelos</h2>
+
+<p>La ventaja de los POGOS de Groovy se siente al declarar o instanciar algún objeto de dominio:</p>
+
+<pre><code class="groovy">import groovy.transform.CompileStatic
+
+@CompileStatic
+class User {
+    String id
+    String username
+    String token
+}
+</code></pre>
+
+<p>Ahora instanciamos nuestra clase en cualquier parte:</p>
+
+<pre><code class="groovy">User getUserSession(Context context) {
+    SharedPreferences session = context.getSharedPreferences("UserSession",Context.MODE_PRIVATE)
+    String username = session.getString("username",null);
+    String token = session.getString("token",null)
+    String id = session.getString("id",null)
+    new User(username:username,token:token,id:id)
+}
+</code></pre>
+
+<p>La nota <strong>importante</strong> aquí es la forma de la instanciación y que no hay palabra reservada <code>return</code>, al igual que la declaración del método como <code>public</code> no es necesaria. Además de que puedes llamar de forma abreviada a sus atributos.</p>
+
+<h2><code>@StaticCompile</code></h2>
+
+<p><strong>Groovy es un lenguaje de tipado dinámico opcional</strong>, lo cuál significa que podemos beneficiarnos de ciertos elementos del lenguaje y estar seguros de que compilará correctamente; esta anotación hace al compilador mas estricto, con la ventaja de optimizar el código de byte dando como resultado una mejor ejecución. Los desarrolladores recomiendan el uso intenso de esta anotación en todas las clases dentro del proyecto Android:</p>
+
+<pre><code class="groovy">import android.content.Context
+import android.content.Intent
+import android.support.v4.app.Fragment
+import com.makingdevs.app.common.SingleFragmentActivity
+import com.makingdevs.app.ui.fragment.RegistrationFragment
+import groovy.transform.CompileStatic
+
+@CompileStatic
+class RegistrationActivity extends SingleFragmentActivity{
+
+    static Intent newIntentWithContext(Context context){
+        Intent intent = new Intent(context, RegistrationActivity)
+        intent
+    }
+
+    @Override
+    Fragment createFragment() {
+        new RegistrationFragment()
+    }
+}
+</code></pre>
+
+<p>Realmente este es un tema que se puede extender un poco más, pero iniciando con esto es suficiente.</p>
+
+<h2>Los closures</h2>
+
+<p>Para quién ya ha programado en Groovy conocerá que los closures son un elemento fundamental, para quiénes no, podrán compararlos con las lambdas de Java 8 o simplemente como lo que son: closures.</p>
+
+<p>La forma general del closure en Groovy es:</p>
+
+<pre><code class="groovy">{ p1,p2,p3... -&gt; body }
+</code></pre>
+
+<p>Y creo que es de las partes de las que más podemos comentar, incluso creo que cada beneficio particular que nos da Groovy con los closures lo podremos comentar en un post por separado.</p>
+
+<h3>Implementando interfaces con Closures</h3>
+
+<p>El evento más solicitado dentro de una app Android es el <em>click</em> de un componente, con un closure podemos tratarlo:</p>
+
+<pre><code class="groovy">@CompileStatic
+public class SomeFragment extends Fragment {
+
+    FloatingActionButton mButtonGoChekin
+
+    // ...more code...
+
+    @Override
+    View onCreateView(LayoutInflater inflater,
+                      @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+
+        mButtonGoChekin= (FloatingActionButton) root.findViewById(R.id.button_go_chekin)
+        mButtonGoChekin.onClickListener = {
+            Intent intent = AnotherActivity.newIntentWithContext(getContext())
+            startActivity(intent)
+        }
+    }
+}
+</code></pre>
+
+<p>Ahora aquí una de las que más me gusta en conjunto con otra anotación de Groovy <code>@Singleton</code>, de la cual hablaremos en otro post.</p>
+
+<pre><code class="Groovy">@Singleton
+@CompileStatic
+class RetrofitTemplate {
+
+    Retrofit retrofit = new Retrofit.Builder()
+            .addConverterFactory(GsonConverterFactory.create())
+            .baseUrl(BuildConfig.API_SERVER_URL)
+            .build()
+
+    def withRetrofit(Class operations, Closure onSuccess, Closure onError, Closure action){
+        CustomRestOperations restOperations = retrofit.create(operations) as CustomRestOperations
+        Call&lt;Checkin&gt; model = action(restOperations) as Call&lt;Checkin&gt;
+        def callback = [
+                onResponse :onSuccess,
+                onFailure : onError
+        ]
+        model.enqueue(callback as Callback&lt;Checkin&gt;)
+    }
+}
+</code></pre>
+
+<p><strong>Podemos hacer que un mapa se comporte como la implementación de una interfaz</strong>, es sólo cuestión de usar los closures correctamente. Y también podemos ejecutar closures para mandarles parámetros listos para usarse en otros contextos.</p>
+
+<h2>Conclusión</h2>
+
+<p>Si bien, Groovy agrega peso a las aplicaciones Android, creo que cada byte y cada línea vale todo lo que no tuvimos que codificar, la fluidez en el teclado y la productividad ganada.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Uso De Logback]]></title>
@@ -350,112 +548,6 @@ s3Service.putObject bucket, s3Object
 
 
 <p>Si bien hay más cosas que se pueden hacer, les sugiero se den una vuelta por la documentación de esta biblioteca.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Hot Deployment en Gradle]]></title>
-    <link href="http://blog.makingdevs.com/2015/07/26/hot-deployment-en-gradle/"/>
-    <updated>2015-07-26T23:19:13-05:00</updated>
-    <id>http://blog.makingdevs.com/2015/07/26/hot-deployment-en-gradle</id>
-    <content type="html"><![CDATA[<p>Durante un tiempo estuve buscando de la forma de tener una aplicación web con Gradle y tener características como el hot deploy, Grails lo tiene y viendólo de forma interna usa un elemento de nombre <a href="https://github.com/spring-projects/spring-loaded" title="springloaded">SpringLoaded</a>.</p>
-
-<p>Después me di cuenta que frameworks como <a href="https://github.com/spring-projects/spring-loaded" title="dropwizard">Dropwizard</a> lo usan, y que incluso SpringBoot a través del uso del CLI también, investigando un poco más al respecto y por la necesidad de tenerlo listo para algunos proyectos encontré <a href="http://www.cholick.com/entry/show/280" title="tomcat">un artículo</a> en donde explica como ponerlo en acción usando propiamente <a href="https://github.com/spring-projects/spring-loaded" title="dropwizard">Dropwizard</a>. Fue un buen acercamiento, el problema es el siguiente bloque de código en configuración de gradle:</p>
-
-<!-- more -->
-
-
-<pre><code class="groovy">run {
-  args = ['server', 'app.yaml']
-  jvmArgs = ["-javaagent:${new File("$buildDir/agent/springloaded-${springloadedVersion}.jar").absolutePath}", '-noverify']
-}
-</code></pre>
-
-<p>En donde, el atributo <code>jvmArgs</code> es sólo aplicable a tareas del tipo <code>JavaExec</code>, más específico, que implementan <code>JavaExecSpec</code> o <code>JavaForkOptions</code>. Es aquí en donde <a href="https://github.com/bmuschko/gradle-tomcat-plugin" title="tomcat">el plugin de tomcat</a> que se puede encontrar para Gradle tiene el problema, pues su tarea no lo hace.</p>
-
-<p>La combinación se haría en conjunto con un plugin de gradle, <a href="https://github.com/bluepapa32/gradle-watch-plugin" title="gradle watch">el watch</a>, el actúa con cada cambio en la aplicación realizando las tareas que se le digan. Sin embargo, lo que encontré funcionaba para la cmbinación de SpringBooy e IntelliJ Idea, lo cual no veía mal, pero no era mi caso. De cualquier forma pongo disponible la configuración que independiente me sirvió para hacer un hot deploy usando ambos elementos:</p>
-
-<pre><code class="groovy">apply plugin: 'groovy'
-apply plugin: 'spring-boot'
-apply plugin: 'com.bluepapa32.watch'
-
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
-
-ext {
-  springLoadedVersion = '1.2.1.RELEASE'
-}
-
-mainClassName='com.makingdevs.Application'
-
-repositories {
-  mavenCentral()
-  maven {
-    url "https://code.lds.org/nexus/content/groups/main-repo"
-  }
-}
-
-dependencies {
-  compile("org.springframework.boot:spring-boot-starter-web")
-  compile 'org.codehaus.groovy:groovy-all:2.4.3'
-}
-
-buildscript {
-  repositories {
-    mavenCentral()
-    jcenter()
-  }
-  dependencies {
-    classpath "org.springframework.boot:spring-boot-gradle-plugin:1.2.4.RELEASE"
-    classpath 'org.springframework:springloaded:1.2.0.RELEASE'
-    classpath 'com.bluepapa32:gradle-watch-plugin:0.1.5'
-  }
-}
-
-jar {
-  baseName = 'meerkat-mymapmanager'
-  version =  '0.1.0'
-}
-
-compileGroovy {
-  //enable compilation in a separate daemon process
-  options.fork = true
-}
-
-watch {
-  groovy {
-    files files('src/main/groovy')
-    tasks 'compileGroovy'
-  }
-}
-</code></pre>
-
-<p>Al final del día, lo que encontre fue <a href="http://akhikhl.github.io/gretty-doc/index.html" title="gretty">el plugin de Gretty</a>, con el que fácilmente podemos usar un contenedor de Tomcat o Jetty y tener disponible el Hot deploy, creo que tiene algunos detalles de rendimiento pero es útil. Finalmente la configuración se reduce mucho y hay varias tareas disponibles, entre ellas <code>appRun</code>, que es la que levanta el elemento configuraco y lo dijo listo para los cambios:</p>
-
-<pre><code class="groovy">// Using the new mechanism to include plugins
-plugins {
-  id 'groovy'
-  id 'war'
-  id "org.akhikhl.gretty" version "1.2.4"
-}
-
-repositories {
-  mavenCentral()
-  jcenter()
-}
-
-dependencies {
-  compile 'org.codehaus.groovy:groovy-all:2.3.4'
-}
-
-gretty {
-  // 'jetty7', 'jetty8', 'jetty9', 'tomcat7', 'tomcat8'
-  servletContainer = 'tomcat7'
-  httpPort = 9091
-}
-</code></pre>
-
-<p>Creo que nos servirá bien un rato para las cosas que tenemos que hcaer, por que incluso soporta SpringBoot.</p>
 ]]></content>
   </entry>
   

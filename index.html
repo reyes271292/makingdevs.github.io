@@ -9,7 +9,7 @@
   <meta name="author" content="MakingDevs">
 
   
-  <meta name="description" content="En el proceso de desarrollo de software se implementan bitácoras o mejor conocidas como loggers que permiten tener información de salida útil al &hellip;">
+  <meta name="description" content="En las vísperas de la fecha en la que escribo este post, habíamos decidido entrar más de lleno con Android dentro del equipo de desarrollo, sin &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -66,6 +66,47 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/2016/07/19/making-android-con-groovy-otra-vez/">Making Android Con Groovy(otra Vez)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2016-07-19T19:12:30-05:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>19</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>7:12 pm</span></time>
+        
+           | <a href="/2016/07/19/making-android-con-groovy-otra-vez/#disqus_thread"
+             data-disqus-identifier="http://blog.makingdevs.com/2016/07/19/making-android-con-groovy-otra-vez/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>En las vísperas de la fecha en la que escribo este post, habíamos decidido entrar más de lleno con Android dentro del equipo de desarrollo, sin embargo, la convicción fue como siempre hacerlo de forma diferente, o por lo menos algo diferente con respecto a una industria que parecía siempre hacer lo mismo con lo mismo.</p>
+
+<p>Es por ello que me gustaría escribirles al respecto de la experiencia que tuvimos usando Groovy en un proyecto Android, sé de antemano que la atención y los reflectores se encuentran en otros lenguajes, sin embargo, a nosotros nos ayudo muchísimo la  la experiencia que teníamos con el lenguaje pero usándolo en otro contexto muy distinto, y aunque no escribiremos todo lo que hicimos en este post, si les comentaremos en algunos más que fue lo que hicimos y como nos beneficiamos.</p>
+
+<p>Explicarles como agregamos el plugin de Groovy dentro de un proyecto Android está de más, pueden consultarlo directamente en su <a href="https://github.com/groovy/groovy-android-gradle-plugin">repositorio de GitHub</a>. Lo que me gustaría mencionar es que ya está en una versión estable y confiable como para usarse.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/2016/07/19/making-android-con-groovy-otra-vez/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -234,85 +275,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/2016/01/22/bitacorado-de-pruebas-en-gradle/">Bitacorado De Pruebas en Gradle</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2016-01-22T18:14:37-06:00'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>22</span><span class='date-suffix'>nd</span>, <span class='date-year'>2016</span></span> <span class='time'>6:14 pm</span></time>
-        
-           | <a href="/2016/01/22/bitacorado-de-pruebas-en-gradle/#disqus_thread"
-             data-disqus-identifier="http://blog.makingdevs.com/2016/01/22/bitacorado-de-pruebas-en-gradle/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Hace tiempo al correr unas pruebas con un proyecto de gradle tuve la necesidad de saber el orden y la forma en que se estaban corriendo ciertas pruebas, gradle arroja este resultado al final de la ejecución, sin embargo yo quería un bitacorado al momento de la ejecución, para lo cual buscando en la documentación me encontre con el <a href="https://docs.gradle.org/current/dsl/org.gradle.api.tasks.testing.logging.TestLoggingContainer.html">TestLoggingContainer</a>, del cual pude obtener este fragmento:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">apply</span> <span class="nl">plugin:</span> <span class="err">&#39;</span><span class="n">java</span><span class="err">&#39;</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">test</span> <span class="o">{</span>
-</span><span class='line'>  <span class="n">testLogging</span> <span class="o">{</span>
-</span><span class='line'>    <span class="c1">// set options for log level LIFECYCLE</span>
-</span><span class='line'>    <span class="n">events</span> <span class="s">&quot;failed&quot;</span>
-</span><span class='line'>      <span class="n">exceptionFormat</span> <span class="s">&quot;short&quot;</span>
-</span><span class='line'>
-</span><span class='line'>      <span class="c1">// set options for log level DEBUG</span>
-</span><span class='line'>      <span class="n">debug</span> <span class="o">{</span>
-</span><span class='line'>        <span class="n">events</span> <span class="s">&quot;started&quot;</span><span class="o">,</span> <span class="s">&quot;skipped&quot;</span><span class="o">,</span> <span class="s">&quot;failed&quot;</span>
-</span><span class='line'>          <span class="n">exceptionFormat</span> <span class="s">&quot;full&quot;</span>
-</span><span class='line'>      <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1">// remove standard output/error logging from --info builds</span>
-</span><span class='line'>    <span class="c1">// by assigning only &#39;failed&#39; and &#39;skipped&#39; events</span>
-</span><span class='line'>    <span class="n">info</span><span class="o">.</span><span class="na">events</span> <span class="o">=</span> <span class="o">[</span><span class="s">&quot;failed&quot;</span><span class="o">,</span> <span class="s">&quot;skipped&quot;</span><span class="o">]</span>
-</span><span class='line'>  <span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>En donde pongo todo los tipos de eventos del proyecto que son <code>events "started", "passed", "skipped", "failed"</code> y con ello obtengo una salida como la siguiente:</p>
-
-<p><img src="http://blog.makingdevs.com/images/test_logging.png" alt="Screenshot 1" /></p>
-
-<p>Muy útil cuando no queremos hacer bitácora manual de que pruebas se están corriendo, Gradle ya cuenta con ella.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/2">&larr; Older</a>
@@ -328,6 +290,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/2016/07/19/making-android-con-groovy-otra-vez/">Making Android Con Groovy(otra Vez)</a>
+      </li>
+    
+      <li class="post">
         <a href="/2016/03/28/logger-logback/">Uso De Logback</a>
       </li>
     
@@ -341,10 +307,6 @@
     
       <li class="post">
         <a href="/2016/03/07/pruebas-funcionales-con-geb-y-spock/">Pruebas Funcionales Con Geb Y Spock</a>
-      </li>
-    
-      <li class="post">
-        <a href="/2016/01/22/bitacorado-de-pruebas-en-gradle/">Bitacorado De Pruebas en Gradle</a>
       </li>
     
   </ul>
