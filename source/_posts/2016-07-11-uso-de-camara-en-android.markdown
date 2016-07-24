@@ -11,12 +11,15 @@ Android esta enfoca al desarrollo móvil, como es de esperarse cuenta con las he
 
 <!-- more -->
 
+##  Intent en android
 Para poder hacer uso de la cámara se realiza mediante intent, que son el mecanismo por el cual se comunica la aplicación en tiempo de ejecución con otros componentes, así como lanzar eventos, se cuenta con dos tipos los cuales son:    
-*Intento implícito     
+**Intento implícito**   
 Se puede iniciar una actividad en otra aplicación en el dispositivo   
-*Intento explicito     
+**Intento explicito**       
 Se especifica la clase de la actividad a empezar para que el sistema operativo la inicie
 
+
+## Acceso a la cámara 
 Android cuenta con la clase **MediaStore**, esta se encarga de proveer los medios de comunicación, el que nos interesa es **ACTION_IMAGE_CAPTURE**, este en el intent con el cual podemos hacer uso de la cámara.  
 
 ``` groovy   
@@ -37,7 +40,7 @@ Android cuenta con la clase **MediaStore**, esta se encarga de proveer los medio
 	}
 ```   
 
-* Almacenamiento externo   
+## Almacenamiento externo   
 Al capturar una foto, esta debe ser almacenada para poder ser usada posteriormente, Android provee una unidad principal para ello, la cual puede ser su almacenamiento interno o una memoria SD.   
 
 Para acceder a ese directorio, Android cuenta con una clase llamada **Environment**, el método que regresa el directorio de almacenamiento común/externo es **getExternalStoragePublicDirectory(…)**, el tipo de archivo son imágenes por lo cual el parámetro para este caso será **Environment.DIRECTORY_PICTURES**.   
@@ -51,7 +54,7 @@ Para acceder a ese directorio, Android cuenta con una clase llamada **Environmen
 	}
 ```
 
-* Manipular el resultado de la cámara   
+## Manipular el resultado de la cámara   
 Cuando se captura la foto, se deberá manipular su resolución para obtener el archivo que se necesita, como se crea un intent hacia la cámara una vez que termina se maneja el resultado con el método onActivityResult(…).
 
 ``` groovy 
@@ -113,9 +116,9 @@ Cuando el proceso se haya terminado, se anexa la foto a la galería para que el 
   }
 ```  
 
-* Permisos de Android      
+## Permisos de Android      
 A la hora de manejar el hardware se debe de pedir ciertos permisos como son el escribir y leer en la memoria externa, así como usar la cámara, para esto se usa la etiqueta ``<uses-permission>`` donde se coloca que permiso es solicitado.  
-``<uses-feature android:name="android.hardware.camera" android:required="true" />``
+``<uses-feature android:name="android.hardware.camera" android:required="true" />``   
 ``<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>``   
 
 Pueden encontrar el código completo [*aquí*][1].
