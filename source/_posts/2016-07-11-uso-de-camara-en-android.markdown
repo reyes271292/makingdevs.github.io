@@ -4,10 +4,10 @@ title: "Uso de camara en android"
 date: 2016-07-11 22:53:27 -0500
 comments: true
 author: Juan Francisco Reyes Silva
-published: false
+published: true
 ---   
 
-Android esta enfoca al desarrollo móvil, como es de esperarse cuenta con las herramientas necesarias para hacer uso del hardware, en esta ocasión se mostrará cómo usar la cámara.   
+Android esta enfoca al desarrollo móvil, como es de esperarse cuenta con las herramientas necesarias para hacer uso del hardware, en esta ocasión se mostrará cómo usar la cámara en un Activity.   
 
 <!-- more -->
 
@@ -20,21 +20,21 @@ Se especifica la clase de la actividad a empezar para que el sistema operativo l
 
 
 ## Acceso a la cámara 
-Android cuenta con la clase **MediaStore**, esta se encarga de proveer los medios de comunicación, el que nos interesa es **ACTION_IMAGE_CAPTURE**, este en el intent con el cual podemos hacer uso de la cámara.  
+Android cuenta con la clase **MediaStore**, esta se encarga de proveer los medios de comunicación, el que nos interesa es **ACTION_IMAGE_CAPTURE**, este en el intent con el cual podemos hacer uso de la cámara.   
+El siguiente metodo muestra como usar la camara nativa de Android, la clase que se encarga de usarlo es **ExampleCamera**.  
 
 ``` groovy   
-	void dispatchTakePictureIntent(Context context) {
-		Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-		if (takePictureIntent.resolveActivity(context.getPackageManager()) != null) {
+	void launchCamera() {
+		Intent camera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+		if (camera.resolveActivity(getPackageManager())) {
 			try {
-				photoFile = mCamaraUtil.createImageFile("IMG")
-			} catch (IOException ex) {
-				Toast.makeText(getActivity(), R.string.error_take_photo, Toast.LENGTH_SHORT).show()
-			}
-			if (photoFile != null) {
-				takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photoFile))
-				Log.d(TAG,takePictureIntent.getProperties().toString())
-				startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO)
+				filePhoto = createPhoto("IMG_")
+				} catch (IOException ex) {
+					Log.d(TAG, "Error ${ex.message}")
+				}
+				if (filePhoto) {
+					camera.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(filePhoto))
+					startActivityForResult(camera, CAPTURE_IMAGE)
 			}
 		}
 	}
@@ -43,83 +43,56 @@ Android cuenta con la clase **MediaStore**, esta se encarga de proveer los medio
 ## Almacenamiento externo   
 Al capturar una foto, esta debe ser almacenada para poder ser usada posteriormente, Android provee una unidad principal para ello, la cual puede ser su almacenamiento interno o una memoria SD.   
 
-Para acceder a ese directorio, Android cuenta con una clase llamada **Environment**, el método que regresa el directorio de almacenamiento común/externo es **getExternalStoragePublicDirectory(…)**, el tipo de archivo son imágenes por lo cual el parámetro para este caso será **Environment.DIRECTORY_PICTURES**.   
+Para acceder a ese directorio, Android cuenta con una clase llamada **Environment**, el método que regresa el directorio de almacenamiento común/externo es **getExternalStoragePublicDirectory(…)**, el tipo de archivo son imágenes por lo cual el parámetro para este caso será **Environment.DIRECTORY_PICTURES**.      
+
+El método **createPhoto(...)** se encarga de crear un directorio denominado **ExampleCamera** dentro de **PICTURES**, además de generar el archivo para cada foto, un dato interesante es que no se realizó el import de la clase **File**, la razón es que al usar **groovy**, ciertos paquetes vienen incluidos por default.   
 
 ``` groovy   
-	File createImageFile(String name){
-		String timeStamp = new Date().format("yyyyMMdd_HHmmss")
-		String imageFileName = "${name}_$timeStamp"
-		File storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
-		File image = File.createTempFile(imageFileName,".jpg", storageDir)
+	File createPhoto(String name) {
+		File storagePhotos = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "ExampleCamera")
+		if (!storagePhotos.exists()) {
+			if (!storagePhotos.mkdirs()) {
+				Log.d(TAG, "Error al crear directorio")
+			}
+		}
+		new File(storagePhotos.getPath() + File.separator + "${name + new Date().format("ddMMyyyy_HHmmss")}.jpg")
 	}
 ```
 
 ## Manipular el resultado de la cámara   
-Cuando se captura la foto, se deberá manipular su resolución para obtener el archivo que se necesita, como se crea un intent hacia la cámara una vez que termina se maneja el resultado con el método onActivityResult(…).
+Cuando se captura la foto, una vez que termina se maneja el resultado con el método onActivityResult(…), donde se verifica el estatus de la captura de la foto, ya sea que se culminó o cancelado, ante lo cual se muestra un mensaje emergente haciendo uso de los **Toast**.   
 
 ``` groovy 
 	@Override
-  void onActivityResult(int requestCode, int resultCode, Intent data) {
-	  if (requestCode == REQUEST_TAKE_PHOTO && resultCode == Activity.RESULT_OK) {
-
-		  Bitmap bitmapResize = mCamaraUtil.resizeBitmapFromFilePath(photoFile.getPath(),1280,960)
-		  File photo = mCamaraUtil.saveBitmapToFile(bitmapResize,photoFile.getName())
-		  mImageUtil.addPictureToGallery(getActivity(),photo.getPath())
-		  Toast.makeText(getActivity(), R.string.success_take_photo, Toast.LENGTH_SHORT).show()
-
-		} else {
-			Toast.makeText(getActivity(), R.string.error_take_photo, Toast.LENGTH_SHORT).show()
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data)
+		if (requestCode == CAPTURE_IMAGE) {
+			if (resultCode == RESULT_OK) {
+				Toast.makeText(getApplicationContext(), "Exito al crear la foto", Toast.LENGTH_SHORT).show()
+			} else if (resultCode == RESULT_CANCELED) {
+				Toast.makeText(this, "Se cancelo la foto", Toast.LENGTH_LONG).show()
+			} else {
+				Toast.makeText(this, "Error al capturar la foto", Toast.LENGTH_LONG).show()
+			}
 		}
-  }
-``` 
-
-Como se mencionó se debe ajustar la resolución de la foto capturada, como se muestra a continuación:   
-
-``` groovy
-Bitmap resizeBitmapFromFilePath(String pathPhoto, Integer width, Integer height){
-	BitmapFactory.Options bmOptions = new BitmapFactory.Options()
-	Bitmap bitmap = BitmapFactory.decodeFile(pathPhoto,bmOptions)
-	bitmap = Bitmap.createScaledBitmap(bitmap,width,height,true)
-}
-```
-
-Una vez culminado el ajuste de la foto, se procede a guardar el archivo con los cambios.   
-
-``` groovy
-
-    File saveBitmapToFile(Bitmap bitmap,String photoName){
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, bytes)
-        File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString() + File.separator + photoName)
-        FileOutputStream fileOutputStream
-        try {
-            file.createNewFile()
-            fileOutputStream = new FileOutputStream(file)
-            fileOutputStream.write(bytes.toByteArray())
-            fileOutputStream.close()
-        }catch (Exception e){
-            Log.d(TAG,"Error... "+e.message)
-        }
-        file
-    }
-```
-
-Cuando el proceso se haya terminado, se anexa la foto a la galería para que el usuario pueda visualizar sin problemas su archivo, como se muestra.  
-
-``` groovy 
-	public static void addPictureToGallery(Context context, String picturePath) {
-		Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
-		File f = new File(picturePath)
-		Uri contentUri = Uri.fromFile(f)
-		mediaScanIntent.setData(contentUri)
-		context.sendBroadcast(mediaScanIntent)
-  }
-```  
+	}
+```   
 
 ## Permisos de Android      
 A la hora de manejar el hardware se debe de pedir ciertos permisos como son el escribir y leer en la memoria externa, así como usar la cámara, para esto se usa la etiqueta ``<uses-permission>`` donde se coloca que permiso es solicitado.  
 ``<uses-feature android:name="android.hardware.camera" android:required="true" />``   
-``<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>``   
+``<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>``  
+
+## Imports default groovy  
+Groovy realiza el import de los paquetes más usados, para reducir el código.   
+``import java.lang.*``   
+``import java.util.*``   
+``import java.io.*``   
+``import java.net.*``   
+``import groovy.lang.*``   
+``import groovy.util.*``   
+``import java.math.BigInteger``   
+``import java.math.BigDecimal``   
 
 Pueden encontrar el código completo [*aquí*][1].
 
@@ -132,6 +105,8 @@ Pueden encontrar el código completo [*aquí*][1].
 [4]: https://developer.android.com/reference/android/os/Environment.html
 
 [5]: https://developer.android.com/training/basics/intents/result.html
+
+[6]: https://developer.android.com/guide/topics/ui/notifiers/toasts.html
 
 
 
