@@ -4,7 +4,7 @@ title: "Uso de camara en android"
 date: 2016-07-11 22:53:27 -0500
 comments: true
 author: Juan Francisco Reyes Silva
-published: true
+published: false
 ---   
 
 Android esta enfoca al desarrollo móvil, como es de esperarse cuenta con las herramientas necesarias para hacer uso del hardware, en esta ocasión se mostrará cómo usar la cámara en un Activity.   
